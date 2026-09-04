@@ -41,7 +41,10 @@ jobs:
           tools: composer
       - name: Install backend deps
         working-directory: backend
-        run: composer install --no-dev --prefer-dist --no-progress
+        run: |
+          cp .env.example .env
+          echo "APP_KEY=base64:MTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXY=" >> .env
+          composer install --no-dev --prefer-dist --no-progress
       - name: artisan version
         working-directory: backend
         run: php artisan --version
@@ -63,7 +66,10 @@ jobs:
           tools: composer
       - name: Install backend deps (with dev)
         working-directory: backend
-        run: composer install --prefer-dist --no-progress
+        run: |
+          cp .env.example .env
+          echo "APP_KEY=base64:MTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXY=" >> .env
+          composer install --prefer-dist --no-progress
       - name: Configure .env
         working-directory: backend
         run: |
@@ -112,7 +118,10 @@ jobs:
           node-version: "22"
       - name: Install backend deps
         working-directory: backend
-        run: composer install --no-dev --prefer-dist --no-progress
+        run: |
+          cp .env.example .env
+          echo "APP_KEY=base64:MTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXY=" >> .env
+          composer install --no-dev --prefer-dist --no-progress
       - name: Configure .env
         working-directory: backend
         run: |
