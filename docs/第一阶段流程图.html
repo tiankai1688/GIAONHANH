@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="l5p9OFFnsOhC8dl71xrSWV">
+<head data-page-node-id="JiQAw6dB36aGW2PtXPaGTs">
+<meta charset="UTF-8" data-page-node-id="vNVUqlG0ZakAkRww9U1KSq">
+<title>GIAONHANH 第一阶段流程图</title>
+<style>
+  body{margin:0;background:#121214;font-family:Inter,'PingFang SC','Microsoft YaHei',sans-serif;color:#F5F2EE;display:flex;justify-content:center;padding:30px 0;}
+  .wrap{width:680px;}
+  h1{font-size:22px;margin:0 0 6px;}
+  .sub{color:#8A8A8E;font-size:13px;margin-bottom:20px;}
+  .step{background:#1F1F22;border:1px solid #2A2A2D;border-radius:12px;padding:14px 18px;margin-bottom:10px;position:relative;}
+  .step::before{content:attr(data-num);position:absolute;left:-14px;top:14px;width:28px;height:28px;border-radius:50%;background:#FF8C42;color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;}
+  .step.done::before{background:#4ED5A2;}
+  .step.wait::before{background:#FFB347;}
+  .step h3{margin:0 0 4px;font-size:15px;}
+  .step p{margin:0;color:#B5A296;font-size:13px;}
+  .arrow{text-align:center;color:#8A8A8E;font-size:18px;margin-bottom:10px;}
+  .split{display:flex;gap:10px;margin:10px 0;}
+  .branch{flex:1;background:#1A1A1D;border:1px dashed #3A3A3D;border-radius:10px;padding:12px;}
+  .branch h4{margin:0 0 4px;font-size:13px;color:#FFB347;}
+  .branch p{margin:0;font-size:12px;color:#B5A296;}
+  .end{background:#4ED5A2;color:#121214;border-radius:12px;padding:16px;text-align:center;font-weight:700;margin-top:10px;}
+</style>
+</head>
+<body data-page-node-id="vlHBQqlvmzANbF2s1edpGc">
+<div class="wrap" data-page-node-id="XiIIMogLCblGj35NAvJFqJ">
+  <h1 data-page-node-id="A0YYaRFZ7am2oBtaVH2xoc">GIAONHANH 第一阶段 · 执行流程图</h1>
+  <div class="sub" data-page-node-id="f04n0856k1Ndh8doNZcPvn">跟着数字走，一次只做一步</div>
+
+  <div class="step" data-num="0" data-page-node-id="OFkKBIwx3Fn2P7KBfflHUw"><h3 data-page-node-id="hkGbdnSuI0jhVsAu123LfZ">准备工具</h3><p data-page-node-id="qVfnQw5udoYHd2YQVr71ad">安装 Git、注册 GitHub 账号、安装 Docker Desktop、准备录屏工具</p></div>
+  <div class="arrow" data-page-node-id="cDe9EnaBZugptLUOkh7CW8">↓</div>
+
+  <div class="step" data-num="1" data-page-node-id="IciCnKWEoHDBFxQeyAHfzb"><h3 data-page-node-id="fZhl46UuoArO9SxRv21D57">Push 代码触发 CI</h3><p data-page-node-id="TUcSgblsi3TCE0f8N1Z2dZ">把当前代码推送到 GitHub，等 4 个 CI job 全绿 → 截图</p></div>
+  <div class="split" data-page-node-id="tgArkDOv5IYSClwUdhZJpP">
+    <div class="branch" data-page-node-id="hdNGxKuGVV3AnWI3PE3ASl"><h4 data-page-node-id="cYmLlHZflIT8sHFmbGl2Lw">已有 GitHub 仓库</h4><p data-page-node-id="hR1dsB8QJ5BS3YS5WqeOAQ">git add -A && git commit && git push origin main</p></div>
+    <div class="branch" data-page-node-id="QTpPLSGPZaNZ2OCef2gcOG"><h4 data-page-node-id="GUsdCnvgsOgSMyYvDTyCxW">还没有仓库</h4><p data-page-node-id="b3zTzgwK1oqoHvT4EBqiK2">github.com/new 创建空仓库 → git init → git remote add origin → push</p></div>
+  </div>
+  <div class="arrow" data-page-node-id="64jUb5awJLGmSyvWtbu1uh">↓</div>
+
+  <div class="step" data-num="2" data-page-node-id="4Kx54I62nZOn2uTQEN9aA2"><h3 data-page-node-id="D5Ung6RtvUjzgkHugF6BP6">本地 Docker 起服务</h3><p data-page-node-id="fGRGomm3gtI8HXSzm9u1Pb">docker compose up -d --build → 等 MySQL 健康 → migrate --seed</p></div>
+  <div class="arrow" data-page-node-id="rl3tbftzRgGfOREyjtyB8Y">↓</div>
+
+  <div class="step" data-num="3" data-page-node-id="RnDr2ZreoFwQMzp6wibXlY"><h3 data-page-node-id="GaDmplnFv3en7biBYoUUx3">验证后端能跑</h3><p data-page-node-id="Blswkffwn3pHx3Ex93Mpx7">跑 API_BASE=http://localhost:8080 node tools/backend-smoke.mjs → 全部 PASS</p></div>
+  <div class="arrow" data-page-node-id="wseQPEul2wZhCEtyUUYzGE">↓</div>
+
+  <div class="step" data-num="4" data-page-node-id="J03ZYWFxUUuld7Yo2SxURd"><h3 data-page-node-id="J0l7kA0bBUmQrjimLyY7yp">打开 App 录视频</h3><p data-page-node-id="cO5VGko6fiiLEBqiaoBtxy">浏览器打开 app/index.html → 首页/商家/加购/下单/COD/订单详情 → 保存 demo.mp4</p></div>
+  <div class="arrow" data-page-node-id="20eZkqwKgaF501YRj6Uqrv">↓</div>
+
+  <div class="step" data-num="5" data-page-node-id="Xuazh6hT1b2UTnuGdkhgGV"><h3 data-page-node-id="ZTLlAPNIaYxKGYDu23FEXi">营收模型拍板</h3><p data-page-node-id="byEA62BC5Mw8N6tRKTOQ2p">选 A（0佣金）/ B（收佣金，告诉我%）/ C（混合），我写入 backend/.env</p></div>
+  <div class="arrow" data-page-node-id="z1vCy08MQMQb7Efg093FQL">↓</div>
+
+  <div class="end" data-page-node-id="Z5m2HaC63yVifaJ71Dix7R">第一阶段全绿 ✅ · 原生代码包可交付客户</div>
+</div>
+</body>
+</html>

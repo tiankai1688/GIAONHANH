@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>GIAONHANH · 骑手端</title>
+<style>
+  :root{--brand:#ff6a2b;--brand-2:#ffb020;--accent:#2bd4a7;--ease:cubic-bezier(0.16,1,0.3,1);
+    --font:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;}
+  html[data-theme="dark"]{--bg:#0b0d13;--panel:#151821;--surface:rgba(255,255,255,.05);--surface-2:rgba(255,255,255,.09);
+    --border:rgba(255,255,255,.10);--text:#f4f6fb;--dim:#9aa3b8;--faint:#646d82;--glass:rgba(18,21,30,.6);
+    --map:linear-gradient(135deg,#1b2030,#10131c);}
+  html[data-theme="light"]{--bg:#f4f6fb;--panel:#fff;--surface:rgba(20,30,60,.04);--surface-2:rgba(20,30,60,.07);
+    --border:rgba(15,23,42,.08);--text:#131722;--dim:#5a6478;--faint:#9aa3b8;--glass:rgba(255,255,255,.7);
+    --map:linear-gradient(135deg,#eef2fb,#e3e9f6);}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{height:100%;}
+  body{font-family:var(--font);background:#05060a;color:var(--text);display:flex;justify-content:center;align-items:center;min-height:100vh;transition:background .4s var(--ease);}
+  body.light-body{background:#c9d2e3;}
+  .stage{display:flex;align-items:center;justify-content:center;padding:24px;}
+  .device{position:relative;width:min(430px,100vw);height:min(932px,100vh);background:var(--bg);border-radius:44px;overflow:hidden;
+    box-shadow:0 0 0 12px #0d0f15,0 0 0 14px #2a2f3c,0 50px 100px -34px rgba(0,0,0,.9);transition:background .4s var(--ease);}
+  @media(max-width:479px){
+    html,body{height:100%;overflow:hidden;}
+    body{display:block;min-height:100%;}
+    .stage{padding:0;display:block;height:100%;}
+    .device{width:100vw;height:100vh;height:100dvh;border-radius:0;box-shadow:none;overflow:visible;}
+    .screen{padding-top:100px!important;}
+  }
+  .statusbar{position:absolute;top:0;left:0;right:0;height:46px;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:14px;font-weight:600;pointer-events:none;color:var(--text);}
+  .statusbar .right{display:flex;align-items:center;gap:6px;}
+  .statusbar .bat{width:24px;height:12px;border:1.5px solid currentColor;border-radius:3px;position:relative;opacity:.9;}
+  .statusbar .bat::after{content:"";position:absolute;right:-3px;top:3px;width:2px;height:6px;background:currentColor;border-radius:0 2px 2px 0;}
+  .statusbar .bat i{position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:70%;background:currentColor;border-radius:1px;}
+  .screens{position:absolute;inset:0;}
+  .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-top:46px;padding-bottom:calc(74px + env(safe-area-inset-bottom,0px));display:none;animation:fade .35s var(--ease);}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  .tabbar{position:absolute;left:0;right:0;bottom:0;height:70px;z-index:40;display:flex;background:var(--glass);backdrop-filter:blur(22px) saturate(180%);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom,0px);transition:transform .4s var(--ease),background .4s var(--ease);}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--faint);font-size:11px;font-weight:600;cursor:pointer;transition:color .25s var(--ease);}
+  .tab .ic{font-size:21px;line-height:1;filter:grayscale(.4);transition:.25s var(--ease);}
+  .tab.active{color:var(--brand);} .tab.active .ic{filter:none;transform:translateY(-1px) scale(1.06);}
+  .topbar{position:fixed;top:46px;left:0;right:0;z-index:30;display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--glass);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);height:54px;}
+  @media(min-width:480px){.topbar{position:sticky;top:46px;left:auto;right:auto;height:auto;}}
+  .topbar h1{font-size:17px;font-weight:800;}
+
+  /* rider header */
+  .rhead{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;padding:18px;display:flex;align-items:center;gap:12px;}
+  .rhead .av{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:28px;}
+  .rhead .nm{font-size:18px;font-weight:850;} .rhead .sub{font-size:12px;opacity:.92;margin-top:2px;}
+  .rhead .on{margin-left:auto;background:rgba(255,255,255,.2);padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;}
+  .rhead .on i{width:8px;height:8px;border-radius:50%;background:#fff;display:inline-block;}
+
+  .sec-title{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 8px;}
+  .sec-title b{font-size:16px;font-weight:800;} .sec-title span{font-size:12.5px;color:var(--dim);}
+
+  /* task card */
+  .task{margin:0 14px 12px;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+  .task .th{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);}
+  .task .th .no{font-weight:800;font-size:14px;} .task .th .fee{margin-left:auto;color:var(--accent);font-weight:850;font-size:15px;}
+  .task .leg{display:flex;gap:10px;padding:10px 14px;font-size:13px;}
+  .task .leg .col{flex:1;}
+  .task .leg .lbl{font-size:11px;color:var(--dim);} .task .leg .val{font-weight:600;margin-top:2px;}
+  .task .meta{display:flex;gap:14px;padding:0 14px 10px;font-size:12px;color:var(--dim);}
+  .task .acts{padding:10px 14px 14px;}
+  .task .acts button{width:100%;border:none;border-radius:12px;padding:13px;font-weight:850;font-size:15px;cursor:pointer;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;}
+  .task .acts button.done{background:var(--accent);color:#04201a;}
+
+  /* active delivery map */
+  .map{position:relative;height:240px;margin:0 14px 12px;border-radius:18px;overflow:hidden;border:1px solid var(--border);background:var(--map);}
+  .map .grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:28px 28px;}
+  .map svg{position:absolute;inset:0;width:100%;height:100%;}
+  .map .rider{position:absolute;width:36px;height:36px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:19px;box-shadow:0 6px 16px -4px rgba(0,0,0,.5);left:8%;top:80%;transition:left 3s linear,top 3s linear;z-index:3;border:2px solid var(--brand);}
+  .map .store-p{position:absolute;left:6%;top:80%;font-size:22px;} .map .home-p{position:absolute;right:6%;top:12%;font-size:22px;}
+  .track-st{margin:0 14px 6px;text-align:center;} .track-st .eta{font-size:13px;color:var(--dim);}
+  .track-st .eta b{color:var(--brand);font-size:20px;} .track-st .st{font-size:16px;font-weight:850;margin-top:2px;}
+
+  /* earnings */
+  .egrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:4px 14px;}
+  .ecard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 8px;text-align:center;}
+  .ecard .ev{font-size:18px;font-weight:850;} .ecard .el{font-size:11.5px;color:var(--dim);margin-top:4px;}
+  .ecard.hl .ev{color:var(--accent);}
+
+  .menu{margin:0 16px 16px;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+  .menu .mi{display:flex;align-items:center;gap:13px;padding:15px 16px;border-bottom:1px solid var(--border);cursor:pointer;}
+  .menu .mi:last-child{border-bottom:none;}
+  .menu .mi .mi-ic{font-size:20px;width:26px;text-align:center;}
+  .menu .mi .mi-t{flex:1;font-size:14.5px;font-weight:600;} .menu .mi .mi-a{color:var(--faint);}
+  .empty{text-align:center;color:var(--dim);padding:60px 20px;font-size:14px;} .empty .e{font-size:46px;margin-bottom:10px;}
+  .badge-dot{position:absolute;top:6px;right:18px;min-width:18px;height:18px;border-radius:9px;background:#ff3b5c;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 5px;border:2px solid var(--bg);}
+  .map .leaflet-container{background:var(--map);border-radius:18px;}
+  .map .leaflet-popup-content-wrapper{background:var(--panel);color:var(--text);font-size:12px;border-radius:10px;}
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-og3Vp3+93jOtPzAHjvq4rf/A9zpav5PRl+JqZNWqZFc=' 'sha256-GnZv5EbOnISUkvi6BFMrO4jw9cLH/m/phimhTlo4zoU=' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https: wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'" />
+</head>
+<body>
+<div class="stage"><div class="device" id="device">
+  <div class="statusbar"><span id="clock">19:58</span><span class="right"><span>📶</span><span>🛜</span><span class="bat"><i></i></span></span></div>
+  <div class="screens" id="screens">
+
+    <!-- TASKS -->
+    <section class="screen active" id="screen-tasks">
+      <div class="topbar"><h1 data-a="tab_tasks">抢单</h1><div style="margin-left:auto;display:flex;align-items:center;gap:12px"><div id="settingsBtn" title="数据模式" style="font-size:18px;cursor:pointer">⚙️</div><div id="voiceBtn" title="语音提醒" style="font-size:18px;cursor:pointer">🔊</div><div style="font-size:12px;color:var(--dim)" id="onlineState">🟢 在线</div></div></div>
+      <div class="rhead">
+        <div class="av">🛵</div>
+        <div><div class="nm" id="rName">Shipper A</div><div class="sub" id="rSub">🛵 Xe máy · ★4.9</div></div>
+        <div class="on" id="onlineBtn"><i></i><span id="onlineTxt">在线接单</span></div>
+      </div>
+      <div class="sec-title"><b data-a="near_tasks">附近待接单</b><span id="taskCount"></span></div>
+      <div id="taskList"></div>
+      <div style="height:10px"></div>
+    </section>
+
+    <!-- ACTIVE -->
+    <section class="screen" id="screen-active">
+      <div class="topbar"><h1 data-a="tab_active">配送中</h1></div>
+      <div id="activeBox"></div>
+      <div style="height:10px"></div>
+    </section>
+
+    <!-- EARNINGS -->
+    <section class="screen" id="screen-earn">
+      <div class="topbar"><h1 data-a="tab_earn">收益</h1></div>
+      <div class="egrid">
+        <div class="ecard hl"><div class="ev" id="eToday">0 ₫</div><div class="el" data-a="e_today">今日收入</div></div>
+        <div class="ecard"><div class="ev" id="eDone">0</div><div class="el" data-a="e_done">完成单</div></div>
+        <div class="ecard"><div class="ev" id="eRate">4.9</div><div class="el" data-a="e_rate">评分</div></div>
+      </div>
+      <div class="sec-title"><b data-a="hist">今日完成</b></div>
+      <div id="histList"></div>
+      <div style="height:10px"></div>
+    </section>
+
+    <!-- ME -->
+    <section class="screen" id="screen-me">
+      <div class="topbar"><h1 data-a="tab_me">我的</h1></div>
+      <div class="rhead">
+        <div class="av">🛵</div>
+        <div><div class="nm" id="meName">Shipper</div><div class="sub" id="meSub"></div></div>
+      </div>
+      <div class="menu" style="margin-top:16px">
+        <div class="mi" id="swVoice"><div class="mi-ic">🔊</div><div class="mi-t" data-a="voice_entry">语音提醒</div><div class="mi-a" id="voiceState">开</div></div>
+        <div class="mi" id="swSettings"><div class="mi-ic">⚙️</div><div class="mi-t" data-a="settings_entry">数据模式</div><div class="mi-a">›</div></div>
+        <div class="mi" data-mi="lang"><div class="mi-ic">🌐</div><div class="mi-t" data-a="lang_entry">语言</div><div class="mi-a">›</div></div>
+        <div class="mi" data-mi="theme"><div class="mi-ic">🎨</div><div class="mi-t" data-a="theme_entry">主题</div><div class="mi-a">›</div></div>
+        <div class="mi" data-mi="exit"><div class="mi-ic">↩️</div><div class="mi-t" data-a="exit_app">返回消费者端</div><div class="mi-a">›</div></div>
+      </div>
+    </section>
+
+  </div>
+  <div class="tabbar" id="tabbar">
+    <div class="tab active" data-tab="tasks"><div class="ic">📋</div><div data-a="tab_tasks">抢单</div></div>
+    <div class="tab" data-tab="active"><div class="ic">🛵</div><div data-a="tab_active">配送中</div></div>
+    <div class="tab" data-tab="earn"><div class="ic">💰</div><div data-a="tab_earn">收益</div></div>
+    <div class="tab" data-tab="me"><div class="ic">👤</div><div data-a="tab_me">我的</div></div>
+  </div>
+</div></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+/* Shared config resolver — reads the SAME localStorage keys written by the
+   consumer app's "数据模式" overlay, so one place configures all three ends.
+   URL overrides: ?api= ?live ?demo ?pusher= ?pusherCluster= */
+window.GN_CONFIG = (function(){
+  const q = new URLSearchParams(location.search);
+  const base = (q.get('api') || localStorage.getItem('gn_api_base') || '').trim().replace(/\/+$/,'');
+  let useApi;
+  if(q.has('live')) useApi = true;
+  else if(q.has('demo')) useApi = false;
+  else { const s = localStorage.getItem('gn_use_api'); useApi = s===null ? !!base : s==='1'; }
+  const key = (q.get('pusher') || localStorage.getItem('gn_pusher_key') || '').trim();
+  const cluster = (q.get('pusherCluster') || localStorage.getItem('gn_pusher_cluster') || 'ap1').trim();
+  return { apiBase:base, useApi, pusherKey:key, pusherCluster:cluster };
+})();
+</script>
+<script src="native-bridge.js" defer></script>
+<script src="settings-overlay.js" defer></script>
+<script src="api.js" defer></script>
+<script>
+/* ===================== I18N ===================== */
+const APP = {
+  vi:{
+    tab_tasks:"Nhận đơn", tab_active:"Đang giao", tab_earn:"Thu nhập", tab_me:"Của tôi",
+    near_tasks:"Đơn gần đây chờ nhận", e_today:"Thu nhập hôm nay", e_done:"Đơn hoàn thành", e_rate:"Đánh giá",
+    hist:"Hoàn thành hôm nay", online:"Trực tuyến", offline:"Ngoại tuyến",
+    pickup:"Lấy hàng", dropoff:"Giao đến", customer:"Khách", dist:"Cách", eta:"ETA",
+    accept:"Nhận đơn", picked:"Đã lấy hàng", deliver:"Hoàn thành giao", done:"Đã giao xong",
+    empty_tasks:"Không có đơn nào gần", empty_active:"Chưa có đơn đang giao",
+    on:"Trực tuyến", off:"Ngoại tuyến",
+    voice_entry:"Thông báo giọng nói", settings_entry:"Chế độ dữ liệu", lang_entry:"Ngôn ngữ", theme_entry:"Giao diện", exit_app:"Về app khách",
+  },
+  zh:{
+    tab_tasks:"抢单", tab_active:"配送中", tab_earn:"收益", tab_me:"我的",
+    near_tasks:"附近待接单", e_today:"今日收入", e_done:"完成单", e_rate:"评分",
+    hist:"今日完成", online:"在线", offline:"离线",
+    pickup:"取货点", dropoff:"送达", customer:"客户", dist:"距离", eta:"预计",
+    accept:"接单", picked:"已取货", deliver:"完成送达", done:"已送达",
+    empty_tasks:"附近暂无订单", empty_active:"暂无配送中订单",
+    on:"在线接单", off:"离线",
+    voice_entry:"语音提醒", settings_entry:"数据模式", lang_entry:"语言", theme_entry:"主题", exit_app:"返回消费者端",
+  }
+};
+
+/* ===================== OFFLINE DEMO DATA ===================== */
+const RIDER = { id:1, name:"Shipper A", vehicle:"Xe máy", rating:4.9, online:true, e_today:185000, done:7 };
+let TASKS = [
+  { order_no:"GN20260715A1", pickup:"GREEN MART", pickup_addr:"Cầu Giấy", dropoff_addr:"123 Tràng Tiền, Hoàn Kiếm",
+    customer:"Nguyen Van A", dist_km:2.4, fee:12000, status:"pending", eta:18 },
+  { order_no:"GN20260715A2", pickup:"PHỞ 24H", pickup_addr:"Hoàn Kiếm", dropoff_addr:"45 Hàng Bài",
+    customer:"Tran Thi B", dist_km:1.8, fee:10000, status:"pending", eta:14 },
+  { order_no:"GN20260715A3", pickup:"BEAUTY HUB", pickup_addr:"Hai Bà Trưng", dropoff_addr:"12 Lý Thái Tổ",
+    customer:"Le Van C", dist_km:3.1, fee:15000, status:"pending", eta:24 },
+];
+const HIST = [
+  {no:"GN20260715Z9",fee:15000},{no:"GN20260715Z7",fee:12000},{no:"GN20260715Z5",fee:10000},
+];
+
+/* Rider demo position (Hanoi) — used for nearby-distance only. */
+const RIDER_LAT = 21.0285, RIDER_LNG = 105.8542;
+
+/* ===================== LIVE STATE ===================== */
+let LIVE = null;
+const srcTasks  = () => (LIVE && LIVE.tasks) ? LIVE.tasks : TASKS;
+const srcActive = () => (LIVE && LIVE.active) ? LIVE.active : activeTask;
+const srcRider  = () => (LIVE && LIVE.rider) ? LIVE.rider : RIDER;
+
+/* Voice: announce only genuinely NEW grabbable orders (dedup by order_no).
+   Demo's initial tasks are seeded so the cold start stays silent. */
+const announcedOrders = new Set();
+TASKS.forEach(t => announcedOrders.add(t.order_no));
+function announceNewTasks(list){
+  if(!list || !list.length) return;
+  const fresh = list.filter(t => !announcedOrders.has(t.order_no));
+  fresh.forEach(t => announcedOrders.add(t.order_no));
+  if(fresh.length && window.GN && GN.voice && !GN.voice.isMuted()) GN.voice.say('new_order');
+}
+
+function mapTask(o){
+  return {
+    order_no: o.order_no,
+    status: "pending",            // grabbable pool normalized to demo shape
+    pickup: (o.merchant && o.merchant.name) || "Merchant",
+    pickup_addr: (o.merchant && o.merchant.address) || "",
+    dropoff_addr: o.address || "",
+    customer: o.contact_name || "Khách",
+    dist_km: o.distance_km || 0,
+    fee: o.delivery_fee || 0,
+    eta: o.distance_km ? Math.round(o.distance_km * 6) : 15,
+  };
+}
+function mapActive(o){
+  return {
+    order_no: o.order_no,
+    status: "delivering",
+    pickup: (o.merchant && o.merchant.name) || "Merchant",
+    pickup_addr: (o.merchant && o.merchant.address) || "",
+    pickup_lat: (o.merchant && o.merchant.lat) || null,
+    pickup_lng: (o.merchant && o.merchant.lng) || null,
+    dropoff_addr: o.address || "",
+    dropoff_lat: o.lat || null,
+    dropoff_lng: o.lng || null,
+    customer: o.contact_name || "Khách",
+    dist_km: o.distance_km || 0,
+    fee: o.delivery_fee || 0,
+    eta: o.distance_km ? Math.round(o.distance_km * 6) : 15,
+  };
+}
+function mapRider(p){
+  return {
+    id: p.id, name: p.name, vehicle: p.vehicle, rating: p.rating,
+    online: p.status !== "offline",
+    e_today: p.today_earnings || 0, done: p.today_completed || 0,
+  };
+}
+
+/* ---- live sync ---- */
+async function tryLive(){
+  if(!(GN_CONFIG.useApi && GN_CONFIG.apiBase)) return;
+  try{
+    const logged = await GN.demoLoginAs('0900000004','rider');
+    if(!logged || logged.offline || !logged.token) return;
+    initEcho(); // wire real-time new-order alerts (best-effort)
+    const [ords, cur, prof] = await Promise.all([
+      GN.API.riderOrders(RIDER_LAT, RIDER_LNG),
+      GN.API.riderCurrent(),
+      GN.API.riderProfile(),
+    ]);
+    const arr = (ords && Array.isArray(ords)) ? ords : (ords && ords.data) || [];
+    const tasks = arr.filter(o => o.rider_id === null).map(mapTask);
+    const active = (cur && cur.order_no) ? mapActive(cur) : null;
+    LIVE = {
+      tasks,
+      active,
+      rider: (prof && !prof.offline) ? mapRider(prof) : null,
+    };
+    activeTask = active;            // keep global in sync for renderActive
+    announceNewTasks(LIVE.tasks);
+    applyText(); renderTasks(); renderActive(); renderEarn();
+  }catch(e){ /* keep offline demo */ }
+}
+async function refreshTasks(){
+  if(!LIVE) return;
+  const ords = await GN.API.riderOrders(RIDER_LAT, RIDER_LNG);
+  const arr = (ords && Array.isArray(ords)) ? ords : (ords && ords.data) || [];
+  LIVE.tasks = arr.filter(o => o.rider_id === null).map(mapTask);
+  announceNewTasks(LIVE.tasks);
+}
+async function refreshRider(){
+  if(!LIVE) return;
+  const p = await GN.API.riderProfile();
+  if(p && !p.offline) LIVE.rider = mapRider(p);
+}
+
+/* ---- real-time: Laravel Echo / Pusher for INSTANT new-order alerts ----
+   Subscribes to the PUBLIC channel `orders.grab` (no auth needed). When a
+   merchant marks an order ready, the backend broadcasts OrderReadyForGrab;
+   we chime immediately (deduped by order_no) and refresh the grabbable list
+   to pull real fee/distance. Falls back to polling if Pusher isn't configured.
+   Uses the shared GN.initEcho helper (script loading + Echo instance). */
+let echoReady=false, echoTried=false;
+function initEcho(){
+  if(echoReady || echoTried) return;
+  if(!(GN_CONFIG.useApi && GN_CONFIG.apiBase && GN_CONFIG.pusherKey)) return;
+  echoTried=true;
+  GN.initEcho({ key:GN_CONFIG.pusherKey, cluster:GN_CONFIG.pusherCluster||'ap1' }).then(echo=>{
+    if(!echo) return;
+    echoReady=true;
+    echo.channel('orders.grab').listen('.OrderReadyForGrab', (e)=>{
+      if(!announcedOrders.has(e.order_no)){ announcedOrders.add(e.order_no); if(!(window.GN && GN.voice && GN.voice.isMuted())) GN.voice.say('new_order'); }
+      if(LIVE) refreshTasks();
+    });
+  });
+}
+
+/* ===================== STATE ===================== */
+let lang = localStorage.getItem("gn_rider_lang") || "vi";
+let theme = localStorage.getItem("gn_rider_theme") || "dark";
+let current="tasks";
+let activeTask=null;
+let etaTimer=null;
+const $ = s => document.querySelector(s);
+const fmt = v => Number(v).toLocaleString("vi-VN")+" ₫";
+
+function setLang(l){ lang=l; localStorage.setItem("gn_rider_lang",l); document.documentElement.setAttribute("lang",l); applyText(); renderTasks(); renderActive(); renderEarn(); }
+function setTheme(t){ theme=t; localStorage.setItem("gn_rider_theme",t); document.documentElement.setAttribute("data-theme",t); document.body.classList.toggle("light-body",t==="light"); }
+function applyText(){ document.querySelectorAll("[data-a]").forEach(el=>{const k=el.getAttribute("data-a"); if(APP[lang][k]!=null) el.textContent=APP[lang][k];});
+  document.querySelectorAll("#tabbar .tab").forEach(t=>{const map={tasks:"tab_tasks",active:"tab_active",earn:"tab_earn",me:"tab_me"}; t.querySelector("div:last-child").textContent=APP[lang][map[t.dataset.tab]];});
+  const r = srcRider();
+  $("#rName").textContent = r.name || "Shipper";
+  $("#rSub").textContent = `🛵 ${r.vehicle || ""} · ★${r.rating || "--"}`.trim();
+  if($("#meName")) $("#meName").textContent = r.name || "Shipper";
+  if($("#meSub")) $("#meSub").textContent = `🛵 ${r.vehicle || ""} · ★${r.rating || "--"}`.trim();
+  $("#onlineTxt").textContent = r.online? APP[lang].on : APP[lang].off;
+  $("#onlineState").textContent = r.online? "🟢 "+APP[lang].online : "⚪ "+APP[lang].offline;
+  renderMeVoice();
+}
+function tab(name){ current=name; document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); $("#screen-"+name).classList.add("active"); document.querySelectorAll("#tabbar .tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===name)); if(name==="tasks")renderTasks(); if(name==="active")renderActive(); if(name==="earn")renderEarn(); if(name==="me")renderMe(); }
+function renderMe(){
+  const r = srcRider();
+  if($("#meName")) $("#meName").textContent = r.name || "Shipper";
+  if($("#meSub")) $("#meSub").textContent = `🛵 ${r.vehicle || ""} · ★${r.rating || "--"}`.trim();
+  renderMeVoice();
+}
+function renderMeVoice(){
+  const el=$("#voiceState"); if(!el) return;
+  const muted = window.GN && GN.voice ? GN.voice.isMuted() : false;
+  el.textContent = muted ? (lang==="vi"?"Tắt":"关") : (lang==="vi"?"Bật":"开");
+}
+
+function renderTasks(){
+  const pend = srcTasks().filter(t=>t.status==="pending");
+  $("#taskCount").textContent = pend.length?`(${pend.length})`:"";
+  $("#taskList").innerHTML = pend.length? pend.map(taskCard).join("") : emptyBox("empty_tasks");
+  const tb=document.querySelector('#tabbar .tab[data-tab="tasks"]'); let dot=tb.querySelector(".badge-dot");
+  if(pend.length){ if(!dot){dot=document.createElement("div");dot.className="badge-dot";tb.appendChild(dot);} dot.textContent=pend.length; } else if(dot) dot.remove();
+  $("#taskList").querySelectorAll("[data-accept]").forEach(b=>b.onclick=()=>acceptTask(b.dataset.accept));
+}
+function taskCard(t){
+  return `<div class="task">
+    <div class="th"><span class="no">${t.order_no}</span><span class="fee">+${fmt(t.fee)}</span></div>
+    <div class="leg">
+      <div class="col"><div class="lbl">🏪 ${APP[lang].pickup}</div><div class="val">${esc(t.pickup)}</div><div class="lbl" style="margin-top:4px">${esc(t.pickup_addr)}</div></div>
+      <div class="col"><div class="lbl">🏠 ${APP[lang].dropoff}</div><div class="val">${esc(t.customer)}</div><div class="lbl" style="margin-top:4px">${esc(t.dropoff_addr)}</div></div>
+    </div>
+    <div class="meta"><span>📍 ${APP[lang].dist} ${t.dist_km} km</span><span>⏱ ${APP[lang].eta} ~${t.eta}'</span></div>
+    <div class="acts"><button data-accept="${t.order_no}">🛵 ${APP[lang].accept}</button></div>
+  </div>`;
+}
+function emptyBox(k){ return `<div class="empty"><div class="e">🛵</div>${APP[lang][k]}</div>`; }
+
+async function acceptTask(no){
+  const list = srcTasks();
+  const t = list.find(x=>x.order_no===no); if(!t) return;
+  if(GN_CONFIG.useApi && GN_CONFIG.apiBase && LIVE){
+    try{
+      await GN.API.riderAccept(no);
+      const cur = await GN.API.riderCurrent();
+      if(cur && cur.order_no){ LIVE.active = mapActive(cur); activeTask = LIVE.active; }
+      LIVE.tasks = LIVE.tasks.filter(x=>x.order_no!==no);
+      if(window.GN && GN.voice) GN.voice.say('order_accepted');
+      riderGrabFeedback();
+      tab("active"); renderActive(); renderTasks(); return;
+    }catch(e){ /* fall back to local demo behaviour */ }
+  }
+  // demo / fallback
+  t.status="delivering"; activeTask=t;
+  if(LIVE) LIVE.tasks = LIVE.tasks.filter(x=>x.order_no!==no);
+  else TASKS = TASKS.filter(x=>x!==t);
+  if(window.GN && GN.voice) GN.voice.say('order_accepted');
+  riderGrabFeedback();
+  tab("active"); renderActive(); renderTasks();
+}
+
+/* Haptic + visual confirmation after a successful grab (both live + demo). */
+function riderGrabFeedback(){
+  try { if (navigator.vibrate) navigator.vibrate([45, 30, 45]); } catch (e) {}
+  if (window.GN && GN.toast) {
+    const msg = (lang === 'zh') ? '已接单，前往取货' : 'Đã nhận đơn, đến lấy hàng';
+    GN.toast(msg, 'success');
+  }
+}
+
+function renderActive(){
+  const box=$("#activeBox");
+  const t = srcActive();
+  if(!t){ box.innerHTML=emptyBox("empty_active"); return; }
+  box.innerHTML=`
+    <div class="track-st"><div class="eta">${APP[lang].eta} <b id="etaMin">${t.eta}</b>′</div><div class="st" id="activeSt">🛵 ${APP[lang].picked}</div></div>
+    <div id="liveMap" class="map"></div>
+    <div class="task" style="margin-top:12px">
+      <div class="th"><span class="no">${t.order_no}</span><span class="fee">+${fmt(t.fee)}</span></div>
+      <div class="leg"><div class="col"><div class="lbl">🏪 ${APP[lang].pickup}</div><div class="val">${t.pickup}</div></div>
+        <div class="col"><div class="lbl">🏠 ${APP[lang].dropoff}</div><div class="val">${t.customer}</div></div></div>
+      <div class="acts"><button class="done" id="deliverBtn">✅ ${APP[lang].deliver}</button></div>
+    </div>`;
+  renderLeafletMap($("#liveMap"), t);
+  // ETA countdown
+  if(etaTimer) clearInterval(etaTimer);
+  let e=t.eta; etaTimer=setInterval(()=>{ e--; const el=$("#etaMin"); if(el) el.textContent=Math.max(0,e); if(e<=0) clearInterval(etaTimer); },1000);
+  $("#deliverBtn").onclick=()=>deliverTask();
+}
+
+async function deliverTask(){
+  const t = srcActive(); if(!t) return;
+  if(GN_CONFIG.useApi && GN_CONFIG.apiBase && LIVE){
+    try{
+      await GN.API.riderDeliver(t.order_no);
+      await refreshRider();
+      const cur = await GN.API.riderCurrent();
+      LIVE.active = (cur && cur.order_no) ? mapActive(cur) : null;
+      activeTask = LIVE.active;
+      await refreshTasks();
+      renderEarn(); renderTasks(); tab("tasks"); return;
+    }catch(e){ /* fall back to local demo behaviour */ }
+  }
+  // demo / fallback
+  RIDER.e_today += t.fee; RIDER.done += 1;
+  HIST.unshift({no:t.order_no, fee:t.fee});
+  activeTask=null; if(LIVE) LIVE.active=null; if(etaTimer) clearInterval(etaTimer);
+  renderEarn();
+  tab("tasks");
+}
+
+function renderEarn(){
+  const r = srcRider();
+  $("#eToday").textContent=fmt(r.e_today||0);
+  $("#eDone").textContent=r.done||0;
+  $("#eRate").textContent=r.rating||"--";
+  const box=$("#histList");
+  if(LIVE){
+    box.innerHTML = `<div style="padding:14px 16px;font-size:13px;color:var(--dim)">${r.done||0} ${lang==="vi"?"đơn đã giao":"单已完成"} · ${APP[lang].e_today} ${fmt(r.e_today||0)}</div>`;
+  } else {
+    box.innerHTML = HIST.map(h=>`<div style="display:flex;justify-content:space-between;padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border)"><span>${h.no}</span><b style="color:var(--accent)">+${fmt(h.fee)}</b></div>`).join("");
+  }
+}
+
+/* Render a real OSM/Leaflet map for the active delivery: pickup + dropoff
+   markers. Uses backend coords when live, else synthesizes around the
+   rider's Hanoi base so the demo still shows a real map. */
+function renderLeafletMap(container, t){
+  if(!container) return;
+  if(typeof L==="undefined"){ container.innerHTML='<div class="grid-bg"></div><div class="store-p">🏪</div><div class="home-p">🏠</div><div class="rider">🛵</div>'; return; }
+  const pk=(t.pickup_lat && t.pickup_lng)?[t.pickup_lat,t.pickup_lng]:[RIDER_LAT+0.012,RIDER_LNG-0.010];
+  const dp=(t.dropoff_lat && t.dropoff_lng)?[t.dropoff_lat,t.dropoff_lng]:[RIDER_LAT-0.010,RIDER_LNG+0.014];
+  container.innerHTML='';
+  const map=L.map(container,{scrollWheelZoom:false,zoomControl:false}).setView(pk,14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+  L.marker(pk,{title:t.pickup}).addTo(map).bindPopup('🏪 '+(t.pickup||''));
+  L.marker(dp,{title:t.customer||'Khách'}).addTo(map).bindPopup('🏠 '+(t.dropoff_addr||''));
+  setTimeout(()=>{ try{ map.invalidateSize(); }catch(e){} },250);
+}
+
+/* ---- events ---- */
+document.querySelectorAll("#tabbar .tab").forEach(t=>t.onclick=()=>tab(t.dataset.tab));
+$("#onlineBtn").onclick=async()=>{
+  const r = srcRider();
+  const online = !r.online;
+  if(GN_CONFIG.useApi && GN_CONFIG.apiBase && LIVE){
+    try{ await GN.API.setRiderOnline(online); await refreshRider(); }catch(e){}
+  }
+  r.online = online;
+  applyText();
+};
+/* voice mute toggle */
+function renderVoiceBtn(){
+  const b=$("#voiceBtn"); if(!b) return;
+  const muted = window.GN && GN.voice ? GN.voice.isMuted() : false;
+  b.textContent = muted ? "🔇" : "🔊";
+}
+const vb=$("#voiceBtn"); if(vb) vb.onclick=()=>{
+  if(window.GN && GN.voice){ const m=GN.voice.toggle(); if(!m) GN.voice.beep(880,160); renderVoiceBtn(); }
+};
+const sb=$("#settingsBtn"); if(sb) sb.onclick=()=>{ if(window.GN && GN.openDataModeOverlay) GN.openDataModeOverlay(); };
+/* "我的" page: voice toggle + data-mode overlay + lang/theme/return-to-consumer */
+const swv=$("#swVoice"); if(swv) swv.onclick=()=>{ if(window.GN && GN.voice){ const m=GN.voice.toggle(); if(!m) GN.voice.beep(880,160); renderVoiceBtn(); renderMeVoice(); } };
+const sws=$("#swSettings"); if(sws) sws.onclick=()=>{ if(window.GN && GN.openDataModeOverlay) GN.openDataModeOverlay(); };
+document.querySelectorAll("#screen-me .mi[data-mi]").forEach(m=>m.onclick=()=>{
+  const k=m.dataset.mi;
+  if(k==="lang") setLang(lang==="vi"?"zh":"vi");
+  else if(k==="theme") setTheme(theme==="dark"?"light":"dark");
+  else if(k==="exit") location.href="index.html#profile";
+});
+
+function tick(){ const d=new Date(); $("#clock").textContent=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+setInterval(tick,10000); tick();
+
+setTheme(theme); setLang(lang); renderTasks(); renderEarn();
+setTimeout(renderVoiceBtn, 0); // refresh icon after GN.voice (deferred bridge) loads
+setTimeout(renderMeVoice, 0); // same for the 我的 page voice state
+if(GN_CONFIG.useApi && GN_CONFIG.apiBase){
+  setInterval(async ()=>{ if(LIVE){ try{ await refreshTasks(); renderTasks(); }catch(e){} } }, 12000);
+}
+tryLive();
+</script>
+</body>
+</html>

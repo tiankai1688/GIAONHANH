@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GIAONHANH · Bảng điều khiển (L)</title>
+<link rel="stylesheet" href="admin.css" />
+<style>
+  /* ---- L-admin: a few components admin.css does not ship ---- */
+  .sw{position:relative;width:46px;height:26px;border-radius:999px;background:var(--surface-2);
+    border:1px solid var(--border);cursor:pointer;transition:.25s var(--ease);flex-shrink:0;display:inline-block;}
+  .sw i{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;
+    transition:.25s var(--ease);box-shadow:0 1px 3px rgba(15,23,42,.25);}
+  .sw.on{background:linear-gradient(135deg,var(--brand),var(--brand-strong));border-color:transparent;}
+  .sw.on i{left:22px;}
+  .switch-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;
+    border-bottom:1px solid var(--border);}
+  .switch-row:last-child{border-bottom:none;}
+  .switch-row .k{font-size:14px;font-weight:700;}
+  .switch-row .k small{display:block;font-size:12px;color:var(--dim);font-weight:500;margin-top:2px;line-height:1.4;}
+  .funnel{display:flex;flex-direction:column;gap:14px;}
+  .funnel-row{display:flex;align-items:center;gap:16px;}
+  .funnel-row .fl{width:160px;font-size:13px;font-weight:650;color:var(--dim);flex-shrink:0;}
+  .funnel-bar{flex:1;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-strong));
+    display:flex;align-items:center;padding:0 14px;color:#fff;font-weight:750;font-size:13px;box-shadow:var(--shadow-sm);
+    transition:width .5s var(--ease);min-width:60px;}
+  .perm-grid{display:grid;grid-template-columns:180px repeat(3,1fr);border:1px solid var(--border);
+    border-radius:var(--radius-sm);overflow:hidden;background:var(--surface);}
+  .perm-grid > div{padding:13px 16px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);
+    font-size:13px;font-weight:650;display:flex;align-items:center;}
+  .perm-grid > div:nth-child(4n){border-right:none;}
+  .perm-grid .ph{background:var(--surface-2);font-weight:800;font-size:11.5px;text-transform:uppercase;
+    letter-spacing:.5px;color:var(--dim);}
+  .perm-grid .role{background:var(--surface-2);font-weight:800;}
+  .perm-grid input{width:18px;height:18px;accent-color:var(--brand-strong);cursor:pointer;}
+  .perm-grid .center{justify-content:center;}
+  .cover-card{background:linear-gradient(135deg,var(--brand),var(--brand-deep));border-radius:var(--radius);
+    padding:24px;color:#fff;box-shadow:var(--shadow-md);position:relative;overflow:hidden;}
+  .cover-card::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,.18),transparent 70%);}
+  .cover-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px;}
+  .cover-stat{background:rgba(255,255,255,.14);border-radius:12px;padding:14px 16px;}
+  .cover-stat b{display:block;font-size:24px;font-weight:850;letter-spacing:-.5px;}
+  .cover-stat span{font-size:12px;opacity:.9;}
+  .es-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .es-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+  .es-card .es-h{padding:13px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:800;}
+  .es-card .es-b{padding:16px;}
+  .price-input{width:150px;font-family:inherit;font-size:13.5px;font-weight:750;color:var(--text);
+    background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 11px;outline:none;
+    text-align:right;font-variant-numeric:tabular-nums;transition:.16s var(--ease);}
+  .price-input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft-2);}
+  .note-box{background:var(--brand-soft);border:1px solid var(--brand-soft-2);border-radius:12px;
+    padding:14px 16px;font-size:12.5px;color:var(--brand-deep);line-height:1.6;}
+  .note-box b{color:var(--brand-deep);}
+  .add-badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:800;padding:2px 8px;
+    border-radius:999px;background:var(--warn-soft);color:#B45309;margin-left:8px;vertical-align:middle;}
+  @media(max-width:1100px){.perm-grid{grid-template-columns:130px repeat(3,1fr);}.es-grid{grid-template-columns:1fr;}}
+</style>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Tk3B7bOq5xwL4KPSldnYSqSsbmNSGSOQrwzGrhvVfQ4=' 'sha256-QRDZV0xEz7EtbP1kpE6csGXXY5/Yrekx6sqAAgJNFaI=' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https: wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'" />
+</head>
+<body>
+
+<!-- ===================== LOGIN GATE ===================== -->
+<div class="login" id="login">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="logo">G</div>
+      <div class="bn">GIAONHANH<small data-a="console">Bảng điều khiển nền tảng</small></div>
+    </div>
+    <h1 data-a="login_title">Đăng nhập quản trị</h1>
+    <p class="lead" data-a="login_lead">Console tự vận hành · Nền tảng giờ vàng Việt Nam</p>
+    <div class="login-err" id="loginErr" data-a="login_err">Sai tài khoản hoặc mật khẩu.</div>
+    <div class="field">
+      <label data-a="login_phone">Số điện thoại</label>
+      <input id="loginPhone" value="0900000001" inputmode="numeric" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label data-a="login_pass">Mật khẩu</label>
+      <input id="loginPass" type="password" value="demo123" autocomplete="current-password" />
+    </div>
+    <button class="btn btn-primary" id="loginBtn" style="width:100%" data-a="login_btn">Đăng nhập</button>
+    <p class="hint" data-a="login_hint">Demo: <b>0900000001</b> / demo123</p>
+  </div>
+</div>
+
+<!-- ===================== APP SHELL ===================== -->
+<div class="app-shell" id="app" style="display:none">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">G</div>
+      <div class="bn">GIAONHANH<small data-a="console">Bảng điều khiển</small></div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-label" data-a="nav_label">Vận hành</div>
+      <div class="nav-item active" data-page="dashboard">
+        <span class="ic">__IC_DASHBOARD__</span>
+        <span class="tx">Tổng quan<span class="zh" data-a="nav_dashboard_zh">概览</span></span>
+      </div>
+      <div class="nav-item" data-page="merchants">
+        <span class="ic">__IC_SHOP__</span>
+        <span class="tx">Merchant &amp; KYC<span class="zh" data-a="nav_merchants_zh">商户与资质</span></span>
+        <span class="dot" id="navPendingDot" style="display:none">0</span>
+      </div>
+      <div class="nav-item" data-page="orders">
+        <span class="ic">__IC_RECEIPT__</span>
+        <span class="tx">Đơn hàng<span class="zh" data-a="nav_orders_zh">订单</span></span>
+      </div>
+      <div class="nav-item" data-page="settlement">
+        <span class="ic">__IC_WALLET__</span>
+        <span class="tx">Đối soát &amp; Thanh toán<span class="zh" data-a="nav_settlement_zh">分账与提现</span></span>
+      </div>
+      <div class="nav-label" data-a="nav_label2">Nền tảng</div>
+      <div class="nav-item" data-page="overview">
+        <span class="ic">__IC_COVER__</span>
+        <span class="tx">Toàn cảnh<span class="zh" data-a="nav_overview_zh">平台总览</span></span>
+      </div>
+      <div class="nav-item" data-page="riders">
+        <span class="ic">__IC_RIDER__</span>
+        <span class="tx">Tài xế<span class="zh" data-a="nav_riders_zh">骑手管理</span></span>
+        <span class="dot" id="navRiderDot" style="display:none">0</span>
+      </div>
+      <div class="nav-item" data-page="coupons">
+        <span class="ic">__IC_COUPON__</span>
+        <span class="tx">Mã giảm giá<span class="zh" data-a="nav_coupons_zh">平台优惠券</span></span>
+      </div>
+      <div class="nav-item" data-page="agents">
+        <span class="ic">__IC_AGENT__</span>
+        <span class="tx">Đại lý<span class="zh" data-a="nav_agents_zh">代理商</span></span>
+        <span class="dot" id="navAgentDot" style="display:none">0</span>
+      </div>
+      <div class="nav-label" data-a="nav_label3">Hệ thống</div>
+      <div class="nav-item" data-page="settings">
+        <span class="ic">__IC_SETTINGS__</span>
+        <span class="tx">Cài đặt nền tảng<span class="zh" data-a="nav_settings_zh">平台设置</span></span>
+      </div>
+      <div class="nav-item" data-page="permissions">
+        <span class="ic">__IC_PERMISSION__</span>
+        <span class="tx">Phân quyền<span class="zh" data-a="nav_permissions_zh">后台权限</span></span>
+      </div>
+      <div class="nav-item" data-page="notifications">
+        <span class="ic">__IC_BELL__</span>
+        <span class="tx">Thông báo<span class="zh" data-a="nav_notifications_zh">通知中心</span></span>
+        <span class="dot" id="navNotifDot" style="display:none">0</span>
+      </div>
+      <div class="nav-item" data-page="cover">
+        <span class="ic">__IC_COVER__</span>
+        <span class="tx">Trang招商<span class="zh" data-a="nav_cover_zh">招商落地页</span></span>
+      </div>
+      <div class="nav-item" data-page="emptystates">
+        <span class="ic">__IC_EMPTY__</span>
+        <span class="tx">Trạng thái rỗng<span class="zh" data-a="nav_emptystates_zh">空状态规范</span></span>
+      </div>
+    </nav>
+    <div class="side-foot">
+      <div class="admin-card" id="logoutBtn">
+        <div class="av">A</div>
+        <div>
+          <div class="nm" data-a="admin_name">Admin GIAONHANH</div>
+          <div class="rl" data-a="admin_role">Quản trị viên</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <div class="title" id="pageTitle">Tổng quan</div>
+        <div class="title" style="font-size:12px;font-weight:600;color:var(--dim)" id="pageSub"></div>
+      </div>
+      <div class="spacer"></div>
+      <div class="search">
+        __IC_SEARCH__
+        <input id="globalSearch" placeholder="Tìm kiếm..." />
+      </div>
+      <div class="lang-pill" id="langPill">
+        <button data-lang="vi" class="on">VI</button>
+        <button data-lang="zh">中文</button>
+      </div>
+      <div class="icon-btn" id="themeBtn" title="Giao diện">__IC_SUN__</div>
+      <div class="icon-btn" id="bellBtn" title="Thông báo">
+        __IC_BELL__
+        <span class="badge" id="bellBadge" style="display:none">0</span>
+      </div>
+      <div class="admin-card" style="padding:0;cursor:default">
+        <div class="av" style="width:38px;height:38px">A</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- ============ DASHBOARD ============ -->
+      <section class="page active" id="page-dashboard">
+        <div class="kpi-grid" id="kpiGrid"></div>
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head">
+              <h3 data-a="chart_title">Đơn hàng 7 ngày qua</h3>
+              <span class="sub" id="chartMax"></span>
+            </div>
+            <div class="chart" id="chart7"></div>
+            <div class="chart-legend">
+              <span class="lg"><span class="sw" style="background:linear-gradient(180deg,var(--brand),var(--brand-strong))"></span><span data-a="chart_orders">Số đơn</span></span>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <h3 data-a="todos">Cần xử lý</h3>
+              <span class="sub" id="todoCount"></span>
+            </div>
+            <div id="todoList"></div>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:18px">
+          <div class="panel-head">
+            <h3 data-a="recent_orders">Đơn hàng gần đây</h3>
+            <button class="btn btn-ghost btn-sm act" data-goto="orders" data-a="view_all">Xem tất cả</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr>
+                <th data-a="col_order">Mã đơn</th>
+                <th data-a="col_user">Khách</th>
+                <th data-a="col_merchant">Merchant</th>
+                <th class="right" data-a="col_amount">Tiền</th>
+                <th data-a="col_status">Trạng thái</th>
+                <th data-a="col_time">Thời gian</th>
+              </tr></thead>
+              <tbody id="recentOrders"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ MERCHANTS / KYC ============ -->
+      <section class="page" id="page-merchants">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_merchants">Merchant &amp; KYC</h2>
+            <p data-a="merchants_desc">Duyệt merchant mới và xác minh hồ sơ KYC (giấy phép + CCCD).</p>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="tabs" id="merchantTabs">
+            <button class="on" data-s="all" data-a="tab_all">Tất cả</button>
+            <button data-s="pending" data-a="tab_pending">Chờ duyệt</button>
+            <button data-s="approved" data-a="tab_approved">Đã duyệt</button>
+            <button data-s="rejected" data-a="tab_rejected">Từ chối</button>
+          </div>
+          <input class="input" id="merchantSearch" data-a="search_ph" placeholder="Tìm merchant..." />
+          <div class="spacer"></div>
+          <span class="tag" id="merchantCountTag"></span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th data-a="col_merchant">Merchant</th>
+              <th data-a="col_contact">Người liên hệ</th>
+              <th data-a="col_phone">SĐT</th>
+              <th data-a="col_cat">Ngành</th>
+              <th data-a="col_status">Trạng thái</th>
+              <th data-a="col_kyc">KYC</th>
+              <th data-a="col_joined">Ngày tham gia</th>
+              <th class="right" data-a="col_action">Thao tác</th>
+            </tr></thead>
+            <tbody id="merchantTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ ORDERS ============ -->
+      <section class="page" id="page-orders">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_orders">Đơn hàng</h2>
+            <p data-a="orders_desc">Tổng quan mọi đơn hàng trên nền tảng theo thời gian thực.</p>
+          </div>
+        </div>
+        <div class="toolbar">
+          <select class="select" id="orderStatus">
+            <option value="" data-a="tab_all">Tất cả trạng thái</option>
+            <option value="paid" data-a="status_paid">Chờ xác nhận</option>
+            <option value="accepted" data-a="status_accepted">Đã nhận</option>
+            <option value="picked" data-a="status_picked">Đã lấy hàng</option>
+            <option value="delivering" data-a="status_delivering">Đang giao</option>
+            <option value="delivered" data-a="status_delivered">Đã giao</option>
+            <option value="cancelled" data-a="status_cancelled">Đã hủy</option>
+          </select>
+          <input class="input" id="orderSearch" data-a="search_ph" placeholder="Tìm mã đơn..." />
+          <div class="spacer"></div>
+          <span class="tag" id="orderCountTag"></span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th data-a="col_order">Mã đơn</th>
+              <th data-a="col_user">Khách</th>
+              <th data-a="col_merchant">Merchant</th>
+              <th class="right" data-a="col_amount">Tiền</th>
+              <th data-a="col_status">Trạng thái</th>
+              <th data-a="col_time">Thời gian</th>
+            </tr></thead>
+            <tbody id="orderTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ SETTLEMENT / WITHDRAW ============ -->
+      <section class="page" id="page-settlement">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_settlement">Đối soát &amp; Thanh toán</h2>
+            <p data-a="settle_desc">Mô hình 0% hoa hồng · nền tảng trợ phí giao hàng. Đối soát và chi tiền cho merchant.</p>
+          </div>
+          <div class="spacer"></div>
+          <label class="tag" style="gap:8px;cursor:pointer">
+            <span data-a="settle_period">Kỳ</span>
+            <input type="date" id="settlePeriod" style="border:none;background:none;font-family:inherit;font-size:13px;font-weight:700;color:var(--brand-strong);outline:none" />
+          </label>
+          <button class="btn btn-primary" id="btnCreatePayout" data-a="create_payout">Tạo lệnh chi</button>
+        </div>
+
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="kpi"><div class="top"><div class="ic o">__IC_WALLET__</div>
+            <div class="lab"><span data-a="settle_total_payable">Tổng phải chi</span><small data-a="settle_total_payable_zh">应付商户</small></div></div>
+            <div class="val" id="settleTotal">0 ₫</div></div>
+          <div class="kpi"><div class="top"><div class="ic w">__IC_SUBSIDY__</div>
+            <div class="lab"><span data-a="settle_subsidy">Trợ phí giao hàng</span><small data-a="settle_subsidy_zh">平台补贴</small></div></div>
+            <div class="val" id="settleSubsidy">0 ₫</div></div>
+          <div class="kpi"><div class="top"><div class="ic t">__IC_ZERO__</div>
+            <div class="lab"><span data-a="settle_commission">Hoa hồng nền tảng</span><small data-a="settle_commission_zh">平台佣金</small></div></div>
+            <div class="val" id="settleCommission" style="color:var(--ok)">0 ₫</div></div>
+          <div class="kpi"><div class="top"><div class="ic b">__IC_SHOP__</div>
+            <div class="lab"><span data-a="settle_merchant_count">Số merchant</span><small data-a="settle_merchant_count_zh">结算商户</small></div></div>
+            <div class="val" id="settleMerchantCount">0</div></div>
+        </div>
+
+        <div class="split">
+          <div class="panel">
+            <div class="panel-head">
+              <h3 data-a="settle_merchant_list">Đối soát theo merchant</h3>
+              <span class="sub" id="settleDateLabel"></span>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr>
+                  <th data-a="col_settle_merchant">Merchant</th>
+                  <th class="right" data-a="col_payable">Phải chi</th>
+                  <th class="right" data-a="col_paid">Đã chi</th>
+                  <th data-a="col_settle_status">Trạng thái</th>
+                </tr></thead>
+                <tbody id="settleTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3 data-a="reconcile">Đối soát tổng hợp</h3></div>
+            <div style="padding:6px 18px 18px">
+              <div class="stat-line"><span class="k" data-a="recon_gmv">GMV 7 ngày</span><span class="v" id="reconGmv">0 ₫</span></div>
+              <div class="stat-line"><span class="k" data-a="recon_payable">Phải chi merchant</span><span class="v" id="reconPayable">0 ₫</span></div>
+              <div class="stat-line"><span class="k" data-a="recon_subsidy">Chi phí trợ giá</span><span class="v" id="reconSubsidy">0 ₫</span></div>
+              <div class="stat-line"><span class="k" data-a="recon_commission">Hoa hồng thu được</span><span class="v" style="color:var(--ok)" id="reconCommission">0 ₫</span></div>
+              <div class="stat-line"><span class="k" data-a="recon_net">Lợi nhuận gộp</span><span class="v" id="reconNet">0 ₫</span></div>
+              <div style="margin-top:16px;padding:13px 15px;background:var(--brand-soft);border-radius:12px;font-size:12.5px;color:var(--brand-deep);line-height:1.55" data-a="model_note">
+                Mô hình: hoa hồng nền tảng = 0%. Tiền hàng 100% về merchant; phí giao hàng do nền tảng trợ giá. Lợi nhuận đến từ trợ giá đối tác &amp; quảng cáo.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ OVERVIEW (Platform) ============ -->
+      <section class="page" id="page-overview">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_overview">Toàn cảnh nền tảng</h2>
+            <p data-a="overview_desc">Bức tranh vận hành 4 đầu (C/M/R/L), phễu招商 &amp; biến động hôm nay.</p>
+          </div>
+        </div>
+        <div class="kpi-grid" id="overviewKpi"></div>
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head"><h3 data-a="overview_funnel">Phễu招商 (Cover → 入驻 → KYC)</h3><span class="sub" data-a="overview_funnel_sub">7 ngày</span></div>
+            <div class="panel-body"><div class="funnel" id="overviewFunnel"></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3 data-a="overview_changes">Biến động hôm nay</h3><span class="sub" id="overviewChangesCount"></span></div>
+            <div id="overviewChanges"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ RIDERS ============ -->
+      <section class="page" id="page-riders">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_riders">Quản lý tài xế</h2>
+            <p data-a="riders_desc">Danh sách tài xế, trạng thái trực tuyến &amp; đơn đang giao. Tắt/bật từng tài xế.</p>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn btn-ghost" id="btnRiderRefresh" data-a="refresh">Làm mới</button>
+        </div>
+        <div class="toolbar">
+          <div class="tabs" id="riderTabs">
+            <button class="on" data-s="all" data-a="tab_all">Tất cả</button>
+            <button data-s="online" data-a="rider_online">Đang trực</button>
+            <button data-s="busy" data-a="rider_busy">Đang giao</button>
+            <button data-s="offline" data-a="rider_offline">Ngoại tuyến</button>
+          </div>
+          <input class="input" id="riderSearch" data-a="search_ph" placeholder="Tìm tài xế..." />
+          <div class="spacer"></div>
+          <span class="tag" id="riderCountTag"></span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th data-a="col_rider">Tài xế</th>
+              <th data-a="col_phone">SĐT</th>
+              <th data-a="col_status">Trạng thái</th>
+              <th data-a="col_area">Khu vực</th>
+              <th class="right" data-a="col_rider_orders">Đơn hôm nay</th>
+              <th class="right" data-a="col_rider_earn">Thu nhập</th>
+              <th class="right" data-a="col_action">Thao tác</th>
+            </tr></thead>
+            <tbody id="riderTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ COUPONS (Platform) ============ -->
+      <section class="page" id="page-coupons">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_coupons">Mã giảm giá nền tảng</h2>
+            <p data-a="coupons_desc">Coupon do nền tảng phát hành &amp; tài trợ (vd: mã新人 do GIAONHANH chi tiền).</p>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" id="btnNewCoupon">__IC_PLUS__ <span data-a="coupon_new">Tạo mã</span></button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th data-a="col_coupon_name">Tên mã</th>
+              <th data-a="col_coupon_type">Loại</th>
+              <th class="right" data-a="col_coupon_value">Mệnh giá</th>
+              <th class="right" data-a="col_coupon_cond">Điều kiện</th>
+              <th class="right" data-a="col_coupon_claim">Đã nhận</th>
+              <th class="right" data-a="col_coupon_used">Đã dùng</th>
+              <th data-a="col_status">Trạng thái</th>
+            </tr></thead>
+            <tbody id="couponTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ AGENTS ============ -->
+      <section class="page" id="page-agents">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_agents">Quản lý đại lý</h2>
+            <p data-a="agents_desc">Đại lý tuyển merchant theo vùng; chia sẻ doanh thu theo hợp đồng.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th data-a="col_agent">Đại lý</th>
+              <th data-a="col_area">Khu vực</th>
+              <th class="right" data-a="col_agent_merchants">Merchant</th>
+              <th class="right" data-a="col_agent_share">Chia sẻ</th>
+              <th data-a="col_status">Trạng thái</th>
+              <th class="right" data-a="col_action">Thao tác</th>
+            </tr></thead>
+            <tbody id="agentTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ SETTINGS (Platform) ============ -->
+      <section class="page" id="page-settings">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_settings">Cài đặt nền tảng</h2>
+            <p data-a="lsettings_desc">Cấu hình vận hành toàn cục: trợ phí, tuyên bố 0% hoa hồng, rút tiền, API.</p>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" id="btnSaveLSettings">__IC_CHECK__ <span data-a="lsettings_save">Lưu cấu hình</span></button>
+        </div>
+        <div class="split">
+          <div class="panel">
+            <div class="panel-head"><h3 data-a="lsettings_ops">Vận hành</h3></div>
+            <div style="padding:8px 18px 14px">
+              <div class="switch-row">
+                <div class="k"><span data-a="lsettings_subsidy">Bật trợ phí giao hàng</span><small data-a="lsettings_subsidy_sub">Nền tảng tài trợ phí ship cho mọi đơn.</small></div>
+                <div class="sw on" id="lSetSubsidySw"><i></i></div>
+              </div>
+              <div class="field-row" style="display:grid;grid-template-columns:170px 1fr;gap:12px 16px;align-items:center;margin:14px 0">
+                <label data-a="lsettings_subsidy_amt">Mức trợ phí (₫/đơn)</label>
+                <input id="lSetSubsidyAmt" class="price-input" style="width:100%" inputmode="numeric" />
+              </div>
+              <div class="switch-row">
+                <div class="k"><span data-a="lsettings_zero">Tuyên bố 0% hoa hồng</span><small data-a="lsettings_zero_sub">Tiền hàng 100% về merchant.</small></div>
+                <div class="sw on" id="lSetZeroSw"><i></i></div>
+              </div>
+              <div class="field-row" style="display:grid;grid-template-columns:170px 1fr;gap:12px 16px;align-items:center;margin-top:14px">
+                <label data-a="lsettings_withdraw">Quy tắc rút tiền</label>
+                <input id="lSetWithdraw" placeholder="T+1 · tối thiểu 200.000 ₫" />
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3 data-a="lsettings_sys">Hệ thống</h3></div>
+            <div style="padding:8px 18px 14px">
+              <div class="field-row" style="display:grid;grid-template-columns:170px 1fr;gap:12px 16px;align-items:center;margin:14px 0">
+                <label data-a="lsettings_lang">Ngôn ngữ mặc định</label>
+                <select class="select" id="lSetLang" style="width:100%">
+                  <option value="vi">Tiếng Việt</option>
+                  <option value="zh">中文</option>
+                </select>
+              </div>
+              <div class="field-row" style="display:grid;grid-template-columns:170px 1fr;gap:12px 16px;align-items:center">
+                <label data-a="lsettings_apikey">API key (placeholder)</label>
+                <input id="lSetApiKey" placeholder="gn_live_••••••••••••" />
+              </div>
+              <div class="note-box" style="margin-top:14px" data-a="lsettings_note">Thay đổi áp dụng cho toàn bộ nền tảng. Dữ liệu demo — chưa ghi backend.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PERMISSIONS ============ -->
+      <section class="page" id="page-permissions">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_permissions">Phân quyền backend</h2>
+            <p data-a="perm_desc">Ma trận quyền theo vai trò (Admin / Vận hành / Tài chính).</p>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" id="btnSavePerm">__IC_CHECK__ <span data-a="perm_save">Lưu phân quyền</span></button>
+        </div>
+        <div class="perm-grid" id="permGrid"></div>
+      </section>
+
+      <!-- ============ NOTIFICATIONS ============ -->
+      <section class="page" id="page-notifications">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_notifications">Trung tâm thông báo</h2>
+            <p data-a="notif_desc">Push &amp; thông báo trong app: merchant chờ duyệt, KYC chờ duyệt, đơn bất thường.</p>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn btn-ghost" id="btnMarkAllRead" data-a="notif_readall">Đánh dấu đã đọc</button>
+        </div>
+        <div id="notifList"></div>
+      </section>
+
+      <!-- ============ COVER (Landing preview) ============ -->
+      <section class="page" id="page-cover">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_cover">Trang招商 (Landing)</h2>
+            <p data-a="cover_desc">Xem trước landing page招商 &amp; chỉ số truy cập (dữ liệu demo).</p>
+          </div>
+          <div class="spacer"></div>
+          <a class="btn btn-ghost" href="index.html" target="_blank" id="btnOpenCover" data-a="cover_open">Mở trang gốc ↗</a>
+        </div>
+        <div class="cover-card">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="width:54px;height:54px;border-radius:14px;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:28px">🚀</div>
+            <div><div style="font-size:20px;font-weight:850">GIAONHANH · Hợp tác Merchant</div>
+            <div style="font-size:13px;opacity:.9">0% hoa hồng · Trợ phí giao hàng · Hoạt động 60 phút</div></div>
+          </div>
+          <div class="cover-stats" id="coverStats"></div>
+        </div>
+        <div class="panel" style="margin-top:18px">
+          <div class="panel-head"><h3 data-a="cover_preview">Xem trước nội dung</h3></div>
+          <div class="panel-body" data-a="cover_preview_text">Trang landing giới thiệu quyền lợi merchant, form đăng ký &amp; FAQ. Không viết lại tại đây — chỉ là entry &amp; chỉ số từ backend/admin.</div>
+        </div>
+      </section>
+
+      <!-- ============ EMPTY STATES (design system) ============ -->
+      <section class="page" id="page-emptystates">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_emptystates">Quy chuẩn trạng thái rỗng</h2>
+            <p data-a="es_desc">Thư viện thành phần chuẩn cho trạng thái rỗng / lỗi / đang tải — frontend tham chiếu thống nhất.</p>
+          </div>
+        </div>
+        <div class="es-grid">
+          <div class="es-card"><div class="es-h" data-a="es_empty">Trạng thái rỗng (Empty)</div>
+            <div class="es-b"><div class="empty"><div class="e">📭</div><div data-a="es_empty_t">Chưa có dữ liệu</div><small style="color:var(--faint)" data-a="es_empty_s">Danh sách sẽ hiển thị tại đây.</small></div></div></div>
+          <div class="es-card"><div class="es-h" data-a="es_error">Trạng thái lỗi (Error)</div>
+            <div class="es-b"><div class="empty" style="color:var(--bad)"><div class="e">⚠️</div><div data-a="es_error_t">Tải thất bại</div><small style="color:var(--faint)" data-a="es_error_s">Nhấn thử lại.</small></div></div></div>
+          <div class="es-card"><div class="es-h" data-a="es_loading">Đang tải (Loading)</div>
+            <div class="es-b">
+              <div class="skeleton" style="height:42px;margin-bottom:10px"></div>
+              <div class="skeleton" style="height:42px;margin-bottom:10px"></div>
+              <div class="skeleton" style="height:42px"></div>
+            </div></div>
+        </div>
+        <div class="es-grid" style="margin-top:18px">
+          <div class="es-card"><div class="es-h" data-a="es_table">Bảng rỗng</div>
+            <div class="es-b"><div class="empty" style="padding:30px"><div class="e">🗂️</div><div data-a="es_table_t">Không có kết quả</div></div></div></div>
+          <div class="es-card"><div class="es-h" data-a="es_search">Tìm kiếm rỗng</div>
+            <div class="es-b"><div class="empty" style="padding:30px"><div class="e">🔍</div><div data-a="es_search_t">Không tìm thấy</div></div></div></div>
+          <div class="es-card"><div class="es-h" data-a="es_perm">Quyền truy cập</div>
+            <div class="es-b"><div class="empty" style="padding:30px;color:var(--warn)"><div class="e">🔒</div><div data-a="es_perm_t">Không có quyền</div></div></div></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DRAWER ===================== -->
+<div class="overlay" id="drawerOverlay"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div class="dh-ic" id="drawerIc">🏪</div>
+    <div><h3 id="drawerTitle"></h3><p id="drawerSub"></p></div>
+    <button class="x" id="drawerClose">__IC_X__</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-foot" id="drawerFoot"></div>
+</aside>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ===================== CONFIG + SCRIPTS ===================== -->
+<script>
+/* Shared config resolver — reads the SAME localStorage keys as the other ends.
+   URL overrides: ?api= ?live ?demo */
+window.GN_CONFIG = (function(){
+  const q = new URLSearchParams(location.search);
+  const base = (q.get('api') || localStorage.getItem('gn_api_base') || '').trim().replace(/\/+$/,'');
+  let useApi;
+  if(q.has('live')) useApi = true;
+  else if(q.has('demo')) useApi = false;
+  else { const s = localStorage.getItem('gn_use_api'); useApi = s===null ? !!base : s==='1'; }
+  return { apiBase:base, useApi, pusherKey:(q.get('pusher')||localStorage.getItem('gn_pusher_key')||'').trim(), pusherCluster:(q.get('pusherCluster')||localStorage.getItem('gn_pusher_cluster')||'ap1').trim() };
+})();
+</script>
+<script src="api.js"></script>
+<script>
+/* ===================== ICONS ===================== */
+const ICONS = {
+  dashboard:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  shop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg>',
+  receipt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18l2-1 2 1 2-1 2 1 2-1 2 1V3l-2 1-2-1-2 1-2-1-2 1z"/><path d="M9 8h6M9 12h6"/></svg>',
+  wallet:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h15a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 7V5a2 2 0 0 1 2-2h11"/><circle cx="17" cy="13" r="1.4"/></svg>',
+  rider:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="2.5"/><circle cx="18" cy="17" r="2.5"/><path d="M5.5 17l3-6h6l3 6M8.5 11l-1-4h4l2 4"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+  sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15l7-7 7 7"/></svg>',
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg>',
+  subsidy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h13a3 3 0 1 0-3-3"/><path d="M3 12v6h13"/><path d="M16 9l3-3 3 3"/></svg>',
+  zero:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9.5a3 3 0 0 0 0 5M15 14.5a3 3 0 0 0 0-5"/></svg>',
+  cover:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2l13 5V6L3 11z"/><path d="M16 7a4 4 0 0 1 0 10"/><path d="M3 13a9 9 0 0 0 5 4"/></svg>',
+  coupon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4z"/><path d="M12 7v10" stroke-dasharray="2 2"/></svg>',
+  agent:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  settings:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  permission:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>',
+  empty:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h5l2 3h4l2-3h5"/><path d="M5 5h14v14H5z"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+};
+/* inject icons into placeholders */
+document.querySelectorAll('[class="ic"]').forEach(()=>{});
+document.body.innerHTML = document.body.innerHTML
+  .replace(/__IC_DASHBOARD__/g, ICONS.dashboard)
+  .replace(/__IC_SHOP__/g, ICONS.shop)
+  .replace(/__IC_RECEIPT__/g, ICONS.receipt)
+  .replace(/__IC_WALLET__/g, ICONS.wallet)
+  .replace(/__IC_SEARCH__/g, ICONS.search)
+  .replace(/__IC_BELL__/g, ICONS.bell)
+  .replace(/__IC_SUN__/g, ICONS.sun)
+  .replace(/__IC_X__/g, ICONS.x)
+  .replace(/__IC_SUBSIDY__/g, ICONS.subsidy)
+  .replace(/__IC_ZERO__/g, ICONS.zero)
+  .replace(/__IC_COVER__/g, ICONS.cover)
+  .replace(/__IC_COUPON__/g, ICONS.coupon)
+  .replace(/__IC_AGENT__/g, ICONS.agent)
+  .replace(/__IC_SETTINGS__/g, ICONS.settings)
+  .replace(/__IC_PERMISSION__/g, ICONS.permission)
+  .replace(/__IC_EMPTY__/g, ICONS.empty)
+  .replace(/__IC_PLUS__/g, ICONS.plus)
+  .replace(/__IC_USERS__/g, ICONS.users);
+
+/* ===================== I18N ===================== */
+const APP = {
+  vi:{
+    console:"Bảng điều khiển nền tảng", nav_label:"Vận hành",
+    nav_dashboard_zh:"概览", nav_merchants_zh:"商户与资质", nav_orders_zh:"订单", nav_settlement_zh:"分账与提现",
+    login_title:"Đăng nhập quản trị", login_lead:"Console tự vận hành · Nền tảng giờ vàng Việt Nam",
+    login_phone:"Số điện thoại", login_pass:"Mật khẩu", login_btn:"Đăng nhập",
+    login_err:"Sai tài khoản hoặc mật khẩu.", login_hint:"Demo: 0900000001 / demo123",
+    admin_name:"Admin GIAONHANH", admin_role:"Quản trị viên",
+    kpi_orders:"Đơn hôm nay", kpi_orders_zh:"今日订单", kpi_gmv:"GMV hôm nay", kpi_gmv_zh:"今日成交额",
+    kpi_merchants:"Merchant đăng ký", kpi_merchants_zh:"在册商户", kpi_riders:"Đối tác tài xế", kpi_riders_zh:"骑手数",
+    kpi_pending:"Chờ duyệt", kpi_pending_zh:"待审商户", vs_yesterday:"so với hôm qua",
+    chart_title:"Đơn hàng 7 ngày qua", chart_orders:"Số đơn",
+    todos:"Cần xử lý", todo_empty:"Không có việc cần xử lý 🎉",
+    recent_orders:"Đơn hàng gần đây", view_all:"Xem tất cả",
+    col_order:"Mã đơn", col_user:"Khách", col_merchant:"Merchant", col_amount:"Tiền", col_status:"Trạng thái", col_time:"Thời gian",
+    col_contact:"Người liên hệ", col_phone:"SĐT", col_cat:"Ngành", col_joined:"Ngày tham gia", col_action:"Thao tác", col_kyc:"KYC",
+    col_payable:"Phải chi", col_paid:"Đã chi", col_settle_status:"Trạng thái", col_settle_merchant:"Merchant",
+    tab_all:"Tất cả", tab_pending:"Chờ duyệt", tab_approved:"Đã duyệt", tab_rejected:"Từ chối",
+    merchants_desc:"Duyệt merchant mới và xác minh hồ sơ KYC (giấy phép + CCCD).",
+    orders_desc:"Tổng quan mọi đơn hàng trên nền tảng theo thời gian thực.",
+    settle_desc:"Mô hình 0% hoa hồng · nền tảng trợ phí giao hàng. Đối soát và chi tiền cho merchant.",
+    search_ph:"Tìm kiếm...", approve:"Duyệt", reject:"Từ chối", view:"Xem",
+    status_pending:"Chờ duyệt", status_approved:"Đã duyệt", status_rejected:"Đã từ chối",
+    kyc_pending:"Chờ KYC", kyc_approved:"Đã KYC", kyc_rejected:"KYC fail",
+    status_paid:"Chờ xác nhận", status_accepted:"Đã nhận", status_picked:"Đã lấy hàng",
+    status_delivering:"Đang giao", status_delivered:"Đã giao", status_cancelled:"Đã hủy",
+    settle_period:"Kỳ", settle_total_payable:"Tổng phải chi", settle_total_payable_zh:"应付商户",
+    settle_subsidy:"Trợ phí giao hàng", settle_subsidy_zh:"平台补贴",
+    settle_commission:"Hoa hồng nền tảng", settle_commission_zh:"平台佣金",
+    settle_merchant_count:"Số merchant", settle_merchant_count_zh:"结算商户",
+    settle_merchant_list:"Đối soát theo merchant", create_payout:"Tạo lệnh chi",
+    reconcile:"Đối soát tổng hợp", model_note:"Mô hình: hoa hồng nền tảng = 0%. Tiền hàng 100% về merchant; phí giao hàng do nền tảng trợ giá. Lợi nhuận đến từ trợ giá đối tác & quảng cáo.",
+    reconcile_gmv:"GMV 7 ngày", reconcile_payable:"Phải chi merchant", reconcile_subsidy:"Chi phí trợ giá",
+    reconcile_commission:"Hoa hồng thu được", reconcile_net:"Lợi nhuận gộp",
+    settle_paid:"Đã thanh toán", settle_unpaid:"Chờ thanh toán",
+    kyc_title:"Hồ sơ KYC", kyc_biz:"Giấy phép kinh doanh", kyc_id:"CCCD / CMND", kyc_bank:"Tài khoản ngân hàng",
+    kyc_contact:"Người liên hệ", kyc_phone:"SĐT", kyc_addr:"Địa chỉ", kyc_cat:"Ngành hàng", kyc_joined:"Ngày tham gia",
+    kyc_reject_reason:"Lý do từ chối", kyc_no_reason:"(chưa có)",
+    kyc_reject_btn:"Từ chối KYC", kyc_approve_btn:"Duyệt KYC", merchant_approve:"Duyệt Merchant", merchant_reject:"Từ chối Merchant",
+    kyc_question:"Nhập lý do từ chối KYC:", merchant_question:"Nhập lý do từ chối merchant:",
+    order_title:"Chi tiết đơn hàng", order_items:"Sản phẩm", order_addr:"Địa chỉ giao", order_pay:"Thanh toán", order_rider:"Tài xế",
+    logout:"Đăng xuất", empty:"Không có dữ liệu", new_merchant:"Merchant mới", new_kyc:"KYC chờ duyệt",
+    toast_approve:"Đã duyệt merchant", toast_reject:"Đã từ chối merchant", toast_kyc_ok:"Đã duyệt KYC", toast_kyc_no:"KYC bị từ chối",
+    toast_login:"Đăng nhập thành công", toast_payout:"Đã tạo lệnh chi", toast_live:"Đã kết nối dữ liệu thật", toast_demo:"Đang chạy dữ liệu demo",
+    bell_title:"Thông báo", pay_momo:"MoMo", pay_zalo:"ZaloPay", pay_cod:"COD", pay_wallet:"Ví GIAONHANH",
+    /* ---- new L screens ---- */
+    nav_label2:"Nền tảng", nav_label3:"Hệ thống",
+    nav_overview_zh:"平台总览", nav_riders_zh:"骑手管理", nav_coupons_zh:"平台优惠券", nav_agents_zh:"代理商",
+    nav_settings_zh:"平台设置", nav_permissions_zh:"后台权限", nav_notifications_zh:"通知中心", nav_cover_zh:"招商落地页", nav_emptystates_zh:"空状态规范",
+    overview_desc:"Bức tranh vận hành 4 đầu (C/M/R/L), phễu招商 & biến động hôm nay.",
+    overview_funnel:"Phễu招商 (Cover → 入驻 → KYC)", overview_funnel_sub:"7 ngày", overview_changes:"Biến động hôm nay",
+    riders_desc:"Danh sách tài xế, trạng thái trực tuyến & đơn đang giao. Tắt/bật từng tài xế.",
+    refresh:"Làm mới", rider_online:"Đang trực", rider_busy:"Đang giao", rider_offline:"Ngoại tuyến",
+    col_rider:"Tài xế", col_rider_orders:"Đơn hôm nay", col_rider_earn:"Thu nhập", col_area:"Khu vực",
+    rider_on:"Đang trực", rider_busy_s:"Đang giao", rider_off:"Ngoại tuyến", rider_disabled:"Đã tắt",
+    rider_enable:"Bật", rider_disable:"Tắt", rider_detail:"Chi tiết tài xế",
+    rider_orders:"Đơn đang giao", rider_earn:"Thu nhập", rider_region:"Khu vực", rider_id:"CCCD", rider_vehicle:"Phương tiện",
+    coupons_desc:"Coupon do nền tảng phát hành & tài trợ (vd: mã新人 do GIAONHANH chi tiền).",
+    coupon_new:"Tạo mã", col_coupon_name:"Tên mã", col_coupon_type:"Loại", col_coupon_value:"Mệnh giá", col_coupon_cond:"Điều kiện",
+    col_coupon_claim:"Đã nhận", col_coupon_used:"Đã dùng",
+    coupon_name:"Tên mã", coupon_type:"Loại", coupon_value:"Mệnh giá (₫)", coupon_cond:"Điều kiện (₫ tối thiểu)",
+    coupon_total:"Số lượng phát hành", coupon_expire:"Hạn dùng", coupon_new_title:"Tạo mã giảm giá", coupon_funded:"Nền tảng tài trợ",
+    coupon_newbie:"Mã新人 (nền tảng chi tiền)", coupon_discount:"Giảm giá", coupon_cash:"Tiền mặt",
+    agents_desc:"Đại lý tuyển merchant theo vùng; chia sẻ doanh thu theo hợp đồng.",
+    col_agent:"Đại lý", col_agent_merchants:"Merchant", col_agent_share:"Chia sẻ",
+    agent_approve:"Duyệt", agent_reject:"Từ chối", agent_pending:"Chờ duyệt", agent_active:"Đang hoạt động", agent_blocked:"Đã chặn",
+    agent_region:"Khu vực", agent_merchants:"Số merchant", agent_share:"Tỷ lệ chia sẻ", agent_contact:"Người liên hệ",
+    lsettings_desc:"Cấu hình vận hành toàn cục: trợ phí, tuyên bố 0% hoa hồng, rút tiền, API.",
+    lsettings_save:"Lưu cấu hình", lsettings_ops:"Vận hành", lsettings_sys:"Hệ thống",
+    lsettings_subsidy:"Bật trợ phí giao hàng", lsettings_subsidy_sub:"Nền tảng tài trợ phí ship cho mọi đơn.",
+    lsettings_subsidy_amt:"Mức trợ phí (₫/đơn)", lsettings_zero:"Tuyên bố 0% hoa hồng", lsettings_zero_sub:"Tiền hàng 100% về merchant.",
+    lsettings_withdraw:"Quy tắc rút tiền", lsettings_lang:"Ngôn ngữ mặc định", lsettings_apikey:"API key (placeholder)", lsettings_note:"Thay đổi áp dụng cho toàn bộ nền tảng. Dữ liệu demo — chưa ghi backend.",
+    perm_desc:"Ma trận quyền theo vai trò (Admin / Vận hành / Tài chính).",
+    perm_save:"Lưu phân quyền", perm_role:"Vai trò", perm_dashboard:"Tổng quan", perm_merchants:"Merchant & KYC",
+    perm_orders:"Đơn hàng", perm_settle:"Đối soát", perm_riders:"Tài xế", perm_agents:"Đại lý", perm_coupons:"Coupon", perm_settings:"Cài đặt",
+    notif_desc:"Push & thông báo trong app: merchant chờ duyệt, KYC chờ duyệt, đơn bất thường.",
+    notif_readall:"Đánh dấu đã đọc", notif_merchant_pending:"Merchant chờ duyệt", notif_kyc_pending:"KYC chờ duyệt", notif_order_abnormal:"Đơn bất thường",
+    notif_unread:"Chưa đọc", notif_read:"Đã đọc", notif_open:"Xem",
+    cover_desc:"Xem trước landing page招商 & chỉ số truy cập (dữ liệu demo).", cover_open:"Mở trang gốc ↗",
+    cover_preview:"Xem trước nội dung", cover_preview_text:"Trang landing giới thiệu quyền lợi merchant, form đăng ký & FAQ. Không viết lại tại đây — chỉ là entry & chỉ số từ backend/admin.",
+    cover_views:"Lượt xem", cover_applies:"Đơn đăng ký", cover_conv:"Tỷ lệ chuyển đổi",
+    es_desc:"Thư viện thành phần chuẩn cho trạng thái rỗng / lỗi / đang tải — frontend tham chiếu thống nhất.",
+    es_empty:"Trạng thái rỗng (Empty)", es_empty_t:"Chưa có dữ liệu", es_empty_s:"Danh sách sẽ hiển thị tại đây.",
+    es_error:"Trạng thái lỗi (Error)", es_error_t:"Tải thất bại", es_error_s:"Nhấn thử lại.",
+    es_loading:"Đang tải (Loading)", es_table:"Bảng rỗng", es_table_t:"Không có kết quả", es_search:"Tìm kiếm rỗng", es_search_t:"Không tìm thấy", es_perm:"Quyền truy cập", es_perm_t:"Không có quyền",
+    toast_rider_off:"Đã tắt tài xế", toast_rider_on:"Đã bật tài xế", toast_coupon:"Đã tạo mã (demo)", toast_agent_ok:"Đã duyệt đại lý", toast_agent_no:"Đã từ chối đại lý", toast_agent_fail:"Thao tác đại lý thất bại",
+    toast_lsettings:"Đã lưu cấu hình (demo)", toast_perm:"Đã lưu phân quyền (demo)", toast_notif_read:"Đã đánh dấu đã đọc",
+  },
+  zh:{
+    console:"平台控制台", nav_label:"运营",
+    nav_dashboard_zh:"概览", nav_merchants_zh:"商户与资质", nav_orders_zh:"订单", nav_settlement_zh:"分账与提现",
+    login_title:"管理员登录", login_lead:"平台自营控制台 · 越南小时达",
+    login_phone:"手机号", login_pass:"密码", login_btn:"登录",
+    login_err:"账号或密码错误。", login_hint:"演示账号：0900000001 / demo123",
+    admin_name:"GIAONHANH 管理员", admin_role:"平台管理员",
+    kpi_orders:"今日订单", kpi_orders_zh:"今日订单", kpi_gmv:"今日成交额", kpi_gmv_zh:"今日 GMV",
+    kpi_merchants:"在册商户", kpi_merchants_zh:"在册商户", kpi_riders:"骑手数", kpi_riders_zh:"骑手数",
+    kpi_pending:"待审商户", kpi_pending_zh:"待审商户", vs_yesterday:"较昨日",
+    chart_title:"近 7 日订单", chart_orders:"订单数",
+    todos:"待处理", todo_empty:"暂无待办 🎉",
+    recent_orders:"近期订单", view_all:"查看全部",
+    col_order:"订单号", col_user:"客户", col_merchant:"商户", col_amount:"金额", col_status:"状态", col_time:"时间",
+    col_contact:"联系人", col_phone:"电话", col_cat:"行业", col_joined:"入驻时间", col_action:"操作", col_kyc:"资质",
+    col_payable:"应收", col_paid:"已结", col_settle_status:"状态", col_settle_merchant:"商户",
+    tab_all:"全部", tab_pending:"待审核", tab_approved:"已通过", tab_rejected:"已拒绝",
+    merchants_desc:"审核新商户并核验 KYC 资料（营业执照 + 身份证）。",
+    orders_desc:"实时查看平台全部订单。",
+    settle_desc:"0 佣金模式 · 平台补贴配送费。对账并向商户打款。",
+    search_ph:"搜索...", approve:"通过", reject:"驳回", view:"查看",
+    status_pending:"待审核", status_approved:"已通过", status_rejected:"已拒绝",
+    kyc_pending:"待认证", kyc_approved:"已认证", kyc_rejected:"认证失败",
+    status_paid:"待接单", status_accepted:"已接单", status_picked:"已取货",
+    status_delivering:"配送中", status_delivered:"已送达", status_cancelled:"已取消",
+    settle_period:"结算周期", settle_total_payable:"应付总额", settle_total_payable_zh:"应付商户",
+    settle_subsidy:"配送补贴", settle_subsidy_zh:"平台补贴",
+    settle_commission:"平台佣金", settle_commission_zh:"平台佣金",
+    settle_merchant_count:"商户数", settle_merchant_count_zh:"结算商户",
+    settle_merchant_list:"按商户对账", create_payout:"生成打款指令",
+    reconcile:"汇总对账", model_note:"模式：平台佣金 = 0%。货款 100% 归商户；配送费由平台补贴。利润来自伙伴补贴与广告。",
+    reconcile_gmv:"近 7 日 GMV", reconcile_payable:"应付商户", reconcile_subsidy:"补贴成本",
+    reconcile_commission:"已收佣金", reconcile_net:"毛利",
+    settle_paid:"已打款", settle_unpaid:"待打款",
+    kyc_title:"KYC 资料", kyc_biz:"营业执照", kyc_id:"身份证 / CCCD", kyc_bank:"银行账户",
+    kyc_contact:"联系人", kyc_phone:"电话", kyc_addr:"地址", kyc_cat:"行业", kyc_joined:"入驻时间",
+    kyc_reject_reason:"驳回原因", kyc_no_reason:"（暂无）",
+    kyc_reject_btn:"驳回 KYC", kyc_approve_btn:"通过 KYC", merchant_approve:"通过商户", merchant_reject:"驳回商户",
+    kyc_question:"请输入 KYC 驳回原因：", merchant_question:"请输入商户驳回原因：",
+    order_title:"订单详情", order_items:"商品", order_addr:"配送地址", order_pay:"支付方式", order_rider:"骑手",
+    logout:"退出登录", empty:"暂无数据", new_merchant:"新商户", new_kyc:"待认证 KYC",
+    toast_approve:"已通过商户", toast_reject:"已驳回商户", toast_kyc_ok:"已通过 KYC", toast_kyc_no:"已驳回 KYC",
+    toast_login:"登录成功", toast_payout:"已生成打款指令", toast_live:"已连接真实数据", toast_demo:"正在运行演示数据",
+    bell_title:"通知", pay_momo:"MoMo", pay_zalo:"ZaloPay", pay_cod:"货到付款", pay_wallet:"GIAONHANH 钱包",
+    /* ---- new L screens (zh) ---- */
+    nav_label2:"平台", nav_label3:"系统",
+    nav_overview_zh:"平台总览", nav_riders_zh:"骑手管理", nav_coupons_zh:"平台优惠券", nav_agents_zh:"代理商",
+    nav_settings_zh:"平台设置", nav_permissions_zh:"后台权限", nav_notifications_zh:"通知中心", nav_cover_zh:"招商落地页", nav_emptystates_zh:"空状态规范",
+    overview_desc:"C/M/R/L 四端运营全景、招商漏斗与今日异动。",
+    overview_funnel:"招商漏斗 (Cover → 入驻 → KYC)", overview_funnel_sub:"近 7 天", overview_changes:"今日异动",
+    riders_desc:"骑手列表、在线状态与在途订单。可停用/启用单个骑手。",
+    refresh:"刷新", rider_online:"在线", rider_busy:"配送中", rider_offline:"离线",
+    col_rider:"骑手", col_rider_orders:"今日单量", col_rider_earn:"收益", col_area:"区域",
+    rider_on:"在线", rider_busy_s:"配送中", rider_off:"离线", rider_disabled:"已停用",
+    rider_enable:"启用", rider_disable:"停用", rider_detail:"骑手详情",
+    rider_orders:"在途单", rider_earn:"收益", rider_region:"区域", rider_id:"身份证号", rider_vehicle:"交通工具",
+    coupons_desc:"由平台发放并出资的优惠券（如：新人券由 GIAONHANH 出资）。",
+    coupon_new:"新建券", col_coupon_name:"券名称", col_coupon_type:"类型", col_coupon_value:"面额", col_coupon_cond:"门槛",
+    col_coupon_claim:"已领", col_coupon_used:"已用",
+    coupon_name:"券名称", coupon_type:"类型", coupon_value:"面额 (₫)", coupon_cond:"门槛 (最低 ₫)",
+    coupon_total:"发放量", coupon_expire:"有效期", coupon_new_title:"新建优惠券", coupon_funded:"平台出资",
+    coupon_newbie:"新人券（平台出资）", coupon_discount:"折扣券", coupon_cash:"代金券",
+    agents_desc:"代理商按区域招募商户，按合同分成。",
+    col_agent:"代理商", col_agent_merchants:"商户数", col_agent_share:"分成",
+    agent_approve:"通过", agent_reject:"驳回", agent_pending:"待审", agent_active:"运营中", agent_blocked:"已封禁",
+    agent_region:"区域", agent_merchants:"商户数", agent_share:"分成比例", agent_contact:"联系人",
+    lsettings_desc:"全局运营配置：配送补贴、0 佣金声明、提现规则、API。",
+    lsettings_save:"保存配置", lsettings_ops:"运营", lsettings_sys:"系统",
+    lsettings_subsidy:"开启配送补贴", lsettings_subsidy_sub:"平台为每单补贴运费。",
+    lsettings_subsidy_amt:"补贴金额 (₫/单)", lsettings_zero:"声明 0% 佣金", lsettings_zero_sub:"货款 100% 归商户。",
+    lsettings_withdraw:"提现规则", lsettings_lang:"默认语言", lsettings_apikey:"API 密钥 (占位)", lsettings_note:"改动对所有商户生效。演示数据——尚未写入后端。",
+    perm_desc:"按角色（Admin / 运营 / 财务）的权限矩阵。",
+    perm_save:"保存权限", perm_role:"角色", perm_dashboard:"总览", perm_merchants:"商户与 KYC",
+    perm_orders:"订单", perm_settle:"对账", perm_riders:"骑手", perm_agents:"代理商", perm_coupons:"优惠券", perm_settings:"设置",
+    notif_desc:"站内推送：商户待审、KYC 待审、异常订单。",
+    notif_readall:"全部标为已读", notif_merchant_pending:"商户待审核", notif_kyc_pending:"KYC 待审核", notif_order_abnormal:"异常订单",
+    notif_unread:"未读", notif_read:"已读", notif_open:"查看",
+    cover_desc:"预览招商落地页与访问指标（演示数据）。",
+    cover_open:"打开原始页 ↗", cover_preview:"内容预览", cover_preview_text:"落地页介绍商户权益、注册表单与 FAQ。此处不重写，仅作入口与指标。",
+    cover_views:"浏览量", cover_applies:"入驻申请", cover_conv:"转化率",
+    es_desc:"空 / 错误 / 加载状态的统一组件库，供前端引用。",
+    es_empty:"空状态 (Empty)", es_empty_t:"暂无数据", es_empty_s:"列表将显示在此处。",
+    es_error:"错误态 (Error)", es_error_t:"加载失败", es_error_s:"点击重试。",
+    es_loading:"加载中 (Loading)", es_table:"空表格", es_table_t:"无结果", es_search:"空搜索", es_search_t:"未找到", es_perm:"权限", es_perm_t:"无权限",
+    toast_rider_off:"已停用骑手", toast_rider_on:"已启用骑手", toast_coupon:"已创建优惠券（演示）", toast_agent_ok:"已通过代理商", toast_agent_no:"已驳回代理商", toast_agent_fail:"代理商操作失败",
+    toast_lsettings:"已保存配置（演示）", toast_perm:"已保存权限（演示）", toast_notif_read:"已标为已读",
+  }
+};
+
+/* ===================== DEMO DATA ===================== */
+const MERCHANTS = [
+  {id:1,name:"GREEN MART",logo:"🛒",contact:"Trần Văn Nam",phone:"0901 234 567",cat:"Siêu thị / Tạp hóa",status:"approved",kyc:"approved",joined:"2026-05-12",addr:"12 Hàng Bài, Hoàn Kiếm, HN",bank:"Vietcombank •••• 1234",license:"GPKD-2026-00123"},
+  {id:2,name:"CIRCLE K QUẬN 1",logo:"🏪",contact:"Lê Thị Mai",phone:"0902 345 678",cat:"Cửa hàng tiện lợi",status:"pending",kyc:"pending",joined:"2026-07-20",addr:"45 Lê Lợi, Q1, HCM",bank:"BIDV •••• 8877",license:"GPKD-2026-0192"},
+  {id:3,name:"PHỞ 24",logo:"🍜",contact:"Nguyễn Văn Hùng",phone:"0903 456 789",cat:"Nhà hàng / F&B",status:"pending",kyc:"pending",joined:"2026-07-21",addr:"88 Nguyễn Huệ, Q1, HCM",bank:"Techcombank •••• 5544",license:"GPKD-2026-0195"},
+  {id:4,name:"THỜI TRANG MAY",logo:"👗",contact:"Phạm Thu Hà",phone:"0904 567 890",cat:"Thời trang",status:"rejected",kyc:"approved",joined:"2026-06-02",addr:"5 Chợ Đồng Xuân, HN",bank:"Vietinbank •••• 3321",license:"GPKD-2026-0077",reject_reason:"Thiếu giấy phép PCCC."},
+  {id:5,name:"TIỆN LỢI MART",logo:"🏬",contact:"Hoàng Minh",phone:"0905 678 901",cat:"Siêu thị",status:"approved",kyc:"approved",joined:"2026-05-30",addr:"200 Cầu Giấy, HN",bank:"VPBank •••• 9988",license:"GPKD-2026-0031"},
+  {id:6,name:"CAFE TRUNG NGUYÊN",logo:"☕",contact:"Đỗ Anh",phone:"0906 789 012",cat:"F&B / Cafe",status:"pending",kyc:"approved",joined:"2026-07-22",addr:"10 Lý Tự Trọng, HCM",bank:"ACB •••• 7766",license:"GPKD-2026-0201"},
+  {id:7,name:"ĐIỆN MÁY XANH",logo:"🔌",contact:"Vũ Quang",phone:"0907 890 123",cat:"Điện máy",status:"approved",kyc:"approved",joined:"2026-04-18",addr:"99 Thái Hà, HN",bank:"MB •••• 2210",license:"GPKD-2026-0009"},
+  {id:8,name:"BÁCH HÓA XANH",logo:"🛍️",contact:"Ngô Lan",phone:"0908 901 234",cat:"Siêu thị",status:"pending",kyc:"pending",joined:"2026-07-23",addr:"33 Tôn Đức Thắng, HCM",bank:"Sacombank •••• 4455",license:"GPKD-2026-0210"},
+];
+function mkItems(arr){ return arr; }
+const ORDERS = [
+  {order_no:"GN20260730A1",user:"Nguyễn Văn A",merchant:"GREEN MART",status:"delivered",created_at:"2026-07-30 09:12",pay:"pay_wallet",items:mkItems([{name:"Sữa tươi",qty:4,price:32000},{name:"Táo nhập khẩu",qty:2,price:45000},{name:"Bánh mì",qty:1,price:38000}])},
+  {order_no:"GN20260730A2",user:"Trần Thị B",merchant:"PHỞ 24",status:"paid",created_at:"2026-07-30 09:40",pay:"pay_momo",items:mkItems([{name:"Phở bò tô",qty:3,price:45000},{name:"Nước ngọt",qty:2,price:12000},{name:"Gỏi cuốn",qty:2,price:15000}])},
+  {order_no:"GN20260730A3",user:"Lê Văn C",merchant:"TIỆN LỢI MART",status:"delivering",created_at:"2026-07-30 10:05",pay:"pay_zalo",items:mkItems([{name:"Mì gói",qty:4,price:12000},{name:"Trứng",qty:1,price:24000},{name:"Nước",qty:2,price:12000}])},
+  {order_no:"GN20260730A4",user:"Phạm D",merchant:"CAFE TRUNG NGUYÊN",status:"accepted",created_at:"2026-07-30 10:20",pay:"pay_wallet",items:mkItems([{name:"Cà phê",qty:2,price:25000},{name:"Bánh ngọt",qty:2,price:11000}])},
+  {order_no:"GN20260730A5",user:"Hoàng E",merchant:"ĐIỆN MÁY XANH",status:"delivered",created_at:"2026-07-30 08:55",pay:"pay_cod",items:mkItems([{name:"Sạc dự phòng",qty:1,price:450000},{name:"Cáp sạc",qty:2,price:50000},{name:"Tai nghe",qty:1,price:900000}])},
+  {order_no:"GN20260730A6",user:"Vũ F",merchant:"CIRCLE K QUẬN 1",status:"picked",created_at:"2026-07-30 10:31",pay:"pay_momo",items:mkItems([{name:"Snack",qty:2,price:15000},{name:"Nước",qty:2,price:12000}])},
+  {order_no:"GN20260730A7",user:"Đỗ G",merchant:"BÁCH HÓA XANH",status:"cancelled",created_at:"2026-07-30 09:02",pay:"pay_wallet",items:mkItems([{name:"Dầu ăn",qty:2,price:45000},{name:"Gạo",qty:1,price:180000},{name:"Nước tương",qty:1,price:42000}])},
+  {order_no:"GN20260730A8",user:"Ngô H",merchant:"GREEN MART",status:"paid",created_at:"2026-07-30 10:48",pay:"pay_zalo",items:mkItems([{name:"Sữa tươi",qty:2,price:32000},{name:"Táo",qty:1,price:45000},{name:"Bánh",qty:1,price:19000}])},
+];
+ORDERS.forEach(o=>o.amount=o.items.reduce((s,i)=>s+i.qty*i.price,0));
+const SETTLEMENTS = [
+  {name:"GREEN MART",period:"2026-07-29",payable:8420000,paid:8420000,status:"paid"},
+  {name:"TIỆN LỢI MART",period:"2026-07-29",payable:5230000,paid:5230000,status:"paid"},
+  {name:"ĐIỆN MÁY XANH",period:"2026-07-29",payable:12800000,paid:0,status:"unpaid"},
+  {name:"CAFE TRUNG NGUYÊN",period:"2026-07-29",payable:1980000,paid:0,status:"unpaid"},
+  {name:"CIRCLE K QUẬN 1",period:"2026-07-29",payable:760000,paid:0,status:"unpaid"},
+  {name:"PHỞ 24",period:"2026-07-29",payable:1240000,paid:0,status:"unpaid"},
+];
+const DASHBOARD = {
+  orders:1284, ordersTrend:8.2, gmv:312450000, gmvTrend:5.4,
+  merchants:186, merchantsNew:3, riders:542, ridersNew:12, pending:7, pendingNew:2,
+  subsidy:4820000, commission:0,
+  chart:[{d:"T2",v:980},{d:"T3",v:1120},{d:"T4",v:1040},{d:"T5",v:1250},{d:"T6",v:1480},{d:"T7",v:1390},{d:"CN",v:1284}],
+  gmv7:2140500000,
+};
+
+/* ===================== NEW L SCREENS — DEMO DATA ===================== */
+const RIDERS = [
+  {id:1,name:"Nguyễn Văn Tài",phone:"0901 111 222",status:"online",region:"Hoàn Kiếm, HN",orders:18,earn:540000,cccd:"079086000123",vehicle:"Xe máy"},
+  {id:2,name:"Trần Thị Linh",phone:"0902 222 333",status:"busy",region:"Cầu Giấy, HN",orders:23,earn:690000,cccd:"079086000456",vehicle:"Xe máy"},
+  {id:3,name:"Lê Văn Hùng",phone:"0903 333 444",status:"online",region:"Q1, HCM",orders:15,earn:450000,cccd:"079086000789",vehicle:"Xe đạp điện"},
+  {id:4,name:"Phạm Minh",phone:"0904 444 555",status:"offline",region:"Q7, HCM",orders:0,earn:0,cccd:"079086000012",vehicle:"Xe máy"},
+  {id:5,name:"Hoàng Anh",phone:"0905 555 666",status:"busy",region:"Hải Châu, ĐN",orders:11,earn:330000,cccd:"079086000345",vehicle:"Xe máy"},
+  {id:6,name:"Đỗ Văn Cường",phone:"0906 666 777",status:"disabled",region:"Ninh Kiều, CT",orders:0,earn:0,cccd:"079086000678",vehicle:"Xe máy"},
+];
+const COUPONS = [
+  {id:1,name:"Mã新人 50K",type:"newbie",value:50000,cond:0,claim:1240,used:380,funded:true,status:"active"},
+  {id:2,name:"Giảm 20K đơn 100K",type:"discount",value:20000,cond:100000,claim:820,used:510,funded:true,status:"active"},
+  {id:3,name:"Freeship 15K",type:"cash",value:15000,cond:50000,claim:2100,used:1500,funded:true,status:"active"},
+  {id:4,name:"Mã Tết 30K",type:"discount",value:30000,cond:150000,claim:300,used:120,funded:true,status:"paused"},
+];
+const AGENTS = [
+  {id:1,name:"Đại lý Hà Nội",region:"Hà Nội",merchants:64,share:8,status:"active",contact:"Trần Agent"},
+  {id:2,name:"Đại lý HCM",region:"TP.HCM",merchants:52,share:8,status:"active",contact:"Lê Agent"},
+  {id:3,name:"Đại lý Đà Nẵng",region:"Đà Nẵng",merchants:18,share:10,status:"pending",contact:"Phạm Agent"},
+  {id:4,name:"Đại lý Cần Thơ",region:"Miền Tây",merchants:9,share:10,status:"pending",contact:"Hoàng Agent"},
+];
+const ROLES = [
+  {key:"admin",label:"Admin"},
+  {key:"ops",label:"Vận hành"},
+  {key:"fin",label:"Tài chính"},
+];
+const PERMS = [
+  {key:"dashboard",label:"perm_dashboard",roles:{admin:true,ops:true,fin:true}},
+  {key:"merchants",label:"perm_merchants",roles:{admin:true,ops:true,fin:false}},
+  {key:"orders",label:"perm_orders",roles:{admin:true,ops:true,fin:false}},
+  {key:"settlement",label:"perm_settle",roles:{admin:true,ops:false,fin:true}},
+  {key:"riders",label:"perm_riders",roles:{admin:true,ops:true,fin:false}},
+  {key:"agents",label:"perm_agents",roles:{admin:true,ops:true,fin:false}},
+  {key:"coupons",label:"perm_coupons",roles:{admin:true,ops:true,fin:false}},
+  {key:"settings",label:"perm_settings",roles:{admin:true,ops:false,fin:false}},
+];
+let NOTIFS = [
+  {id:1,type:"merchant",title:"notif_merchant_pending",sub:"GREEN MART 2 chờ duyệt",time:"10:24",read:false,link:"merchants"},
+  {id:2,type:"kyc",title:"notif_kyc_pending",sub:"CIRCLE K Q1 chờ KYC",time:"09:50",read:false,link:"merchants"},
+  {id:3,type:"order",title:"notif_order_abnormal",sub:"GN20260730A7 bị hủy bất thường",time:"09:30",read:false,link:"orders"},
+  {id:4,type:"merchant",title:"notif_merchant_pending",sub:"BÁCH HÓA XANH chờ duyệt",time:"08:15",read:true,link:"merchants"},
+];
+const OVERVIEW = {
+  ends:[
+    {label:"Khách hàng (C)",val:28400,cls:"o",ic:"users",zh:"消费者端"},
+    {label:"Merchant (M)",val:186,cls:"r",ic:"shop",zh:"商家端"},
+    {label:"Tài xế (R)",val:542,cls:"b",ic:"rider",zh:"骑手端"},
+    {label:"Vận hành (L)",val:12,cls:"t",ic:"settings",zh:"运营端"},
+  ],
+  funnel:[
+    {label:"Cover (truy cập)",val:9600},
+    {label:"Đăng ký merchant",val:1240},
+    {label:"KYC đã duyệt",val:186},
+  ],
+};
+const COVER = {views:9620, applies:1243, conv:12.9};
+
+/* ===================== STATE ===================== */
+let lang = localStorage.getItem("gn_admin_lang") || "vi";
+let theme = localStorage.getItem("gn_admin_theme") || "light";
+let current = "dashboard";
+let LIVE = null;            // live data container
+let MERCH = MERCHANTS;      // working set (demo or live)
+let ORD = ORDERS;
+let SETL = SETTLEMENTS;
+let DASH = DASHBOARD;
+let currentMerchant = null;
+
+const $ = s => document.querySelector(s);
+const fmtVND = v => (v||0).toLocaleString("vi-VN") + " ₫";
+const fmtNum = v => (v||0).toLocaleString("vi-VN");
+const t = k => (APP[lang] && APP[lang][k]!=null) ? APP[lang][k] : (APP.vi[k]||k);
+
+/* ===================== TEXT ===================== */
+function applyText(){
+  document.documentElement.setAttribute("lang", lang);
+  document.querySelectorAll("[data-a]").forEach(el=>{ const k=el.getAttribute("data-a"); if(APP[lang][k]!=null) el.textContent=APP[lang][k]; });
+  document.getElementById("langPill").querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.lang===lang));
+  if(current==="dashboard") setHead("dashboard");
+  else if(current==="merchants") setHead("merchants");
+  else if(current==="orders") setHead("orders");
+  else if(current==="settlement") setHead("settlement");
+  else if(current==="overview") setHead("overview");
+  else if(current==="riders") setHead("riders");
+  else if(current==="coupons") setHead("coupons");
+  else if(current==="agents") setHead("agents");
+  else if(current==="settings") setHead("settings");
+  else if(current==="permissions") setHead("permissions");
+  else if(current==="notifications") setHead("notifications");
+  else if(current==="cover") setHead("cover");
+  else if(current==="emptystates") setHead("emptystates");
+  renderAll();
+}
+function setLang(l){ lang=l; localStorage.setItem("gn_admin_lang",l); applyText(); }
+
+/* ===================== THEME ===================== */
+function setTheme(tm){ theme=tm; localStorage.setItem("gn_admin_theme",tm); document.documentElement.setAttribute("data-theme",tm); }
+
+/* ===================== TOAST ===================== */
+function toast(msg, kind="ok"){
+  const w = $("#toastWrap");
+  const el = document.createElement("div");
+  el.className = "toast " + (kind==="bad"?"bad":"ok");
+  el.innerHTML = `<span class="ti">${kind==="bad"?"!":"✓"}</span><span>${msg}</span>`;
+  w.appendChild(el);
+  setTimeout(()=>{ el.style.opacity="0"; el.style.transform="translateX(40px)"; setTimeout(()=>el.remove(),300); }, 2600);
+}
+
+/* ===================== STATUS PILLS ===================== */
+function statusPill(s){
+  const map={paid:["amber",t("status_paid")],accepted:["blue",t("status_accepted")],picked:["blue",t("status_picked")],
+    delivering:["teal",t("status_delivering")],delivered:["green",t("status_delivered")],cancelled:["red",t("status_cancelled")]};
+  const [c,l]=map[s]||["gray",s]; return `<span class="pill ${c}">${l}</span>`;
+}
+function merchPill(s){
+  const map={pending:["amber",t("status_pending")],approved:["green",t("status_approved")],rejected:["red",t("status_rejected")]};
+  const [c,l]=map[s]||["gray",s]; return `<span class="pill ${c}">${l}</span>`;
+}
+function kycPill(s){
+  const map={pending:["amber",t("kyc_pending")],approved:["green",t("kyc_approved")],rejected:["red",t("kyc_rejected")]};
+  const [c,l]=map[s]||["gray",s]; return `<span class="pill ${c}">${l}</span>`;
+}
+function settlePill(s){
+  return s==="paid" ? `<span class="pill green">${t("settle_paid")}</span>` : `<span class="pill amber">${t("settle_unpaid")}</span>`;
+}
+
+/* ===================== PAGE HEAD ===================== */
+function setHead(page){
+  const map={
+    dashboard:[t("nav_dashboard_zh")?"Tổng quan":"Tổng quan", t("kpi_orders_zh")?"Toàn cảnh vận hành":"Toàn cảnh vận hành"],
+    merchants:["Merchant & KYC", t("merchants_desc")],
+    orders:["Đơn hàng", t("orders_desc")],
+    settlement:["Đối soát & Thanh toán", t("settle_desc")],
+  };
+  // use VI titles; sub-line shows zh note
+  const titles={dashboard:["Tổng quan","概览 · 运营全景"],merchants:["Merchant & KYC","商户与资质审核"],orders:["Đơn hàng","实时订单总览"],settlement:["Đối soát & Thanh toán","分账结算与提现"],
+    overview:["Toàn cảnh nền tảng","平台总览 · 四端运营全景"],riders:["Quản lý tài xế","骑手管理"],
+    coupons:["Mã giảm giá nền tảng","平台优惠券"],agents:["Quản lý đại lý","代理商管理"],
+    settings:["Cài đặt nền tảng","平台设置"],permissions:["Phân quyền backend","后台权限矩阵"],
+    notifications:["Trung tâm thông báo","通知中心"],cover:["Trang招商 (Landing)","招商落地页预览"],emptystates:["Quy chuẩn trạng thái rỗng","空状态设计规范"]};
+  $("#pageTitle").textContent = titles[page][0];
+  $("#pageSub").textContent = titles[page][1];
+}
+
+/* ===================== NAV ===================== */
+function switchPage(page){
+  current=page;
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.toggle("active", n.dataset.page===page));
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  $("#page-"+page).classList.add("active");
+  setHead(page);
+}
+document.querySelectorAll(".nav-item").forEach(n=>n.onclick=()=>switchPage(n.dataset.page));
+document.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>switchPage(b.dataset.goto));
+
+/* ===================== RENDER: DASHBOARD ===================== */
+function renderDashboard(){
+  const k = DASH;
+  const cards = [
+    {ic:"receipt",cls:"o",lab:t("kpi_orders"),zh:t("kpi_orders_zh"),val:fmtNum(k.orders),trend:`<span class="trend up">${ICONS.up}${k.ordersTrend}% ${t("vs_yesterday")}</span>`},
+    {ic:"wallet",cls:"o",lab:t("kpi_gmv"),zh:t("kpi_gmv_zh"),val:fmtVND(k.gmv),trend:`<span class="trend up">${ICONS.up}${k.gmvTrend}% ${t("vs_yesterday")}</span>`},
+    {ic:"shop",cls:"r",lab:t("kpi_merchants"),zh:t("kpi_merchants_zh"),val:fmtNum(k.merchants),trend:`<span class="trend up" style="background:var(--info-soft);color:#1D4ED8">${ICONS.up}+${k.merchantsNew}</span>`},
+    {ic:"rider",cls:"b",lab:t("kpi_riders"),zh:t("kpi_riders_zh"),val:fmtNum(k.riders),trend:`<span class="trend up" style="background:#CCFBF1;color:#0F766E">${ICONS.up}+${k.ridersNew}</span>`},
+    {ic:"clock",cls:"w",lab:t("kpi_pending"),zh:t("kpi_pending_zh"),val:fmtNum(k.pending),trend:`<span class="trend down">${ICONS.up}+${k.pendingNew}</span>`},
+  ];
+  $("#kpiGrid").innerHTML = cards.map(c=>`
+    <div class="kpi">
+      <div class="top"><div class="ic ${c.cls}">${ICONS[c.ic]}</div>
+        <div class="lab">${c.lab}<small>${c.zh}</small></div></div>
+      <div class="val">${c.val}</div>
+      ${c.trend}
+    </div>`).join("");
+
+  // chart
+  const max = Math.max(...k.chart.map(x=>x.v));
+  $("#chart7").innerHTML = k.chart.map(x=>`
+    <div class="bar-col"><div class="bar" style="height:${Math.round(x.v/max*100)}%">
+      <span class="tip">${fmtNum(x.v)} ${t("chart_orders").toLowerCase()}</span></div>
+      <div class="x">${x.d}</div></div>`).join("");
+  $("#chartMax").textContent = `${t("chart_orders")}: ${fmtNum(max)}`;
+
+  // todos (pending merchants + pending kyc)
+  const pendM = MERCH.filter(m=>m.status==="pending");
+  const pendK = MERCH.filter(m=>m.status!=="pending" && m.kyc==="pending");
+  const rows = [
+    ...pendM.map(m=>({ic:"shop",warn:false,title:m.name,sub:`${t("new_merchant")} · ${m.cat}`,id:m.id,act:"merchant"})),
+    ...pendK.map(m=>({ic:"⚠️",warn:true,title:m.name,sub:t("new_kyc"),id:m.id,act:"kyc"})),
+  ];
+  $("#todoCount").textContent = rows.length ? `(${rows.length})` : "";
+  $("#todoList").innerHTML = rows.length ? rows.map(r=>`
+    <div class="list-row" data-open="${r.id}">
+      <div class="lr-ic ${r.warn?"warn":""}">${r.ic}</div>
+      <div class="lr-meta"><b>${r.title}</b><span>${r.sub}</span></div>
+      <div class="lr-act"><span class="mini-act ok" data-open="${r.id}">${t("view")}</span></div>
+    </div>`).join("") : `<div class="empty">${t("todo_empty")}</div>`;
+  $("#todoList").querySelectorAll("[data-open]").forEach(el=>el.onclick=()=>openMerchant(+el.dataset.open));
+
+  // recent orders
+  const rec = ORD.slice(0,5);
+  $("#recentOrders").innerHTML = rec.map(o=>`
+    <tr data-order="${o.order_no}">
+      <td class="num">${o.order_no}</td>
+      <td>${o.user}</td>
+      <td>${o.merchant}</td>
+      <td class="right num">${fmtVND(o.amount)}</td>
+      <td>${statusPill(o.status)}</td>
+      <td class="muted">${o.created_at.slice(5)}</td>
+    </tr>`).join("");
+  $("#recentOrders").querySelectorAll("tr").forEach(tr=>tr.onclick=()=>openOrder(tr.dataset.order));
+}
+
+/* ===================== RENDER: MERCHANTS ===================== */
+let merchantFilter = "all";
+function renderMerchants(){
+  const q = ($("#merchantSearch").value||"").toLowerCase();
+  let list = MERCH.filter(m=>{
+    if(merchantFilter!=="all" && m.status!==merchantFilter) return false;
+    if(q && !(m.name.toLowerCase().includes(q) || m.phone.toLowerCase().includes(q) || (m.contact||"").toLowerCase().includes(q))) return false;
+    return true;
+  });
+  $("#merchantCountTag").textContent = `${list.length} ${lang==="vi"?"merchant":"商户"}`;
+  $("#merchantTableBody").innerHTML = list.length ? list.map(m=>`
+    <tr data-merchant="${m.id}">
+      <td><div class="m-cell"><div class="m-logo">${m.logo}</div>
+        <div class="m-meta"><b>${m.name}</b><span>${m.license}</span></div></div></td>
+      <td>${m.contact}</td>
+      <td class="muted">${m.phone}</td>
+      <td>${m.cat}</td>
+      <td>${merchPill(m.status)}</td>
+      <td>${kycPill(m.kyc)}</td>
+      <td class="muted">${m.joined}</td>
+      <td class="right">
+        ${m.status==="pending"
+          ? `<button class="btn btn-primary btn-xs" data-approve="${m.id}">${t("approve")}</button>
+             <button class="btn btn-danger btn-xs" data-reject="${m.id}" style="margin-left:6px">${t("reject")}</button>`
+          : `<button class="btn btn-ghost btn-xs" data-open="${m.id}">${t("view")}</button>`}
+      </td>
+    </tr>`).join("") : `<tr><td colspan="8"><div class="empty">${t("empty")}</div></td></tr>`;
+
+  $("#merchantTableBody").querySelectorAll("[data-approve]").forEach(b=>b.onclick=e=>{e.stopPropagation();approveMerchant(+b.dataset.approve);});
+  $("#merchantTableBody").querySelectorAll("[data-reject]").forEach(b=>b.onclick=e=>{e.stopPropagation();rejectMerchant(+b.dataset.reject);});
+  $("#merchantTableBody").querySelectorAll("[data-open]").forEach(b=>b.onclick=e=>{e.stopPropagation();openMerchant(+b.dataset.open);});
+  $("#merchantTableBody").querySelectorAll("tr[data-merchant]").forEach(tr=>tr.onclick=()=>openMerchant(+tr.dataset.merchant));
+
+  // nav badge
+  const pn = MERCH.filter(m=>m.status==="pending").length;
+  const dot = $("#navPendingDot");
+  if(pn){ dot.style.display="grid"; dot.textContent=pn; } else dot.style.display="none";
+  const bb = $("#bellBadge");
+  if(pn){ bb.style.display="grid"; bb.textContent=pn; } else bb.style.display="none";
+}
+document.querySelectorAll("#merchantTabs button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#merchantTabs button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); merchantFilter=b.dataset.s; renderMerchants();
+});
+$("#merchantSearch").oninput = renderMerchants;
+
+/* ===================== RENDER: ORDERS ===================== */
+function renderOrders(){
+  const status = $("#orderStatus").value;
+  const q = ($("#orderSearch").value||"").toLowerCase();
+  let list = ORD.filter(o=>{
+    if(status && o.status!==status) return false;
+    if(q && !o.order_no.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  $("#orderCountTag").textContent = `${list.length} ${lang==="vi"?"đơn":"单"}`;
+  $("#orderTableBody").innerHTML = list.length ? list.map(o=>`
+    <tr data-order="${o.order_no}">
+      <td class="num">${o.order_no}</td>
+      <td>${o.user}</td>
+      <td>${o.merchant}</td>
+      <td class="right num">${fmtVND(o.amount)}</td>
+      <td>${statusPill(o.status)}</td>
+      <td class="muted">${o.created_at}</td>
+    </tr>`).join("") : `<tr><td colspan="6"><div class="empty">${t("empty")}</div></td></tr>`;
+  $("#orderTableBody").querySelectorAll("tr").forEach(tr=>tr.onclick=()=>openOrder(tr.dataset.order));
+}
+$("#orderStatus").onchange = renderOrders;
+$("#orderSearch").oninput = renderOrders;
+
+/* ===================== RENDER: SETTLEMENT ===================== */
+function renderSettlement(){
+  const total = SETL.reduce((s,x)=>s+x.payable,0);
+  const paid = SETL.reduce((s,x)=>s+x.paid,0);
+  const period = ($("#settlePeriod").value) || SETL[0]?.period || "2026-07-29";
+  $("#settleDateLabel").textContent = period;
+  $("#settleTotal").textContent = fmtVND(total);
+  $("#settleSubsidy").textContent = fmtVND(DASH.subsidy);
+  $("#settleCommission").textContent = fmtVND(DASH.commission);
+  $("#settleMerchantCount").textContent = fmtNum(SETL.length);
+  $("#settleTableBody").innerHTML = SETL.map(x=>`
+    <tr>
+      <td><div class="m-cell"><div class="m-logo">🏪</div><div class="m-meta"><b>${x.name}</b><span>${x.period}</span></div></div></td>
+      <td class="right num">${fmtVND(x.payable)}</td>
+      <td class="right num" style="color:${x.paid? 'var(--ok)':'var(--dim)'}">${x.paid?fmtVND(x.paid):'—'}</td>
+      <td>${settlePill(x.status)}</td>
+    </tr>`).join("");
+  // reconcile panel
+  const subsidy = DASH.subsidy, commission = DASH.commission;
+  $("#reconGmv").textContent = fmtVND(DASH.gmv7);
+  $("#reconPayable").textContent = fmtVND(total);
+  $("#reconSubsidy").textContent = "−"+fmtVND(subsidy);
+  $("#reconCommission").textContent = fmtVND(commission);
+  $("#reconNet").textContent = fmtVND(commission - subsidy);
+}
+$("#settlePeriod").value = "2026-07-29";
+$("#settlePeriod").onchange = renderSettlement;
+$("#btnCreatePayout").onclick = async ()=>{
+  if(GN_CONFIG.useApi && GN_CONFIG.apiBase){
+    try{
+      const period = $("#settlePeriod").value || SETL[0]?.period || "2026-07-29";
+      let done = 0;
+      for(const x of SETL){
+        if(x.status === "paid") continue;
+        await GN.API.adminSettlementPay(x.id, { settle_date: period, amount: x.payable, method: "bank" });
+        done++;
+      }
+      // refresh paid amounts from the ledger
+      const pouts = await GN.API.adminPayouts('?settle_date='+period);
+      const pmap = {}; (Array.isArray(pouts)?pouts:[]).forEach(p=>{ pmap[p.merchant_id]=p; });
+      SETL.forEach(x=>{ const p=pmap[x.id]; if(p){ x.paid=p.amount; x.status="paid"; x.payout_id=p.id; } });
+      toast((t("toast_payout")||"Đã tạo lệnh chi")+" ("+done+")","ok");
+      renderSettlement();
+    }catch(e){ toast(t("toast_payout_fail")||"Tạo lệnh chi thất bại","bad"); }
+  } else {
+    toast(t("toast_payout"),"ok");
+    SETL.forEach(x=>{ x.paid=x.payable; x.status="paid"; });
+    renderSettlement();
+  }
+};
+
+/* ===================== DRAWER ===================== */
+function openDrawer(){ $("#drawerOverlay").classList.add("show"); $("#drawer").classList.add("show"); }
+function closeDrawer(){ $("#drawerOverlay").classList.remove("show"); $("#drawer").classList.remove("show"); }
+$("#drawerOverlay").onclick = closeDrawer;
+$("#drawerClose").onclick = closeDrawer;
+
+function openMerchant(id){
+  const m = MERCH.find(x=>x.id===id); if(!m) return; currentMerchant=m;
+  $("#drawerIc").textContent = m.logo;
+  $("#drawerTitle").textContent = m.name;
+  $("#drawerSub").textContent = `${m.cat} · ${m.license}`;
+  const kycVer = m.kyc==="approved" ? `<span class="ver ok">✓</span>` : (m.kyc==="rejected"?`<span class="ver pend" style="background:var(--bad-soft);color:#B91C1C">✕</span>`:`<span class="ver pend">…</span>`);
+  $("#drawerBody").innerHTML = `
+    <div class="doc-grid">
+      <div class="doc-frame">
+        <div class="doc-top">${t("kyc_biz")} ${kycVer}</div>
+        <div class="doc-prev"><div class="license">
+          <div class="tt">Giấy phép kinh doanh</div><div class="sub">Business License · SR Việt Nam</div>
+          <div class="row"><span class="k">Mã số</span><span class="v">${m.license}</span></div>
+          <div class="row"><span class="k">Chủ sở hữu</span><span class="v">${m.contact}</span></div>
+          <div class="row"><span class="k">Ngành</span><span class="v">${m.cat}</span></div>
+          <div class="seal">${t("kyc_biz").slice(0,2).toUpperCase()}</div>
+        </div></div>
+      </div>
+      <div class="doc-frame">
+        <div class="doc-top">${t("kyc_id")} ${kycVer}</div>
+        <div class="doc-prev"><div class="idcard">
+          <div class="flag">VN</div>
+          <div class="tt">Căn cước công dân</div>
+          <div class="ph">🙍</div>
+          <div class="row"><span class="k">Họ tên</span><span class="v">${m.contact}</span></div>
+          <div class="row"><span class="k">SĐT</span><span class="v">${m.phone}</span></div>
+          <div class="row"><span class="k">Số CCCD</span><span class="v">0${m.id}1990${100000+m.id*7}</span></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="sec-tt">${t("kyc_title")}</div>
+    <div class="kv">
+      <div class="k">${t("kyc_contact")}</div><div class="v">${m.contact}</div>
+      <div class="k">${t("kyc_phone")}</div><div class="v mono">${m.phone}</div>
+      <div class="k">${t("kyc_addr")}</div><div class="v">${m.addr}</div>
+      <div class="k">${t("kyc_cat")}</div><div class="v">${m.cat}</div>
+      <div class="k">${t("kyc_bank")}</div><div class="v mono">${m.bank}</div>
+      <div class="k">${t("kyc_joined")}</div><div class="v">${m.joined}</div>
+      <div class="k">${t("col_status")}</div><div class="v">${merchPill(m.status)}</div>
+      <div class="k">KYC</div><div class="v">${kycPill(m.kyc)}</div>
+      ${m.reject_reason?`<div class="k">${t("kyc_reject_reason")}</div><div class="v" style="color:var(--bad)">${m.reject_reason}</div>`:""}
+    </div>`;
+  // footer actions
+  let foot = "";
+  if(m.kyc==="pending"){
+    foot += `<button class="btn btn-danger" id="drawerKycReject">${t("kyc_reject_btn")}</button>
+             <button class="btn btn-primary" id="drawerKycApprove">${t("kyc_approve_btn")}</button>`;
+  }
+  if(m.status==="pending"){
+    foot += `<button class="btn btn-danger" id="drawerMReject">${t("merchant_reject")}</button>
+             <button class="btn btn-primary" id="drawerMApprove">${t("merchant_approve")}</button>`;
+  }
+  if(!foot) foot = `<button class="btn btn-ghost" data-action="closeDrawer">${t("view")}</button>`;
+  $("#drawerFoot").innerHTML = foot;
+  if($("#drawerKycApprove")) $("#drawerKycApprove").onclick=()=>approveKyc(m.id);
+  if($("#drawerKycReject")) $("#drawerKycReject").onclick=()=>rejectKyc(m.id);
+  if($("#drawerMApprove")) $("#drawerMApprove").onclick=()=>approveMerchant(m.id);
+  if($("#drawerMReject")) $("#drawerMReject").onclick=()=>rejectMerchant(m.id);
+  openDrawer();
+}
+
+function openOrder(no){
+  const o = ORD.find(x=>x.order_no===no); if(!o) return;
+  $("#drawerIc").textContent = "🧾";
+  $("#drawerTitle").textContent = o.order_no;
+  $("#drawerSub").textContent = `${o.created_at}`;
+  const items = o.items.map(i=>`<div class="stat-line"><span class="k">${i.name} <span style="color:var(--faint)">×${i.qty}</span></span><span class="v">${fmtVND(i.qty*i.price)}</span></div>`).join("");
+  $("#drawerBody").innerHTML = `
+    <div style="margin-bottom:6px">${statusPill(o.status)}</div>
+    <div class="kv">
+      <div class="k">${t("col_user")}</div><div class="v">${o.user}</div>
+      <div class="k">${t("col_merchant")}</div><div class="v">${o.merchant}</div>
+      <div class="k">${t("order_pay")}</div><div class="v">${t(o.pay)}</div>
+    </div>
+    <div class="sec-tt">${t("order_items")}</div>
+    ${items}
+    <div class="stat-line" style="border-top:2px solid var(--border);margin-top:6px"><span class="k" style="font-weight:800">${t("col_amount")}</span><span class="v" style="color:var(--brand-strong);font-size:17px">${fmtVND(o.amount)}</span></div>`;
+  $("#drawerFoot").innerHTML = `<button class="btn btn-ghost" data-action="closeDrawer">${t("view")}</button>`;
+  openDrawer();
+}
+
+/* ===================== ACTIONS ===================== */
+async function approveMerchant(id){
+  const m = MERCH.find(x=>x.id===id); if(!m) return;
+  if(LIVE && GN_CONFIG.useApi && GN_CONFIG.apiBase){
+    try{ await GN.API.adminApproveMerchant(id); }catch(e){}
+  }
+  m.status="approved"; m.commission_rate=0; m.delivery_subsidy=true;
+  toast(t("toast_approve"),"ok"); renderMerchants(); renderDashboard();
+  if($("#drawer").classList.contains("show")) openMerchant(id);
+}
+async function rejectMerchant(id){
+  const m = MERCH.find(x=>x.id===id); if(!m) return;
+  const reason = prompt(lang==="vi"?t("merchant_question"):"请输入商户驳回原因：", m.reject_reason||"");
+  if(reason===null) return;
+  if(LIVE && GN_CONFIG.useApi && GN_CONFIG.apiBase){
+    try{ await GN.API.adminRejectMerchant(id, reason); }catch(e){}
+  }
+  m.status="rejected"; m.reject_reason=reason||t("kyc_no_reason");
+  toast(t("toast_reject"),"bad"); renderMerchants(); renderDashboard();
+  if($("#drawer").classList.contains("show")) openMerchant(id);
+}
+async function approveKyc(id){
+  const m = MERCH.find(x=>x.id===id); if(!m) return;
+  if(LIVE && GN_CONFIG.useApi && GN_CONFIG.apiBase){
+    try{ await GN.API.adminApproveKyc(id); }catch(e){}
+  }
+  m.kyc="approved"; m.kyc_reject_reason=null;
+  toast(t("toast_kyc_ok"),"ok"); renderMerchants(); renderDashboard();
+  if($("#drawer").classList.contains("show")) openMerchant(id);
+}
+async function rejectKyc(id){
+  const m = MERCH.find(x=>x.id===id); if(!m) return;
+  const reason = prompt(lang==="vi"?t("kyc_question"):"请输入 KYC 驳回原因：", "");
+  if(reason===null) return;
+  if(LIVE && GN_CONFIG.useApi && GN_CONFIG.apiBase){
+    try{ await GN.API.adminRejectKyc(id, reason); }catch(e){}
+  }
+  m.kyc="rejected"; m.kyc_reject_reason=reason||t("kyc_no_reason");
+  toast(t("toast_kyc_no"),"bad"); renderMerchants(); renderDashboard();
+  if($("#drawer").classList.contains("show")) openMerchant(id);
+}
+
+/* ===================== LOGIN ===================== */
+async function doLogin(){
+  const phone = $("#loginPhone").value.trim();
+  const pass = $("#loginPass").value;
+  $("#loginBtn").textContent = "..."; $("#loginBtn").disabled = true;
+  // Enter app with demo data regardless (demo fallback). Attempt LIVE if configured.
+  enterApp();
+  if(GN_CONFIG.useApi && GN_CONFIG.apiBase){
+    try{
+      const r = await GN.API.login(phone, pass);
+      if(r && r.token){ GN.token = r.token; await tryLive(); toast(t("toast_login")+" · "+t("toast_live"),"ok"); }
+      else { toast(t("toast_demo"),"ok"); }
+    }catch(e){ toast(t("toast_demo"),"ok"); }
+  } else {
+    toast(t("toast_login")+" · "+t("toast_demo"),"ok");
+  }
+  $("#loginBtn").textContent = t("login_btn"); $("#loginBtn").disabled = false;
+}
+function enterApp(){
+  $("#login").classList.add("hide");
+  $("#app").style.display = "flex";
+  renderAll();
+}
+$("#loginBtn").onclick = doLogin;
+$("#loginPass").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
+
+/* ===================== NEW L SCREENS — RENDER & ACTIONS ===================== */
+function renderOverview(){
+  $("#overviewKpi").innerHTML = OVERVIEW.ends.map(e=>`
+    <div class="kpi">
+      <div class="top"><div class="ic ${e.cls}">${ICONS[e.ic]||ICONS.shop}</div>
+        <div class="lab">${e.label}<small>${e.zh}</small></div></div>
+      <div class="val">${fmtNum(e.val)}</div>
+    </div>`).join("");
+  const max = Math.max(1,...OVERVIEW.funnel.map(x=>x.val));
+  $("#overviewFunnel").innerHTML = OVERVIEW.funnel.map(x=>`
+    <div class="funnel-row"><div class="fl">${x.label}</div>
+      <div class="funnel-bar" style="width:${Math.max(20,Math.round(x.val/max*100))}%">${fmtNum(x.val)}</div></div>`).join("");
+  const chg = [
+    ...MERCH.filter(m=>m.status==="pending").map(m=>({ic:"shop",title:m.name,sub:t("notif_merchant_pending"),link:"merchants"})),
+    ...MERCH.filter(m=>m.kyc==="pending").map(m=>({ic:"⚠️",title:m.name,sub:t("notif_kyc_pending"),link:"merchants"})),
+    ...AGENTS.filter(a=>a.status==="pending").map(a=>({ic:"agent",title:a.name,sub:t("agent_pending"),link:"agents"})),
+  ];
+  $("#overviewChangesCount").textContent = chg.length?`(${chg.length})`:"";
+  $("#overviewChanges").innerHTML = chg.length?chg.map(c=>`
+    <div class="list-row" data-link="${c.link}">
+      <div class="lr-ic">${ICONS[c.ic]!==undefined?ICONS[c.ic]:c.ic}</div>
+      <div class="lr-meta"><b>${c.title}</b><span>${c.sub}</span></div>
+      <div class="lr-act"><span class="mini-act ok" data-link="${c.link}">${t("view")}</span></div>
+    </div>`).join(""):`<div class="empty">🎉 ${t("todo_empty")}</div>`;
+  $("#overviewChanges").querySelectorAll("[data-link]").forEach(el=>el.onclick=()=>switchPage(el.dataset.link));
+}
+
+/* ---- Riders ---- */
+let riderFilter="all";
+function riderPill(s){
+  const map={online:["green",t("rider_on")],busy:["blue",t("rider_busy_s")],offline:["gray",t("rider_off")],disabled:["red",t("rider_disabled")]};
+  const [c,l]=map[s]||["gray",s]; return `<span class="pill ${c}">${l}</span>`;
+}
+function renderRiders(){
+  const q=($("#riderSearch").value||"").toLowerCase();
+  let list=RIDERS.filter(r=>{
+    if(riderFilter!=="all" && r.status!==riderFilter) return false;
+    if(q && !(r.name.toLowerCase().includes(q)||r.phone.toLowerCase().includes(q)||r.region.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  $("#riderCountTag").textContent=`${list.length} ${lang==="vi"?"tài xế":"骑手"}`;
+  $("#riderTableBody").innerHTML = list.length?list.map(r=>`
+    <tr data-rider="${r.id}">
+      <td><div class="m-cell"><div class="m-logo">🛵</div><div class="m-meta"><b>${r.name}</b><span>${r.phone}</span></div></div></td>
+      <td class="muted">${r.phone}</td>
+      <td>${riderPill(r.status)}</td>
+      <td>${r.region}</td>
+      <td class="right num">${fmtNum(r.orders)}</td>
+      <td class="right num">${fmtVND(r.earn)}</td>
+      <td class="right">
+        ${r.status==="disabled"
+          ? `<button class="btn btn-primary btn-xs" data-rider-toggle="${r.id}">${t("rider_enable")}</button>`
+          : `<button class="btn btn-danger btn-xs" data-rider-toggle="${r.id}">${t("rider_disable")}</button>`}
+      </td>
+    </tr>`).join(""):`<tr><td colspan="7"><div class="empty">${t("empty")}</div></td></tr>`;
+  $("#riderTableBody").querySelectorAll("tr[data-rider]").forEach(tr=>tr.onclick=e=>{ if(e.target.closest("[data-rider-toggle]"))return; openRider(+tr.dataset.rider); });
+  $("#riderTableBody").querySelectorAll("[data-rider-toggle]").forEach(b=>b.onclick=e=>{e.stopPropagation();toggleRider(+b.dataset.riderToggle);});
+}
+document.querySelectorAll("#riderTabs button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#riderTabs button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); riderFilter=b.dataset.s; renderRiders();
+});
+$("#riderSearch").oninput=renderRiders;
+$("#btnRiderRefresh").onclick=()=>{ renderRiders(); toast(t("refresh"),"ok"); };
+
+function openRider(id){
+  const r=RIDERS.find(x=>x.id===id); if(!r) return;
+  $("#drawerIc").textContent="🛵";
+  $("#drawerTitle").textContent=r.name;
+  $("#drawerSub").textContent=`${r.region}`;
+  const ver = r.status==="disabled"?`<span class="ver pend" style="background:var(--bad-soft);color:#B91C1C">✕</span>`:`<span class="ver ok">✓</span>`;
+  $("#drawerBody").innerHTML=`
+    <div class="doc-grid">
+      <div class="doc-frame"><div class="doc-top">${t("rider_id")} ${ver}</div>
+        <div class="doc-prev"><div class="idcard"><div class="flag">VN</div><div class="tt">Căn cước công dân</div>
+          <div class="ph">🙍</div>
+          <div class="row"><span class="k">Họ tên</span><span class="v">${r.name}</span></div>
+          <div class="row"><span class="k">SĐT</span><span class="v">${r.phone}</span></div>
+          <div class="row"><span class="k">Số CCCD</span><span class="v">${r.cccd}</span></div></div></div></div>
+      <div class="doc-frame"><div class="doc-top">${t("rider_vehicle")} ${ver}</div>
+        <div class="doc-prev"><div class="license"><div class="tt">Phương tiện</div><div class="sub">Vehicle · GIAONHANH Rider</div>
+          <div class="row"><span class="k">Loại</span><span class="v">${r.vehicle}</span></div>
+          <div class="row"><span class="k">Khu vực</span><span class="v">${r.region}</span></div>
+          <div class="row"><span class="k">Biển số</span><span class="v">29-${r.id}A-2026</span></div>
+          <div class="seal">R</div></div></div></div>
+    </div>
+    <div class="sec-tt">${t("rider_orders")}</div>
+    <div class="kv">
+      <div class="k">${t("rider_orders")}</div><div class="v">${fmtNum(r.orders)}</div>
+      <div class="k">${t("rider_earn")}</div><div class="v">${fmtVND(r.earn)}</div>
+      <div class="k">${t("rider_region")}</div><div class="v">${r.region}</div>
+      <div class="k">${t("col_status")}</div><div class="v">${riderPill(r.status)}</div>
+    </div>
+    <div class="sec-tt">${t("rider_earn")} (7 ngày)</div>
+    <div class="chart" id="riderChart"></div>`;
+  const pts=[120,180,90,210,160,Math.max(40,Math.round(r.earn/1000))].map(v=>Math.round(v));
+  const mx=Math.max(...pts);
+  $("#riderChart").innerHTML=pts.map(v=>`<div class="bar-col"><div class="bar" style="height:${Math.round(v/mx*100)}%"><span class="tip">${fmtNum(v*1000)} ₫</span></div><div class="x">•</div></div>`).join("");
+  let foot="";
+  if(r.status!=="disabled") foot+=`<button class="btn btn-danger" id="drRiderOff">${t("rider_disable")}</button>`;
+  else foot+=`<button class="btn btn-primary" id="drRiderOn">${t("rider_enable")}</button>`;
+  $("#drawerFoot").innerHTML=foot;
+  if($("#drRiderOff")) $("#drRiderOff").onclick=()=>{ toggleRider(r.id); openRider(r.id); };
+  if($("#drRiderOn")) $("#drRiderOn").onclick=()=>{ toggleRider(r.id); openRider(r.id); };
+  openDrawer();
+}
+function toggleRider(id){
+  const r=RIDERS.find(x=>x.id===id); if(!r) return;
+  r.status = r.status==="disabled" ? "online" : "disabled";
+  renderRiders();
+  toast(r.status==="disabled"?t("toast_rider_off"):t("toast_rider_on"), r.status==="disabled"?"bad":"ok");
+}
+
+/* ---- Coupons (platform) ---- */
+function couponPill(s){ return s==="active"?`<span class="pill green">${lang==="vi"?"Đang chạy":"进行中"}</span>`:`<span class="pill gray">${lang==="vi"?"Tạm dừng":"已暂停"}</span>`; }
+function couponType(s){ return s==="newbie"?t("coupon_newbie"):(s==="cash"?t("coupon_cash"):t("coupon_discount")); }
+function renderCoupons(){
+  $("#couponTableBody").innerHTML = COUPONS.length?COUPONS.map(c=>`
+    <tr>
+      <td><b>${c.name}</b>${c.funded?`<span class="add-badge">${t("coupon_funded")}</span>`:""}</td>
+      <td>${couponType(c.type)}</td>
+      <td class="right num">${fmtVND(c.value)}</td>
+      <td class="right num">${c.cond?fmtVND(c.cond):"—"}</td>
+      <td class="right num">${fmtNum(c.claim)}</td>
+      <td class="right num">${fmtNum(c.used)}</td>
+      <td>${couponPill(c.status)}</td>
+    </tr>`).join(""):`<tr><td colspan="7"><div class="empty">${t("empty")}</div></td></tr>`;
+}
+$("#btnNewCoupon").onclick=()=>openCouponForm();
+function openCouponForm(){
+  $("#drawerIc").textContent="🎟️";
+  $("#drawerTitle").textContent=t("coupon_new_title");
+  $("#drawerSub").textContent=t("coupon_funded");
+  $("#drawerBody").innerHTML=`
+    <div class="field-row"><label>${t("coupon_name")}</label><input id="cpName" placeholder="Mã新人 50K" /></div>
+    <div class="field-row"><label>${t("coupon_type")}</label>
+      <select class="select" id="cpType" style="width:100%">
+        <option value="newbie">${t("coupon_newbie")}</option>
+        <option value="discount">${t("coupon_discount")}</option>
+        <option value="cash">${t("coupon_cash")}</option>
+      </select></div>
+    <div class="field-row"><label>${t("coupon_value")}</label><input id="cpValue" type="text" inputmode="numeric" placeholder="50000" /></div>
+    <div class="field-row"><label>${t("coupon_cond")}</label><input id="cpCond" type="text" inputmode="numeric" placeholder="0" /></div>
+    <div class="field-row"><label>${t("coupon_total")}</label><input id="cpTotal" type="text" inputmode="numeric" placeholder="2000" /></div>
+    <div class="field-row"><label>${t("coupon_expire")}</label><input id="cpExpire" placeholder="2026-12-31" /></div>
+    <div class="note-box" style="margin-top:6px">${t("coupon_funded")} · ${t("lsettings_note")}</div>`;
+  $("#drawerFoot").innerHTML=`<button class="btn btn-ghost" data-action="closeDrawer">${t("cancel")}</button><button class="btn btn-primary" id="cpSave">${t("save")}</button>`;
+  $("#cpSave").onclick=()=>{
+    const name=$("#cpName").value.trim(); if(!name){ $("#cpName").focus(); return; }
+    const value=parseInt(($("#cpValue").value||"").replace(/\D/g,""))||0;
+    const cond=parseInt(($("#cpCond").value||"").replace(/\D/g,""))||0;
+    const total=parseInt(($("#cpTotal").value||"").replace(/\D/g,""))||0;
+    const id=Math.max(0,...COUPONS.map(c=>c.id))+1;
+    COUPONS.unshift({id,name,type:$("#cpType").value,value,cond,claim:0,used:0,funded:true,status:"active",total});
+    closeDrawer(); renderCoupons(); toast(t("toast_coupon"),"ok");
+  };
+  openDrawer();
+}
+
+/* ---- Agents ---- */
+function agentPill(s){
+  const map={pending:["amber",t("agent_pending")],active:["green",t("agent_active")],blocked:["red",t("agent_blocked")]};
+  const [c,l]=map[s]||["gray",s]; return `<span class="pill ${c}">${l}</span>`;
+}
+function renderAgents(){
+  const pn = AGENTS.filter(a=>a.status==="pending").length;
+  const dot=$("#navAgentDot"); if(pn){ dot.style.display="grid"; dot.textContent=pn; } else dot.style.display="none";
+  $("#agentTableBody").innerHTML = AGENTS.length?AGENTS.map(a=>`
+    <tr data-agent="${a.id}">
+      <td><div class="m-cell"><div class="m-logo">🤝</div><div class="m-meta"><b>${a.name}</b><span>${a.contact}</span></div></div></td>
+      <td>${a.region}</td>
+      <td class="right num">${fmtNum(a.merchants)}</td>
+      <td class="right num">${a.share}%</td>
+      <td>${agentPill(a.status)}</td>
+      <td class="right">
+        ${a.status==="pending"
+          ? `<button class="btn btn-primary btn-xs" data-agent-ok="${a.id}">${t("agent_approve")}</button>
+             <button class="btn btn-danger btn-xs" data-agent-no="${a.id}" style="margin-left:6px">${t("agent_reject")}</button>`
+          : `<button class="btn btn-ghost btn-xs" data-agent-view="${a.id}">${t("view")}</button>`}
+      </td>
+    </tr>`).join(""):`<tr><td colspan="6"><div class="empty">${t("empty")}</div></td></tr>`;
+  $("#agentTableBody").querySelectorAll("[data-agent-ok]").forEach(b=>b.onclick=e=>{e.stopPropagation();agentDecision(+b.dataset.agentOk,true);});
+  $("#agentTableBody").querySelectorAll("[data-agent-no]").forEach(b=>b.onclick=e=>{e.stopPropagation();agentDecision(+b.dataset.agentNo,false);});
+  $("#agentTableBody").querySelectorAll("[data-agent-view]").forEach(b=>b.onclick=e=>{e.stopPropagation();});
+}
+async function agentDecision(id, ok){
+  const a=AGENTS.find(x=>x.id===id); if(!a) return;
+  if(GN_CONFIG.useApi && GN_CONFIG.apiBase){
+    try{
+      if(ok) await GN.API.adminAgentApprove(id); else await GN.API.adminAgentReject(id);
+      a.status = ok?"active":"blocked";
+    }catch(e){ toast(t("toast_agent_fail")||"Thao tác thất bại", "bad"); return; }
+  } else {
+    a.status = ok?"active":"blocked";
+  }
+  renderAgents();
+  toast(ok?t("toast_agent_ok"):t("toast_agent_no"), ok?"ok":"bad");
+}
+
+/* ---- Platform settings ---- */
+const LSET = { subsidyOn:true, subsidyAmt:8000, zeroCommission:true, withdraw:"T+1 · tối thiểu 200.000 ₫", lang:"vi", apiKey:"gn_live_••••••••••••" };
+function renderLSettings(){
+  $("#lSetSubsidySw").classList.toggle("on", !!LSET.subsidyOn);
+  $("#lSetSubsidyAmt").value = fmtNum(LSET.subsidyAmt);
+  $("#lSetZeroSw").classList.toggle("on", !!LSET.zeroCommission);
+  $("#lSetWithdraw").value = LSET.withdraw;
+  $("#lSetLang").value = LSET.lang;
+  $("#lSetApiKey").value = LSET.apiKey;
+}
+$("#lSetSubsidySw").onclick=()=>{ LSET.subsidyOn=!LSET.subsidyOn; renderLSettings(); };
+$("#lSetZeroSw").onclick=()=>{ LSET.zeroCommission=!LSET.zeroCommission; renderLSettings(); };
+$("#btnSaveLSettings").onclick=async()=>{
+  LSET.subsidyAmt = parseInt(($("#lSetSubsidyAmt").value||"").replace(/\D/g,""))||0;
+  LSET.withdraw = $("#lSetWithdraw").value.trim();
+  LSET.lang = $("#lSetLang").value;
+  LSET.apiKey = $("#lSetApiKey").value.trim();
+  if(GN_CONFIG.useApi && GN_CONFIG.apiBase){ try{ await GN.API.updateMerchantProfile({}); }catch(e){} }
+  toast(t("toast_lsettings"),"ok");
+};
+
+/* ---- Permissions matrix ---- */
+const PERMSTATE = {};
+PERMS.forEach(p=>{ PERMSTATE[p.key]={}; ROLES.forEach(r=>PERMSTATE[p.key][r.key]=!!p.roles[r.key]); });
+function renderPermissions(){
+  const head = `<div class="ph">${t("perm_role")}</div>` + ROLES.map(r=>`<div class="ph center">${r.label}</div>`).join("");
+  const rows = PERMS.map(p=>{
+    const cells = ROLES.map(r=>`<div class="center"><input type="checkbox" data-perm="${p.key}" data-role="${r.key}" ${PERMSTATE[p.key][r.key]?"checked":""}></div>`).join("");
+    return `<div class="role">${t(p.label)}</div>${cells}`;
+  }).join("");
+  $("#permGrid").innerHTML = head + rows;
+  $("#permGrid").querySelectorAll("input[type=checkbox]").forEach(cb=>cb.onchange=()=>{ PERMSTATE[cb.dataset.perm][cb.dataset.role]=cb.checked; });
+}
+$("#btnSavePerm").onclick=()=>{ toast(t("toast_perm"),"ok"); };
+
+/* ---- Notifications ---- */
+function notifIcon(type){ return type==="merchant"?"🏪":(type==="kyc"?"🪪":"⚠️"); }
+function renderNotifications(){
+  const unread = NOTIFS.filter(n=>!n.read).length;
+  const bb=$("#navNotifDot"); if(unread){ bb.style.display="grid"; bb.textContent=unread; } else bb.style.display="none";
+  $("#notifList").innerHTML = NOTIFS.length?NOTIFS.map(n=>`
+    <div class="list-row" data-notif="${n.id}" style="${n.read?"opacity:.55":""}">
+      <div class="lr-ic ${n.read?"":"warn"}">${notifIcon(n.type)}</div>
+      <div class="lr-meta"><b>${t(n.title)}</b><span>${n.sub} · ${n.time}</span></div>
+      <div class="lr-act"><span class="mini-act ${n.read?"no":"ok"}" data-notif-read="${n.id}">${n.read?t("notif_read"):t("notif_unread")}</span></div>
+    </div>`).join(""):`<div class="empty">${t("empty")}</div>`;
+  $("#notifList").querySelectorAll("[data-notif-read]").forEach(b=>b.onclick=e=>{e.stopPropagation();markNotif(+b.dataset.notifRead);});
+  $("#notifList").querySelectorAll("[data-notif]").forEach(r=>r.onclick=()=>{ const n=NOTIFS.find(x=>x.id===+r.dataset.notif); if(n&&n.link) switchPage(n.link); });
+}
+function markNotif(id){ const n=NOTIFS.find(x=>x.id===id); if(n) n.read=true; renderNotifications(); }
+$("#btnMarkAllRead").onclick=()=>{ NOTIFS.forEach(n=>n.read=true); renderNotifications(); toast(t("toast_notif_read"),"ok"); };
+
+/* ---- Cover preview ---- */
+function renderCover(){
+  $("#coverStats").innerHTML = `
+    <div class="cover-stat"><b>${fmtNum(COVER.views)}</b><span>${t("cover_views")}</span></div>
+    <div class="cover-stat"><b>${fmtNum(COVER.applies)}</b><span>${t("cover_applies")}</span></div>
+    <div class="cover-stat"><b>${COVER.conv}%</b><span>${t("cover_conv")}</span></div>`;
+}
+
+/* ===================== LIVE SYNC ===================== */
+async function tryLive(){
+  if(!(GN_CONFIG.useApi && GN_CONFIG.apiBase)) return;
+  try{
+    const [orders, settle, summary] = await Promise.all([
+      GN.API.adminOrders(), GN.API.adminMerchantSettlements(), GN.API.adminSettlement(),
+    ]);
+    // orders (paginated {data:[...]})
+    const oa = orders && Array.isArray(orders.data) ? orders.data : (Array.isArray(orders)?orders:[]);
+    if(oa.length){
+      ORD = oa.map(o=>({ order_no:o.order_no, user:o.contact_name||"Khách", merchant:(o.merchant&&o.merchant.name)||"—",
+        status:o.status, created_at:(o.created_at||"").replace("T"," ").slice(0,16), amount:o.amount,
+        pay:o.pay_method||"pay_wallet", items:(o.items||[]).map(i=>({name:i.name,qty:i.qty,price:i.price})) }));
+      if(!ORD.every(o=>o.amount)) ORD.forEach(o=>o.amount=(o.items||[]).reduce((s,i)=>s+(i.qty*i.price),0));
+    }
+    // settlement per merchant
+    const sa = settle && settle.merchants ? settle.merchants : (settle&&Array.isArray(settle)?settle:[]);
+    if(sa.length){
+      const period = settle.settle_date || "2026-07-29";
+      SETL = sa.map(x=>({ id:x.merchant_id, name:x.merchant_name, period, payable:x.payable, paid:0, status:"unpaid" }));
+      // overlay actual payouts (real disbursement ledger)
+      try{
+        const pouts = await GN.API.adminPayouts('?settle_date='+period);
+        const pmap = {};
+        (Array.isArray(pouts)?pouts:[]).forEach(p=>{ pmap[p.merchant_id]=p; });
+        SETL.forEach(x=>{ const p=pmap[x.id]; if(p){ x.paid=p.amount; x.status="paid"; x.payout_id=p.id; } });
+      }catch(e){ /* no payout records yet */ }
+    }
+    // summary -> dashboard KPIs
+    if(summary){
+      DASH = Object.assign({}, DASH, {
+        gmv: summary.gmv||DASH.gmv,
+        orders: (summary.order_counts? (summary.order_counts.active+summary.order_counts.delivered):DASH.orders),
+        subsidy: summary.platform_subsidy_total||DASH.subsidy,
+        commission: summary.commission_total||0,
+      });
+    }
+    // merchants list (endpoint pending on backend — falls back to demo if 404/offline)
+    try{
+      const mr = await GN.API.adminMerchants();
+      const ma = mr && Array.isArray(mr.data) ? mr.data : (Array.isArray(mr)?mr:[]);
+      if(ma.length) MERCH = ma.map(m=>({ id:m.id, name:m.name, logo:"🏪", contact:m.contact_name||"",
+        phone:m.phone||"", cat:(m.category&&(m.category.name_vi||m.category.name))||"", status:m.status||"pending",
+        kyc:m.kyc_status||"pending", joined:(m.created_at||"").slice(0,10), addr:m.address||"", bank:m.bank_account||"", license:m.business_license||"" }));
+    }catch(e){ /* keep demo merchants */ }
+    // agents list (falls back to demo AGENTS if 404/offline)
+    try{
+      const ar = await GN.API.adminAgents();
+      const aa = ar && Array.isArray(ar.data) ? ar.data : (Array.isArray(ar)?ar:[]);
+      if(aa.length){
+        AGENTS.length = 0;
+        aa.forEach(a=>AGENTS.push({
+          id:a.id, name:a.name, region:a.region||"",
+          merchants:a.merchants_count||0, share:a.share_rate||0,
+          status:(a.status==='approved'?'active':(a.status==='rejected'?'blocked':a.status)),
+          contact:a.phone||""
+        }));
+      }
+    }catch(e){ /* keep demo agents */ }
+    LIVE = true;
+    renderAll();
+  }catch(e){ /* keep demo */ }
+}
+function renderAll(){
+  renderDashboard(); renderMerchants(); renderOrders(); renderSettlement();
+  renderOverview(); renderRiders(); renderCoupons(); renderAgents(); renderLSettings(); renderPermissions(); renderNotifications(); renderCover();
+}
+
+/* ===================== TOPBAR EVENTS ===================== */
+document.querySelectorAll("#langPill button").forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+$("#themeBtn").onclick = ()=> setTheme(theme==="light"?"dark":"light");
+$("#logoutBtn").onclick = ()=>{ $("#app").style.display="none"; $("#login").classList.remove("hide"); };
+$("#bellBtn").onclick = ()=> switchPage("merchants");
+$("#globalSearch").oninput = (e)=>{ const v=e.target.value; switchPage("merchants"); $("#merchantSearch").value=v; renderMerchants(); };
+
+/* ===================== INIT ===================== */
+setTheme(theme); applyText();
+</script>
+</body>
+</html>

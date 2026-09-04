@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GIAONHANH — Cổng thanh toán (Sandbox)</title>
+<style>
+  :root{--brand:#ff6a2b;--brand-2:#ffb020;--bg:#0b0d13;--panel:#151821;--text:#f4f6fb;--dim:#9aa3b8;--ok:#2bd4a7;}
+  *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI","PingFang SC",system-ui,sans-serif;}
+  body{background:linear-gradient(160deg,#ff6a2b,#ffb020);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .card{width:min(380px,100%);background:var(--bg);color:var(--text);border-radius:22px;padding:26px 22px;box-shadow:0 30px 80px -30px rgba(0,0,0,.7);}
+  .head{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .head .lg{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:grid;place-items:center;font-size:24px;}
+  .head b{font-size:17px;}
+  .head small{display:block;color:var(--dim);font-weight:500;}
+  .amt{text-align:center;margin:10px 0 18px;}
+  .amt .n{font-size:34px;font-weight:850;}
+  .amt .l{color:var(--dim);font-size:13px;}
+  .info{background:#151821;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px 14px;font-size:13px;color:var(--dim);margin-bottom:18px;}
+  .info div{display:flex;justify-content:space-between;padding:3px 0;}
+  .info div b{color:var(--text);font-weight:600;}
+  .btn{width:100%;padding:15px;border:none;border-radius:14px;font-size:16px;font-weight:850;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--brand),var(--brand-2));}
+  .btn:disabled{opacity:.6;cursor:default;}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.2);color:var(--dim);margin-top:10px;font-weight:700;font-size:14px;}
+  .done{text-align:center;padding:14px 0;}
+  .done .ic{font-size:54px;margin-bottom:8px;}
+  .done b{font-size:20px;display:block;}
+  .done small{color:var(--ok);}
+  .log{margin-top:14px;font-size:11.5px;color:var(--dim);background:#0e1118;border-radius:10px;padding:10px;max-height:120px;overflow:auto;white-space:pre-wrap;display:none;}
+  .badge{display:inline-block;font-size:11px;background:rgba(255,255,255,.15);padding:2px 9px;border-radius:999px;}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="head">
+    <div class="lg">⚡</div>
+    <div><b>GIAONHANH</b><small>Cổng thanh toán · <span id="gw">Sandbox</span></small></div>
+  </div>
+
+  <div id="payView">
+    <div class="amt"><div class="n" id="amount">—</div><div class="l">Số tiền cần thanh toán</div></div>
+    <div class="info" id="info"></div>
+    <button class="btn" id="payBtn">🟢 Tôi đã thanh toán / 我已支付</button>
+    <button class="btn ghost" id="cancelBtn">Hủy / 取消</button>
+    <div class="log" id="log"></div>
+  </div>
+
+  <div id="doneView" style="display:none;">
+    <div class="done"><div class="ic">✅</div><b>Thanh toán thành công</b><small>IPN đã xác nhận chữ ký · Giao dịch hoàn tất</small></div>
+    <button class="btn ghost" id="closeBtn">Đóng / 关闭</button>
+  </div>
+</div>
+
+<script>
+  const q = new URLSearchParams(location.search);
+  const method = q.get('method');
+  const logEl = document.getElementById('log');
+  const infoEl = document.getElementById('info');
+
+  function log(m){ logEl.style.display='block'; logEl.textContent += m + "\n"; }
+
+  if (method === 'momo') {
+    document.getElementById('gw').textContent = 'MoMo Sandbox';
+    const amount = q.get('amount');
+    document.getElementById('amount').textContent = Number(amount).toLocaleString('vi-VN') + ' ₫';
+    infoEl.innerHTML = `
+      <div><span>Đơn hàng</span><b>${q.get('orderId')}</b></div>
+      <div><span>Phương thức</span><b>MoMo Wallet</b></div>
+      <div><span>Request</span><b>${q.get('requestId')}</b></div>
+      <div><span>Trạng thái</span><b style="color:var(--ok)">Chờ xác nhận</b></div>`;
+    document.getElementById('payBtn').onclick = async () => {
+      const btn = document.getElementById('payBtn'); btn.disabled = true; log('▶ Gửi IPN đến /api/payments/momo/ipn ...');
+      const body = new URLSearchParams();
+      ['partnerCode','orderId','requestId','amount','orderInfo','redirectUrl','ipnUrl','extraData','orderType','paymentOption','message','resultCode','transId','signature']
+        .forEach(k => { if (q.get(k) !== null) body.append(k, q.get(k)); });
+      const res = await fetch('/api/payments/momo/ipn', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body });
+      const r = await res.json();
+      log('◀ MoMo phản hồi: resultCode=' + r.resultCode + ' · ' + r.message);
+      if (r.resultCode === 0) { document.getElementById('payView').style.display='none'; document.getElementById('doneView').style.display='block'; }
+      else { btn.disabled = false; log('✗ Thanh toán thất bại.'); }
+    };
+  } else if (method === 'zalopay') {
+    document.getElementById('gw').textContent = 'ZaloPay Sandbox';
+    const data = JSON.parse(atob(q.get('data')));
+    document.getElementById('amount').textContent = Number(data.amount).toLocaleString('vi-VN') + ' ₫';
+    infoEl.innerHTML = `
+      <div><span>Đơn hàng</span><b>${data.apptransid}</b></div>
+      <div><span>Phương thức</span><b>ZaloPay</b></div>
+      <div><span>App User</span><b>${data.appuser}</b></div>
+      <div><span>Trạng thái</span><b style="color:var(--ok)">Chờ xác nhận</b></div>`;
+    document.getElementById('payBtn').onclick = async () => {
+      const btn = document.getElementById('payBtn'); btn.disabled = true; log('▶ Gửi callback đến /api/payments/zalopay/callback ...');
+      const res = await fetch('/api/payments/zalopay/callback', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ data: q.get('data'), mac: q.get('mac') }) });
+      const r = await res.json();
+      log('◀ ZaloPay phản hồi: return_code=' + r.return_code + ' · ' + r.return_message);
+      if (r.return_code === 1) { document.getElementById('payView').style.display='none'; document.getElementById('doneView').style.display='block'; }
+      else { btn.disabled = false; log('✗ Thanh toán thất bại.'); }
+    };
+  } else if (method === 'sepay' || method === 'payoo') {
+    document.getElementById('gw').textContent = (method === 'sepay' ? 'Sepay' : 'Payoo') + ' (Aggregator)';
+    const data = JSON.parse(atob(q.get('data')));
+    document.getElementById('amount').textContent = Number(data.amount).toLocaleString('vi-VN') + ' ₫';
+    infoEl.innerHTML = `
+      <div><span>Đơn hàng</span><b>${data.order_id}</b></div>
+      <div><span>Phương thức</span><b>${data.method}</b></div>
+      <div><span>Split</span><b>${data.split ? data.split.length + ' bên' : '-'}</b></div>
+      <div><span>Trạng thái</span><b style="color:var(--ok)">Chờ xác nhận</b></div>`;
+    document.getElementById('payBtn').onclick = async () => {
+      const btn = document.getElementById('payBtn'); btn.disabled = true;
+      log('▶ Gửi callback đến /api/payments/aggregator/' + method + '/callback ...');
+      const res = await fetch('/api/payments/aggregator/' + method + '/callback', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ data: q.get('data'), mac: q.get('mac') }) });
+      const r = await res.json();
+      log('◀ Aggregator phản hồi: return_code=' + r.return_code + ' · ' + r.return_message);
+      if (r.return_code === 1) { document.getElementById('payView').style.display='none'; document.getElementById('doneView').style.display='block'; }
+      else { btn.disabled = false; log('✗ Thanh toán thất bại.'); }
+    };
+  } else {
+    document.getElementById('payView').innerHTML = '<div class="done"><div class="ic">⚠️</div><b>Thiếu tham số</b><small>Liên kết không hợp lệ</small></div>';
+  }
+
+  document.getElementById('cancelBtn').onclick = () => { log('✗ Người dùng hủy giao dịch (demo).'); document.getElementById('cancelBtn').disabled = true; };
+  // SECURITY (XSS strictification): replaced the inline onclick="location.reload()"
+  // attribute with an addEventListener wiring so the page runs under a strict CSP.
+  document.getElementById('closeBtn').addEventListener('click', () => location.reload());
+</script>
+</body>
+</html>

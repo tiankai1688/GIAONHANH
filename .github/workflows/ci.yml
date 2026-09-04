@@ -1,0 +1,153 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  # Frontend <-> Backend endpoint contract + JS syntax (runs in this sandbox's Node).
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax check app/api.js
+        run: node --check app/api.js
+      - name: Verify frontend/backend endpoint contract
+        # Hard gate: exits non-zero on any real mismatch (exit 0 = PASS).
+        # Query-string appends (e.g. '/admin/orders' + q) are now correctly
+        # treated as query params, not missing '/{*}' routes, so this is a
+        # trustworthy contract check, not an informational one.
+        run: node tools/verify-contract.mjs
+      - name: CSP strictification regression guard
+        # XSS hardening guard: fails if any inline event-handler attribute
+        # (onclick="...") or unhashed inline <script> was reintroduced. The SPA
+        # relies on a hash-based meta CSP (no 'unsafe-inline'); re-running
+        # tools/strictify-csp.mjs regenerates the hashes after legitimate edits.
+        run: node tools/strictify-csp.mjs --check
+
+  # Laravel install + artisan sanity (proves the backend is buildable).
+  laravel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: pdo_mysql
+          tools: composer
+      - name: Install backend deps
+        working-directory: backend
+        run: composer install --no-dev --prefer-dist -q --no-progress
+      - name: artisan version
+        working-directory: backend
+        run: php artisan --version
+      - name: config sanity (fails if routes are broken)
+        working-directory: backend
+        run: php artisan route:list --columns=method,uri,name --compact
+
+  # PHPUnit/Pest test suite (Feature HTTP tests + existing split/signature
+  # unit tests) against an in-memory SQLite database. Requires dev dependencies
+  # (pestphp/pest, doctrine/dbal) which the --no-dev `laravel` job skips.
+  pest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: pdo_sqlite
+          tools: composer
+      - name: Install backend deps (with dev)
+        working-directory: backend
+        run: composer install --prefer-dist -q --no-progress
+      - name: Configure .env
+        working-directory: backend
+        run: |
+          cp .env.example .env
+          echo "CACHE_DRIVER=array" >> .env
+          echo "QUEUE_CONNECTION=sync" >> .env
+          echo "SESSION_DRIVER=array" >> .env
+      - name: Generate app key
+        working-directory: backend
+        run: php artisan key:generate
+      - name: Run Pest test suite
+        working-directory: backend
+        run: php artisan test
+
+  # Boots the REAL Laravel stack (MySQL) and proves every endpoint works
+  # end-to-end. This is the gate that answers "does the backend actually run?"
+  backend-smoke:
+    needs: laravel
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci_pass
+          MYSQL_DATABASE: giaonhanh
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci_pass"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      API_BASE: http://127.0.0.1:8080
+      ADMIN_PHONE: "0900000001"
+      ADMIN_PASSWORD: "SmokeAdmin#2026"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: pdo_mysql
+          tools: composer
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install backend deps
+        working-directory: backend
+        run: composer install --no-dev --prefer-dist -q --no-progress
+      - name: Configure .env
+        working-directory: backend
+        run: |
+          cp .env.example .env
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=ci_pass/' .env
+          sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
+          grep -q '^ADMIN_SEED_PASSWORD=' .env || echo 'ADMIN_SEED_PASSWORD=SmokeAdmin#2026' >> .env
+          echo "CACHE_DRIVER=array" >> .env
+          echo "QUEUE_CONNECTION=sync" >> .env
+          echo "SESSION_DRIVER=array" >> .env
+      - name: Generate app key
+        working-directory: backend
+        run: php artisan key:generate
+      - name: Migrate (retry until MySQL is ready)
+        working-directory: backend
+        run: |
+          for i in $(seq 1 10); do
+            php artisan migrate --force && break
+            echo "migrate not ready yet ($i), retrying..."; sleep 5
+          done
+      - name: Seed demo data
+        working-directory: backend
+        run: php artisan db:seed --force
+      - name: Boot server + run smoke test
+        run: |
+          (cd backend && php artisan serve --host=127.0.0.1 --port=8080 > /tmp/laravel.log 2>&1 &)
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8080/api/health >/dev/null; then echo "server up"; break; fi
+            sleep 1
+          done
+          node tools/backend-smoke.mjs
+          RC=$?
+          pkill -f "artisan serve" || true
+          exit $RC
+      - name: Surface Laravel log on failure
+        if: failure()
+        run: tail -n 80 /tmp/laravel.log || true

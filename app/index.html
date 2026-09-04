@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>GIAONHANH — 越南同城购物配送 APP</title>
+<style>
+  :root{
+    --brand:#ff6a2b; --brand-2:#ffb020; --accent:#2bd4a7;
+    --ease:cubic-bezier(0.16,1,0.3,1);
+    --font:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  }
+  html[data-theme="dark"]{
+    --bg:#0b0d13; --panel:#151821; --surface:rgba(255,255,255,0.05);
+    --surface-2:rgba(255,255,255,0.09); --border:rgba(255,255,255,0.10);
+    --border-strong:rgba(255,255,255,0.18); --text:#f4f6fb; --dim:#9aa3b8; --faint:#646d82;
+    --glass:rgba(18,21,30,0.6); --shadow:0 20px 50px -24px rgba(0,0,0,.8);
+    --map:linear-gradient(135deg,#1b2030,#10131c);
+  }
+  html[data-theme="light"]{
+    --bg:#f4f6fb; --panel:#ffffff; --surface:rgba(20,30,60,0.04);
+    --surface-2:rgba(20,30,60,0.07); --border:rgba(15,23,42,0.08);
+    --border-strong:rgba(15,23,42,0.14); --text:#131722; --dim:#5a6478; --faint:#9aa3b8;
+    --glass:rgba(255,255,255,0.7); --shadow:0 20px 44px -26px rgba(40,50,90,.35);
+    --map:linear-gradient(135deg,#eef2fb,#e3e9f6);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{height:100%;}
+  body{font-family:var(--font);background:#05060a;color:var(--text);display:flex;justify-content:center;
+    align-items:center;min-height:100vh;transition:background .4s var(--ease);}
+  body.light-body{background:#c9d2e3;}
+
+  /* ===== Device frame ===== */
+  .stage{display:flex;align-items:center;justify-content:center;padding:24px;}
+  .device{position:relative;width:min(430px,100vw);height:min(932px,100vh);background:var(--bg);
+    border-radius:44px;overflow:hidden;box-shadow:0 0 0 12px #0d0f15,0 0 0 14px #2a2f3c,0 40px 90px -30px rgba(0,0,0,.9);
+    transition:background .4s var(--ease);}
+  @media(min-width:480px){.device{box-shadow:0 0 0 12px #0d0f15,0 0 0 14px #2a2f3c,0 50px 100px -34px rgba(0,0,0,.9);}}
+  @media(max-width:479px){
+    html,body{height:100%;overflow:hidden;}
+    body{display:block;min-height:100%;}
+    .stage{padding:0;display:block;height:100%;}
+    .device{width:100vw;height:100vh;height:100dvh;border-radius:0;box-shadow:none;overflow:visible;}
+    .screen{padding-top:100px!important;padding-bottom:calc(74px + env(safe-area-inset-bottom,0px))!important;}
+  }
+
+  /* ===== Status bar ===== */
+  .statusbar{position:absolute;top:0;left:0;right:0;height:46px;z-index:50;display:flex;align-items:center;
+    justify-content:space-between;padding:0 26px;font-size:14px;font-weight:600;pointer-events:none;
+    color:var(--text);}
+  .statusbar .right{display:flex;align-items:center;gap:6px;}
+  .statusbar .bat{width:24px;height:12px;border:1.5px solid currentColor;border-radius:3px;position:relative;opacity:.9;}
+  .statusbar .bat::after{content:"";position:absolute;right:-3px;top:3px;width:2px;height:6px;background:currentColor;border-radius:0 2px 2px 0;}
+  .statusbar .bat i{position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:70%;background:currentColor;border-radius:1px;}
+
+  /* ===== Screens ===== */
+  .screens{position:absolute;inset:0;}
+  .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-top:46px;padding-bottom:74px;
+    display:none;animation:fade .35s var(--ease);}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  .device.no-tab .screen{padding-bottom:46px;}
+  .device.no-tab .tabbar{transform:translateY(120%);}
+
+  /* ===== Tab bar ===== */
+  .tabbar{position:absolute;left:0;right:0;bottom:0;height:70px;z-index:40;display:flex;
+    background:var(--glass);backdrop-filter:blur(22px) saturate(180%);border-top:1px solid var(--border);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    transition:transform .4s var(--ease),background .4s var(--ease);}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    color:var(--faint);font-size:11px;font-weight:600;cursor:pointer;transition:color .25s var(--ease);}
+  .tab .ic{font-size:21px;line-height:1;filter:grayscale(.4);transition:.25s var(--ease);}
+  .tab.active{color:var(--brand);}
+  .tab.active .ic{filter:none;transform:translateY(-1px) scale(1.06);}
+
+  /* ===== Splash ===== */
+  #screen-splash{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    background:radial-gradient(70% 60% at 50% 35%,rgba(255,106,43,.28),transparent 70%),var(--bg);}
+  .splash-logo{width:96px;height:96px;border-radius:28px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
+    display:grid;place-items:center;font-size:50px;box-shadow:0 20px 50px -16px rgba(255,106,43,.6);
+    animation:pop .7s var(--ease);}
+  @keyframes pop{0%{transform:scale(.6);opacity:0;}100%{transform:scale(1);opacity:1;}}
+  .splash-name{font-size:26px;font-weight:850;letter-spacing:-.02em;}
+  .splash-sub{color:var(--dim);font-size:14px;}
+  .splash-bar{width:140px;height:4px;border-radius:4px;background:var(--surface-2);overflow:hidden;margin-top:6px;}
+  .splash-bar i{display:block;height:100%;width:40%;background:linear-gradient(90deg,var(--brand),var(--brand-2));
+    border-radius:4px;animation:load 1.4s var(--ease) infinite;}
+  @keyframes load{0%{margin-left:-40%;}100%{margin-left:100%;}}
+
+  /* ===== Generic app UI ===== */
+  .topbar{position:fixed;top:46px;left:0;right:0;z-index:30;display:flex;align-items:center;gap:10px;padding:10px 16px;
+    background:var(--glass);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);height:54px;}
+  @media(min-width:480px){
+    .topbar{position:sticky;top:46px;left:auto;right:auto;height:auto;}
+  }
+  .topbar .back{font-size:22px;cursor:pointer;width:34px;height:34px;display:grid;place-items:center;border-radius:10px;}
+  .topbar .back:active{background:var(--surface);}
+  .topbar h1{font-size:17px;font-weight:800;}
+  .loc{display:flex;align-items:center;gap:4px;font-weight:700;font-size:15px;cursor:pointer;padding:4px 6px;border-radius:10px;transition:background .2s;}
+  .loc:active{background:var(--surface);}
+  .loc .pin{font-size:15px;}
+  /* ===== City sheet ===== */
+  .city-mask{position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:60;opacity:0;pointer-events:none;transition:opacity .3s var(--ease);}
+  .city-mask.show{opacity:1;pointer-events:auto;}
+  .city-sheet{position:absolute;left:0;right:0;bottom:0;z-index:61;background:var(--panel);border-top-left-radius:22px;border-top-right-radius:22px;
+    padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px));transform:translateY(110%);transition:transform .35s var(--ease);
+    box-shadow:0 -20px 50px -20px rgba(0,0,0,.7);max-height:72%;overflow-y:auto;}
+  .city-sheet.show{transform:translateY(0);}
+  .city-sheet h4{font-size:15px;font-weight:800;margin:4px 4px 12px;}
+  .city-auto{display:flex;align-items:center;gap:10px;padding:13px 12px;border-radius:14px;cursor:pointer;font-weight:700;font-size:15px;
+    background:linear-gradient(120deg,rgba(255,106,43,.16),rgba(255,176,32,.1));color:var(--brand);margin-bottom:8px;transition:filter .2s;}
+  .city-auto:active{filter:brightness(1.12);}
+  .city-list{display:flex;flex-direction:column;gap:2px;}
+  .city-item{display:flex;align-items:center;gap:10px;padding:13px 12px;border-radius:14px;cursor:pointer;font-weight:600;font-size:15px;transition:background .2s;}
+  .city-item:active{background:var(--surface);}
+  .city-item.cur{color:var(--brand);}
+  .city-item .ce{font-size:20px;}
+  .city-item .ck{margin-left:auto;font-size:18px;}
+
+  /* ===== Agent / recruitment sheet ===== */
+  .sheet-head{display:flex;align-items:center;justify-content:space-between;margin:4px 4px 6px;}
+  .sheet-x{font-size:18px;cursor:pointer;width:30px;height:30px;display:grid;place-items:center;border-radius:9px;color:var(--dim);}
+  .sheet-x:active{background:var(--surface);}
+  .agent-lead{font-size:13px;color:var(--dim);margin:0 6px 12px;line-height:1.5;}
+  .agent-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .agent-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:4px;}
+  .agent-card .ac-b{font-size:20px;font-weight:850;color:var(--brand);}
+  .agent-card .ac-t{font-size:13px;font-weight:700;}
+  .agent-card .ac-d{font-size:11.5px;color:var(--dim);line-height:1.4;}
+  .agent-cta{display:block;text-align:center;padding:13px;border-radius:14px;font-weight:800;color:#fff;
+    background:linear-gradient(120deg,var(--brand),var(--brand-2));cursor:pointer;}
+  .agent-cta:active{filter:brightness(1.08);}
+  /* ===== Real map (Leaflet, graceful fallback) ===== */
+  #orderMap{height:200px;border-radius:16px;overflow:hidden;border:1px solid var(--border);background:var(--map);margin:0 0 10px;}
+  #orderMap .leaflet-container{background:transparent;border-radius:16px;font:inherit;outline:none;}
+  .gm-pin{display:grid;place-items:center;width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+    font-size:15px;box-shadow:0 6px 16px -4px rgba(0,0,0,.5);border:2px solid #fff;}
+  .gm-pin span{transform:rotate(45deg);}
+  .gm-home{background:linear-gradient(135deg,#34d399,#059669);}
+  .gm-store{background:linear-gradient(135deg,var(--brand),var(--brand-2));}
+  .gm-rider{background:linear-gradient(135deg,#38bdf8,#2563eb);width:26px;height:26px;}
+  .search{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);
+    border-radius:999px;padding:9px 14px;color:var(--dim);font-size:13px;cursor:pointer;}
+  .pad{padding:16px;}
+
+  /* ===== Search modal ===== */
+  .search-mask{position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:70;opacity:0;pointer-events:none;transition:opacity .3s var(--ease);}
+  .search-mask.show{opacity:1;pointer-events:auto;}
+  .search-modal{position:absolute;left:0;right:0;top:0;z-index:71;background:var(--panel);padding:calc(12px + env(safe-area-inset-top,0px)) 16px 16px;
+    border-bottom-left-radius:22px;border-bottom-right-radius:22px;transform:translateY(-110%);transition:transform .35s var(--ease);
+    box-shadow:0 -20px 50px -20px rgba(0,0,0,.7);}
+  .search-modal.show{transform:translateY(0);}
+  .search-input{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:11px 16px;margin-bottom:10px;}
+  .search-input input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:15px;min-width:0;}
+  .search-input input::placeholder{color:var(--faint);}
+  .search-results{max-height:64vh;overflow-y:auto;}
+  .sr-item{display:flex;align-items:center;gap:12px;padding:13px 8px;border-bottom:1px solid var(--border);cursor:pointer;}
+  .sr-item:active{background:var(--surface);}
+  .sr-item .se{font-size:22px;width:30px;text-align:center;flex-shrink:0;}
+  .sr-item .sn{font-weight:600;font-size:15px;}
+  .sr-item .sm{font-size:12px;color:var(--dim);margin-top:2px;}
+  .sr-empty{padding:28px 12px;text-align:center;color:var(--dim);font-size:14px;}
+
+  .banner{border-radius:18px;padding:18px;color:#fff;margin:14px 16px 4px;
+    background:linear-gradient(120deg,var(--brand),var(--brand-2));position:relative;overflow:hidden;
+    box-shadow:0 14px 34px -16px rgba(255,106,43,.6);}
+  .banner h3{font-size:19px;font-weight:850;}
+  .banner p{font-size:12.5px;opacity:.92;margin-top:4px;}
+  .banner .pill{display:inline-block;margin-top:10px;background:rgba(255,255,255,.22);padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;}
+
+  .sec-title{display:flex;align-items:center;justify-content:space-between;padding:20px 16px 10px;}
+  .sec-title b{font-size:16px;font-weight:800;}
+  .sec-title span{font-size:12.5px;color:var(--dim);}
+
+  .quick{display:grid;grid-template-columns:repeat(5,1fr);gap:14px 6px;padding:6px 14px 4px;}
+  .quick .q{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;}
+  .quick .q .e{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;font-size:24px;
+    background:var(--surface);border:1px solid var(--border);transition:.25s var(--ease);}
+  .quick .q:active .e{transform:scale(.92);}
+  .quick .q small{font-size:11px;color:var(--dim);font-weight:600;}
+
+  .flash{display:flex;gap:12px;overflow-x:auto;padding:6px 16px 8px;scrollbar-width:none;}
+  .flash::-webkit-scrollbar{display:none;}
+  .flash .f{flex:0 0 130px;background:var(--surface);border:1px solid var(--border);border-radius:15px;padding:10px;cursor:pointer;}
+  .flash .f .ph{height:74px;border-radius:11px;display:grid;place-items:center;font-size:34px;
+    background:linear-gradient(135deg,var(--surface-2),var(--surface));}
+  .flash .f .nm{font-size:12.5px;font-weight:600;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .flash .f .pr{font-size:14px;font-weight:850;color:var(--brand);margin-top:3px;}
+  .flash .f .pr s{font-size:11px;color:var(--faint);font-weight:500;margin-left:4px;}
+  .flash .f .bar{height:5px;border-radius:5px;background:var(--surface-2);margin-top:7px;overflow:hidden;}
+  .flash .f .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--brand-2));border-radius:5px;}
+
+  .store{display:flex;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;}
+  .store:active{background:var(--surface);}
+  .store .logo{width:56px;height:56px;border-radius:14px;display:grid;place-items:center;font-size:30px;flex-shrink:0;
+    background:var(--surface-2);border:1px solid var(--border);}
+  .store .info{flex:1;min-width:0;}
+  .store .info .nm{font-weight:800;font-size:15.5px;}
+  .store .info .meta{font-size:12px;color:var(--dim);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;}
+  .store .info .meta .star{color:var(--brand-2);font-weight:700;}
+  .store .info .tags{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;}
+  .store .info .tg{font-size:11px;color:var(--dim);background:var(--surface);border:1px solid var(--border);padding:2px 8px;border-radius:999px;}
+
+  /* ===== Category ===== */
+  .cat-wrap{display:flex;height:calc(100% - 46px);}
+  .cat-left{width:96px;flex-shrink:0;background:var(--surface);overflow-y:auto;border-right:1px solid var(--border);scrollbar-width:none;}
+  .cat-left::-webkit-scrollbar{display:none;}
+  .cat-left .c{position:sticky;padding:15px 8px;text-align:center;font-size:12.5px;color:var(--dim);cursor:pointer;border-left:3px solid transparent;font-weight:600;}
+  .cat-left .c.active{background:var(--bg);color:var(--text);border-left-color:var(--brand);font-weight:800;}
+  .cat-right{flex:1;overflow-y:auto;padding:14px;}
+  .cat-right .blk{margin-bottom:18px;}
+  .cat-right .blk .bh{font-size:13.5px;font-weight:800;margin-bottom:10px;color:var(--brand);}
+  .cat-right .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 8px;}
+  .cat-right .gi{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;}
+  .cat-right .gi .ge{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;font-size:26px;background:var(--surface);border:1px solid var(--border);}
+  .cat-right .gi small{font-size:11px;color:var(--dim);text-align:center;}
+
+  /* ===== Store detail ===== */
+  .st-hero{padding:18px 16px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;position:relative;}
+  .st-hero .nm{font-size:21px;font-weight:850;}
+  .st-hero .m{font-size:13px;opacity:.95;margin-top:6px;display:flex;gap:12px;flex-wrap:wrap;}
+  .st-hero .coupon{display:inline-block;margin-top:12px;background:rgba(255,255,255,.22);padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;}
+  .prod{display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);}
+  .prod .pe{width:62px;height:62px;border-radius:13px;display:grid;place-items:center;font-size:32px;flex-shrink:0;background:var(--surface-2);border:1px solid var(--border);}
+  .prod .pi{flex:1;}
+  .prod .pi .pn{font-size:14.5px;font-weight:700;}
+  .prod .pi .pd{font-size:12px;color:var(--dim);margin-top:2px;}
+  .prod .pi .pp{font-size:15px;font-weight:850;color:var(--brand);margin-top:6px;}
+  .stepper{display:flex;align-items:center;gap:10px;}
+  .stepper button{width:28px;height:28px;border-radius:50%;border:none;font-size:18px;font-weight:800;cursor:pointer;display:grid;place-items:center;}
+  .stepper .minus{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
+  .stepper .plus{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;}
+  .stepper .qty{font-weight:800;min-width:18px;text-align:center;}
+
+  /* cart bar */
+  .cartbar{position:absolute;left:0;right:0;bottom:0;z-index:35;height:62px;display:flex;align-items:center;gap:12px;
+    padding:0 16px;background:var(--glass);backdrop-filter:blur(20px);border-top:1px solid var(--border);}
+  .device.no-tab .cartbar{display:none;}
+  .cartbar .icon{position:relative;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand-2));
+    display:grid;place-items:center;font-size:24px;box-shadow:0 10px 24px -8px rgba(255,106,43,.6);}
+  .cartbar .icon .badge{position:absolute;top:-4px;right:-4px;background:#ff3b5c;color:#fff;font-size:11px;font-weight:800;
+    min-width:20px;height:20px;border-radius:10px;display:grid;place-items:center;padding:0 5px;border:2px solid var(--bg);}
+  .cartbar .total{flex:1;}
+  .cartbar .total .t{font-size:17px;font-weight:850;}
+  .cartbar .total .s{font-size:11px;color:var(--dim);}
+  .cartbar .go{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;font-weight:800;padding:12px 22px;border-radius:14px;font-size:14px;}
+
+  /* ===== Cart screen ===== */
+  .cgroup{margin-bottom:16px;}
+  .cgroup .gh{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);}
+  .cgroup .gh .gl{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:18px;background:var(--surface-2);}
+  .cgroup .gh b{font-size:14.5px;font-weight:800;}
+  .row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);}
+  .row .re{width:50px;height:50px;border-radius:12px;display:grid;place-items:center;font-size:26px;background:var(--surface-2);}
+  .row .ri{flex:1;}
+  .row .ri .rn{font-size:14px;font-weight:700;}
+  .row .ri .rp{font-size:14px;font-weight:850;color:var(--brand);margin-top:2px;}
+  .addr{display:flex;gap:12px;align-items:center;padding:16px;background:var(--surface);margin:14px 16px;border-radius:16px;border:1px solid var(--border);}
+  .addr .ai{font-size:22px;}
+  .addr .at{flex:1;}
+  .addr .at .al{font-size:12px;color:var(--dim);}
+  .addr .at .av{font-weight:800;font-size:15px;}
+  .addr .ar{color:var(--brand);font-size:20px;}
+  .opt{display:flex;gap:10px;padding:0 16px 12px;}
+  .opt .o{flex:1;text-align:center;padding:11px;border-radius:12px;border:1px solid var(--border);font-size:13px;font-weight:700;color:var(--dim);cursor:pointer;}
+  .opt .o.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .summ{padding:16px;}
+  .summ .line{display:flex;justify-content:space-between;font-size:14px;margin-bottom:9px;color:var(--dim);}
+  .summ .line b{color:var(--text);}
+  .summ .line.tot{font-size:17px;font-weight:850;color:var(--text);border-top:1px solid var(--border);padding-top:12px;margin-top:4px;}
+  .summ .line.tot b{color:var(--brand);}
+  .coupon-row{display:flex;gap:8px;padding:0 16px 4px;}
+  .coupon-input{flex:1;padding:11px 12px;border-radius:12px;border:1px solid var(--border);font-size:13px;background:var(--card);color:var(--text);}
+  .coupon-btn{padding:11px 16px;border-radius:12px;border:none;background:var(--brand);color:#fff;font-weight:800;font-size:13px;cursor:pointer;}
+  .coupon-msg{font-size:12px;padding:2px 16px 6px;color:var(--dim);min-height:14px;}
+  .coupon-msg.ok{color:#047857;}
+  .coupon-msg.bad{color:#DC2626;}
+
+  /* ===== Order tracking ===== */
+  .track-status{padding:20px 16px 6px;text-align:center;}
+  .track-status .eta{font-size:14px;color:var(--dim);}
+  .track-status .eta b{color:var(--brand);font-size:22px;}
+  .track-status .st{font-size:18px;font-weight:850;margin-top:4px;}
+  .map{position:relative;height:230px;margin:14px 16px;border-radius:18px;overflow:hidden;border:1px solid var(--border);
+    background:var(--map);}
+  .map .grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:28px 28px;}
+  .map svg{position:absolute;inset:0;width:100%;height:100%;}
+  .map .rider{position:absolute;width:34px;height:34px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:18px;
+    box-shadow:0 6px 16px -4px rgba(0,0,0,.5);left:8%;top:80%;transition:left 2.4s linear,top 2.4s linear;z-index:3;border:2px solid var(--brand);}
+  .map .store-p{position:absolute;left:6%;top:82%;font-size:22px;}
+  .map .home-p{position:absolute;right:6%;top:12%;font-size:22px;}
+  .steps{padding:6px 16px 16px;}
+  .step{display:flex;gap:13px;padding:11px 0;position:relative;}
+  .step:not(:last-child)::before{content:"";position:absolute;left:11px;top:26px;bottom:-11px;width:2px;background:var(--border);}
+  .step .dot{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-size:12px;
+    background:var(--surface-2);border:2px solid var(--border);color:var(--dim);z-index:1;transition:.3s var(--ease);}
+  .step.done .dot{background:var(--brand);border-color:var(--brand);color:#fff;}
+  .step .tx b{font-size:14px;font-weight:700;display:block;}
+  .step .tx span{font-size:12px;color:var(--dim);}
+  .step.done .tx b{color:var(--text);}
+
+  /* ===== Profile ===== */
+  .pf-head{padding:30px 18px 18px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;display:flex;gap:14px;align-items:center;}
+  .pf-head .av{width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.25);display:grid;place-items:center;font-size:32px;}
+  .pf-head .pn{font-size:19px;font-weight:850;}
+  .pf-head .ps{font-size:12.5px;opacity:.92;margin-top:3px;}
+  .pf-wallet{display:flex;margin:16px;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+  .pf-wallet .w{flex:1;text-align:center;padding:16px 8px;}
+  .pf-wallet .w .wn{font-size:18px;font-weight:850;}
+  .pf-wallet .w .wl{font-size:12px;color:var(--dim);margin-top:3px;}
+  .pf-wallet .w:not(:last-child){border-right:1px solid var(--border);}
+  .menu{margin:0 16px 16px;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+  .menu .mi{display:flex;align-items:center;gap:13px;padding:15px 16px;border-bottom:1px solid var(--border);cursor:pointer;}
+  .menu .mi:last-child{border-bottom:none;}
+  .menu .mi .mi-ic{font-size:20px;width:26px;text-align:center;}
+  .menu .mi .mi-t{flex:1;font-size:14.5px;font-weight:600;}
+  .menu .mi .mi-a{color:var(--faint);font-size:18px;}
+
+  .empty{text-align:center;color:var(--dim);padding:60px 20px;font-size:14px;}
+  .empty .e{font-size:46px;margin-bottom:10px;}
+  .btn-block{display:block;width:calc(100% - 32px);margin:6px 16px;padding:14px;border-radius:14px;border:none;
+    background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;font-weight:800;font-size:15px;cursor:pointer;}
+  .btn-block:active{transform:scale(.98);}
+</style>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-2C8Q/k5L1Rsfl0gbC95vNE4JtO//Q29SFvSa6Qrix54=' 'sha256-iJwiVq2nq8VBb++dr4eJPTUYKpIYhGvNMCX8q6eQyjM=' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https: wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'" />
+</head>
+<body>
+<script>
+  /* Integration config resolver.
+     Priority: URL ?api= & ?live / ?demo  >  localStorage  >  empty (offline demo).
+     The consumer app stays a pure offline demo until a backend base is supplied. */
+  window.GN_CONFIG = (function(){
+    const q = new URLSearchParams(location.search);
+    const storedBase = (localStorage.getItem('gn_api_base') || '').trim();
+    const storedUse  = localStorage.getItem('gn_use_api'); // '1' | '0' | null
+    let apiBase = (q.get('api') || '').trim() || storedBase;
+    let useApi;
+    if(q.has('live')) useApi = true;
+    else if(q.has('demo')) useApi = false;
+    else if(storedUse === '1') useApi = true;
+    else if(storedUse === '0') useApi = false;
+    else useApi = !!apiBase; // default: live only when a base is configured
+    apiBase = apiBase.replace(/\/+$/, ''); // strip trailing slashes
+    // Pusher real-time keys (shared with rider/merchant apps via localStorage)
+    const pusherKey = (q.get('pusher') || localStorage.getItem('gn_pusher_key') || '').trim();
+    const pusherCluster = (q.get('pusherCluster') || localStorage.getItem('gn_pusher_cluster') || 'ap1').trim();
+    return {
+      apiBase: apiBase,
+      useApi: useApi,
+      pusherKey: pusherKey,
+      pusherCluster: pusherCluster,
+      payReturnUrl: "giaonhanh://pay/return",
+      momoPartnerCode: "", momoAccessKey: "", momoSecretKey: "",
+      zaloAppId: "", zaloKey1: ""
+    };
+  })();
+</script>
+<div class="stage">
+  <div class="device" id="device">
+    <div class="statusbar">
+      <span id="clock">19:58</span>
+      <span class="right"><span>📶</span><span>🛜</span><span class="bat"><i></i></span></span>
+    </div>
+    <div class="screens" id="screens">
+
+      <!-- SPLASH -->
+      <section class="screen active" id="screen-splash">
+        <div class="splash-logo">⚡</div>
+        <div class="splash-name">GIAONHANH</div>
+        <div class="splash-sub" data-a="splash_sub">越南全域小时达</div>
+        <div class="splash-bar"><i></i></div>
+      </section>
+
+      <!-- HOME -->
+      <section class="screen" id="screen-home">
+        <div class="topbar">
+          <div class="loc"><span class="pin">📍</span><span data-a="loc">Hà Nội</span> ▾</div>
+          <div class="search" data-search="home">🔍 <span data-a="search_ph">搜索商家、商品、服务</span></div>
+        </div>
+        <div class="banner">
+          <h3 data-a="banner_t">30–60分钟极速达</h3>
+          <p data-a="banner_p">0佣金 · 0配送费补贴 · 全城商家火热招商中</p>
+          <span class="pill" data-a="banner_pill">🔥 新用户立减 50.000₫</span>
+        </div>
+        <div class="quick" id="quickGrid"></div>
+        <div class="sec-title"><b data-a="flash_t">⚡ 限时秒杀</b><span data-a="flash_s">整点开抢</span></div>
+        <div class="flash" id="flashRow"></div>
+        <div class="sec-title"><b data-a="near_t">🏪 附近商家</b><span data-a="near_s">为你优选</span></div>
+        <div id="storeList"></div>
+        <div style="height:10px"></div>
+      </section>
+
+      <!-- CATEGORY -->
+      <section class="screen" id="screen-category">
+        <div class="topbar"><h1 data-a="cat_t">全部分类</h1></div>
+        <div class="cat-wrap">
+          <div class="cat-left" id="catLeft"></div>
+          <div class="cat-right" id="catRight"></div>
+        </div>
+      </section>
+
+      <!-- STORE -->
+      <section class="screen" id="screen-store">
+        <div class="topbar"><div class="back" data-back="1">‹</div><div class="search" data-search="store">🔍 <span data-a="search_ph">搜索本店商品</span></div></div>
+        <div id="storeDetail"></div>
+        <div style="height:70px"></div>
+        <div class="cartbar" id="storeCartBar" style="display:none;">
+          <div class="icon" id="storeCartIcon">🛒<span class="badge" id="storeBadge">0</span></div>
+          <div class="total"><div class="t" id="storeTotal">0 ₫</div><div class="s" data-a="cart_s">满 0₫ 免配送费</div></div>
+          <div class="go" data-a="cart_go" data-open-cart="1">去购物车</div>
+        </div>
+      </section>
+
+      <!-- CART -->
+      <section class="screen" id="screen-cart">
+        <div class="topbar"><div class="back" data-back="1">‹</div><h1 data-a="cart_t">购物车</h1></div>
+        <div id="cartBody"></div>
+        <div style="height:10px"></div>
+      </section>
+
+      <!-- ORDER -->
+      <section class="screen" id="screen-order">
+        <div class="topbar"><div class="back" data-back="1">‹</div><h1 data-a="order_t">订单详情</h1></div>
+        <div id="orderBody"></div>
+        <div style="height:20px"></div>
+      </section>
+
+      <!-- PROFILE -->
+      <section class="screen" id="screen-profile">
+        <div class="topbar"><h1 data-a="pf_t">我的</h1></div>
+        <div class="pf-head">
+          <div class="av">😎</div>
+          <div><div class="pn" data-a="pf_name"> Nguyen Van A</div><div class="ps" data-a="pf_sub">越南全域小时达 · 会员</div></div>
+        </div>
+        <div class="pf-wallet">
+          <div class="w"><div class="wn">0 ₫</div><div class="wl" data-a="pf_w1">钱包余额</div></div>
+          <div class="w"><div class="wn">3</div><div class="wl" data-a="pf_w2">优惠券</div></div>
+          <div class="w"><div class="wn">1280</div><div class="wl" data-a="pf_w3">积分</div></div>
+        </div>
+        <div class="menu" id="pfMenu"></div>
+      </section>
+
+    </div>
+
+    <!-- TAB BAR -->
+    <div class="tabbar" id="tabbar">
+      <div class="tab active" data-tab="home"><div class="ic">🏠</div><div data-a="tab_home">首页</div></div>
+      <div class="tab" data-tab="category"><div class="ic">🍱</div><div data-a="tab_cat">分类</div></div>
+      <div class="tab" data-tab="order"><div class="ic">🧾</div><div data-a="tab_order">订单</div></div>
+      <div class="tab" data-tab="profile"><div class="ic">👤</div><div data-a="tab_pf">我的</div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ===================== I18N ===================== */
+const APP = {
+  vi:{
+    splash_sub:"Giao Nhanh Toàn Việt",
+    loc:"Hà Nội", city_title:"Chọn thành phố", city_auto:"Định vị tự động", search_ph:"Tìm nhà bán, món, dịch vụ", search_ph_store:"Tìm món trong cửa hàng này", search_empty:"Không tìm thấy kết quả",
+    banner_t:"Giao 30–60 phút", banner_p:"0% hoa hồng · Trợ phí ship · Tuyển toàn thành phố",
+    banner_pill:"🔥 User mới giảm 50.000₫",
+    flash_t:"⚡ Flash Sale", flash_s:"Đúng giờ mở bán",
+    near_t:"🏪 Nhà bán gần", near_s:"Chọn riêng cho bạn",
+    cat_t:"Tất cả ngành hàng",
+    cart_s:"Freeship đơn từ 0₫", cart_go:"Đến giỏ",
+    cart_t:"Giỏ hàng",
+    order_t:"Chi tiết đơn",
+    pf_t:"Của tôi", pf_name:"Nguyen Van A", pf_sub:"Giao Nhanh Toàn Việt · Thành viên",
+    pf_w1:"Số dư ví", pf_w2:"Mã giảm", pf_w3:"Điểm",
+    tab_home:"Trang chủ", tab_cat:"Danh mục", tab_order:"Đơn", tab_pf:"Tôi",
+    cart_empty:"Giỏ hàng trống", cart_empty_s:"Hãy chọn món yêu thích nhé",
+    deli_now:"Giao ngay", deli_book:"Đặt trước",
+    subtotal:"Tiền hàng", ship:"Phí ship", discount:"Giảm giá", total:"Tổng cộng",
+    coupon_ph:"Nhập mã giảm giá", coupon_apply:"Áp dụng", coupon_invalid:"Mã không hợp lệ", coupon_applied:"Đã áp dụng mã",
+    place_order:"Đặt hàng",
+    addr_label:"Giao đến", addr_add:"Thêm địa chỉ",
+    track_eta:"Dự kiến còn", track_done:"Đã giao thành công",
+    back_home:"Về trang chủ",
+    empty_order:"Chưa có đơn hàng",
+    agent_entry:"🤝 Trở thành đại lý", agent_desc:"Độc quyền khu vực · Chia sẻ vĩnh viễn",
+    coupon_entry:"Mã giảm giá", wallet_entry:"Ví của tôi",
+    order_entry:"Đơn hàng của tôi", addr_entry:"Địa chỉ",
+    set_entry:"Cài đặt", lang_entry:"Ngôn ngữ", theme_entry:"Giao diện",
+    menu_agent:"Trở thành đại lý khu vực",
+    set_api_t:"Cấu hình backend", set_api_d:"Để trống là bản demo offline. Nhập địa chỉ Laravel (vd: https://api.giaonhanh.vn) và chuyển sang «Trực tuyến» để lấy dữ liệu thật.",
+    set_demo:"Demo", set_live:"Trực tuyến", set_save:"Lưu & áp dụng", set_warn:"Chế độ «Trực tuyến» cần địa chỉ backend.",
+    set_rt:"⚡ Realtime (Pusher)", set_pkey:"Pusher App Key", set_pcluster:"Cluster", set_echo:"App Shipper/Merchant cần Pusher Key để reo chuông realtime; không nhập thì lấy theo polling.",
+    mode_label:"Dữ liệu",
+    store_coupon:"🎁 Giảm 20% đơn đầu",
+    q_labels:["Đồ ăn","Siêu thị","Rau củ","Thuốc","Hoa","Trà sữa","3C","Mua hộ","Phở","Sale"],
+  },
+  zh:{
+    splash_sub:"越南全域小时达",
+    loc:"河内", city_title:"选择城市", city_auto:"自动定位", search_ph:"搜索商家、商品、服务", search_ph_store:"搜索本店商品", search_empty:"没有找到相关结果",
+    banner_t:"30–60分钟极速达", banner_p:"0佣金 · 0配送费补贴 · 全城商家火热招商中",
+    banner_pill:"🔥 新用户立减 50.000₫",
+    flash_t:"⚡ 限时秒杀", flash_s:"整点开抢",
+    near_t:"🏪 附近商家", near_s:"为你优选",
+    cat_t:"全部分类",
+    cart_s:"满 0₫ 免配送费", cart_go:"去购物车",
+    cart_t:"购物车",
+    order_t:"订单详情",
+    pf_t:"我的", pf_name:" Nguyen Van A", pf_sub:"越南全域小时达 · 会员",
+    pf_w1:"钱包余额", pf_w2:"优惠券", pf_w3:"积分",
+    tab_home:"首页", tab_cat:"分类", tab_order:"订单", tab_pf:"我的",
+    cart_empty:"购物车是空的", cart_empty_s:"快去挑选喜欢的商品吧",
+    deli_now:"立即送", deli_book:"预约送",
+    subtotal:"商品小计", ship:"配送费", discount:"优惠减免", total:"合计",
+    coupon_ph:"输入优惠码", coupon_apply:"使用", coupon_invalid:"优惠码无效", coupon_applied:"已使用优惠码",
+    place_order:"提交订单",
+    addr_label:"配送至", addr_add:"添加地址",
+    track_eta:"预计还剩", track_done:"已送达，请取餐",
+    back_home:"返回首页",
+    empty_order:"暂无订单",
+    agent_entry:"🤝 成为代理商", agent_desc:"区域独家 · 永久分成",
+    coupon_entry:"优惠券", wallet_entry:"我的钱包",
+    order_entry:"我的订单", addr_entry:"地址管理",
+    set_entry:"设置", lang_entry:"语言", theme_entry:"主题",
+    menu_agent:"成为区域代理商",
+    set_api_t:"后端地址", set_api_d:"留空为离线演示；填写 Laravel 后端地址（如 https://api.giaonhanh.vn）并切换到「在线」即连真实数据。",
+    set_demo:"演示", set_live:"在线", set_save:"保存并应用", set_warn:"「在线」模式需要先填写后端地址。",
+    set_rt:"⚡ 实时广播（Pusher）", set_pkey:"Pusher App Key", set_pcluster:"Cluster", set_echo:"骑手/商家端需填 Pusher Key 才能实时响铃；不填则按轮询拉取。",
+    mode_label:"数据模式",
+    store_coupon:"🎁 首单立减20%",
+    q_labels:["美食外卖","超市便利","生鲜果蔬","医药健康","鲜花绿植","甜品饮品","3C数码","跑腿代购","米粉面食","限时秒杀"],
+  }
+};
+
+/* ===================== DATA ===================== */
+const QUICK = [
+  {e:"🍔",k:0},{e:"🏪",k:1},{e:"🥬",k:2},{e:"💊",k:3},{e:"🌸",k:4},
+  {e:"🧋",k:5},{e:"📱",k:6},{e:"🛍️",k:7},{e:"🍜",k:8},{e:"🎁",k:9}
+];
+
+let FLASH = [
+  {e:"🍔",nm:{vi:"Burger Combo",zh:"汉堡套餐"},pr:45000,old:69000,sold:72},
+  {e:"🥤",nm:{vi:"Trà sữa",zh:"奶茶"},pr:32000,old:45000,sold:65},
+  {e:"🍗",nm:{vi:"Gà rán",zh:"炸鸡"},pr:55000,old:79000,sold:81},
+  {e:"🍓",nm:{vi:"Dâu tươi",zh:"鲜草莓"},pr:39000,old:55000,sold:58},
+];
+
+let STORES = [
+  {id:"s1",e:"🏪",nm:{vi:"Siêu thị Mini Hà Nội",zh:"河内迷你超市"},cat:"超市便利",rate:"4.8",time:"28分钟",fee:"0₫",
+   prods:[
+     {id:"p1",e:"🍜",nm:{vi:"Mì ăn liền",zh:"方便面"},pr:15000},
+     {id:"p2",e:"💧",nm:{vi:"Nước khoáng",zh:"矿泉水"},pr:8000},
+     {id:"p3",e:"🥛",nm:{vi:"Sữa tươi",zh:"纯牛奶"},pr:28000},
+     {id:"p4",e:"🥔",nm:{vi:"Khoai tây chiên",zh:"薯片"},pr:22000},
+     {id:"p5",e:"🍺",nm:{vi:"Bia",zh:"啤酒"},pr:30000},
+   ]},
+  {id:"s2",e:"🍔",nm:{vi:"Burger Sài Gòn",zh:"西贡汉堡"},cat:"美食外卖",rate:"4.7",time:"32分钟",fee:"12.000₫",
+   prods:[
+     {id:"p1",e:"🍔",nm:{vi:"Burger bò",zh:"牛肉汉堡"},pr:45000},
+     {id:"p2",e:"🍟",nm:{vi:"Khoai tây chiên",zh:"薯条"},pr:18000},
+     {id:"p3",e:"🥤",nm:{vi:"Coca",zh:"可乐"},pr:12000},
+     {id:"p4",e:"🍗",nm:{vi:"Gà rán",zh:"炸鸡"},pr:55000},
+   ]},
+  {id:"s3",e:"🥬",nm:{vi:"Rau sạch Organic",zh:"有机生鲜"},cat:"生鲜果蔬",rate:"4.9",time:"25分钟",fee:"0₫",
+   prods:[
+     {id:"p1",e:"🍅",nm:{vi:"Cà chua",zh:"番茄"},pr:12000},
+     {id:"p2",e:"🍎",nm:{vi:"Táo",zh:"苹果"},pr:35000},
+     {id:"p3",e:"🥚",nm:{vi:"Trứng",zh:"鸡蛋"},pr:30000},
+     {id:"p4",e:"🥩",nm:{vi:"Thịt bò",zh:"牛肉"},pr:120000},
+   ]},
+  {id:"s4",e:"🧋",nm:{vi:"Trà sữa Tiên",zh:"甜心奶茶"},cat:"甜品饮品",rate:"4.8",time:"30分钟",fee:"10.000₫",
+   prods:[
+     {id:"p1",e:"🧋",nm:{vi:"Trà sữa",zh:"奶茶"},pr:35000},
+     {id:"p2",e:"🍹",nm:{vi:"Trà trái cây",zh:"果茶"},pr:32000},
+     {id:"p3",e:"🍮",nm:{vi:"Pudding",zh:"布丁"},pr:20000},
+   ]},
+  {id:"s5",e:"💊",nm:{vi:"Nhà thuốc An Khang",zh:"安康大药房"},cat:"医药健康",rate:"4.9",time:"35分钟",fee:"0₫",
+   prods:[
+     {id:"p1",e:"💊",nm:{vi:"Thuốc cảm",zh:"感冒药"},pr:25000},
+     {id:"p2",e:"🟠",nm:{vi:"Vitamin C",zh:"维C"},pr:40000},
+     {id:"p3",e:"😷",nm:{vi:"Khẩu trang",zh:"口罩"},pr:15000},
+   ]},
+];
+
+let CATS = [
+  {e:"🥬",nm:{vi:"Siêu thị tươi sống",zh:"生鲜商超"},subs:[["Rau củ quả","蔬菜水果"],["Thịt & hải sản","肉禽水产"],["Trứng sữa & gạo dầu","蛋奶粮油"],["Ăn vặt","休闲零食"],["Đồ uống & rượu","酒水饮料"],["Sữa bột trẻ em","母婴奶粉"]]},
+  {e:"💄",nm:{vi:"Mỹ phẩm & cá nhân",zh:"美妆个护"},subs:[["Chăm sóc da mặt","面部护理"],["Chăm sóc cơ thể","身体护理"],["Chăm sóc tóc","美发护发"],["Răng miệng","口腔护理"]]},
+  {e:"📱",nm:{vi:"3C & Điện gia dụng",zh:"3C数码&家电"},subs:[["Phụ kiện điện thoại","手机配件"],["Máy tính & văn phòng","电脑办公"],["Điện gia dụng lớn","大家电"],["Điện nhỏ","小家电"]]},
+  {e:"🏠",nm:{vi:"Gia dụng & hàng ngày",zh:"家居日用"},subs:[["Đồ dùng giường","床上用品"],["Đồ dùng bếp","厨房用品"],["Vệ sinh giặt giũ","清洁洗护"],["Trang trí nhà","家居装饰"]]},
+  {e:"👗",nm:{vi:"Thời trang",zh:"时尚服饰"},subs:[["Thời trang nữ","女装"],["Thời trang nam","男装"],["Thời trang trẻ em","童装"],["Giày & phụ kiện","鞋包配饰"]]},
+  {e:"🍼",nm:{vi:"Mẹ & Bé",zh:"母婴用品"},subs:[["Chăm sóc em bé","婴儿洗护"],["Tã & khăn ướt","纸尿裤湿巾"],["Xe đẩy & giường","推车床品"],["Đồ chơi","玩具"]]},
+  {e:"⚽",nm:{vi:"Thể thao & Ô tô",zh:"运动户外汽车"},subs:[["Thiết bị thể thao","运动装备"],["Đồ ngoài trời","户外用品"],["Phụ kiện ô tô","汽车用品"]]},
+  {e:"🐾",nm:{vi:"Thú cưng",zh:"宠物用品"},subs:[["Thức ăn thú cưng","主粮零食"],["Chuồng & đồ dùng","日用窝具"]]},
+  {e:"🎉",nm:{vi:"Giải trí",zh:"休闲娱乐"},subs:[["Karaoke","KTV"],["Massage & Spa","按摩SPA"],["Khách sạn","酒店住宿"],["Du lịch","旅游出行"],["Rạp phim tư nhân","私人影院"]]},
+  {e:"🍜",nm:{vi:"Đồ ăn & Giao hàng",zh:"餐饮外卖"},subs:[["Tráng miệng & nước","甜品饮品"],["Cơm & ăn nhanh","盖饭简餐"],["Đồ ăn nhanh Tây","西式快餐"],["Nướng & xiên","烧烤炸串"],["Phở & mì","米粉面食"]]},
+  {e:"🚕",nm:{vi:"Dịch vụ di chuyển",zh:"出行服务"},subs:[["Gọi xe công nghệ","网约车打车"],["Lái xe hộ","专业代驾"]]},
+];
+
+/* ===================== STATE ===================== */
+let lang = localStorage.getItem("gn_app_lang") || "vi";
+let theme = localStorage.getItem("gn_app_theme") || "dark";
+let cart = []; // {storeId, id, e, nm:{vi,zh}, pr, qty}
+let deliMode = "now";
+let cartCoupon = {}; // storeId -> { code, discount } for valid merchant coupons
+let couponInputVal = "";
+let trackTimer = null;
+
+/* ===================== CITY ===================== */
+const CITIES=[
+  {vi:"Hà Nội",zh:"河内",e:"🏛️",lat:21.0285,lng:105.8542},
+  {vi:"Hồ Chí Minh",zh:"胡志明",e:"🌆",lat:10.8231,lng:106.6297},
+  {vi:"Đà Nẵng",zh:"岘港",e:"🌊",lat:16.0544,lng:108.2022},
+  {vi:"Hải Phòng",zh:"海防",e:"⚓",lat:20.8449,lng:106.6881},
+  {vi:"Cần Thơ",zh:"芹苴",e:"🌾",lat:10.0452,lng:105.7469},
+];
+let citySheetEl=null, cityMaskEl=null;
+function mountCitySheet(){
+  if(citySheetEl) return;
+  cityMaskEl=document.createElement("div"); cityMaskEl.className="city-mask";
+  citySheetEl=document.createElement("div"); citySheetEl.className="city-sheet";
+  cityMaskEl.onclick=closeCitySheet;
+  $("#device").appendChild(cityMaskEl); $("#device").appendChild(citySheetEl);
+}
+function renderCitySheet(){
+  const cur=localStorage.getItem("gn_city");
+  let h=`<h4>📍 ${APP[lang].city_title||"选择城市"}</h4>`;
+  h+=`<div class="city-auto" data-auto="1">🛰️ ${APP[lang].city_auto||"自动定位"}</div>`;
+  h+=`<div class="city-list">`;
+  CITIES.forEach(c=>{
+    const sel=c.vi===cur;
+    h+=`<div class="city-item ${sel?'cur':''}" data-city="${c.vi}"><span class="ce">${c.e}</span><span>${c[lang]}</span>${sel?'<span class="ck">✓</span>':''}</div>`;
+  });
+  h+=`</div>`;
+  citySheetEl.innerHTML=h;
+  citySheetEl.querySelector("[data-auto]").onclick=autoLocate;
+  citySheetEl.querySelectorAll(".city-item").forEach(el=>el.onclick=()=>selectCity(el.dataset.city));
+}
+function openCitySheet(){ mountCitySheet(); renderCitySheet(); requestAnimationFrame(()=>{cityMaskEl.classList.add("show");citySheetEl.classList.add("show");}); }
+function closeCitySheet(){ if(citySheetEl){citySheetEl.classList.remove("show");cityMaskEl.classList.remove("show");} }
+function selectCity(vi){
+  const c=CITIES.find(x=>x.vi===vi); if(!c) return;
+  APP[lang].loc=c[lang]; localStorage.setItem("gn_city",c.vi); applyText();
+  closeCitySheet();
+  if(window.GN&&GN.toast) GN.toast((lang==="zh"?"已切换到 ":"Đã chọn ")+c[lang],"success");
+}
+function autoLocate(silent){
+  if(!navigator.geolocation){ if(!silent && window.GN&&GN.toast) GN.toast(lang==="zh"?"当前环境不支持定位":"Không hỗ trợ định vị","error"); return; }
+  if(!silent && window.GN&&GN.toast) GN.toast(lang==="zh"?"正在定位…":"Đang định vị…","info");
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const la=pos.coords.latitude, lo=pos.coords.longitude;
+    let best=CITIES[0],bd=1e9;
+    CITIES.forEach(c=>{const d=(c.lat-la)**2+(c.lng-lo)**2; if(d<bd){bd=d;best=c;}});
+    selectCity(best.vi);
+    if(!silent && window.GN&&GN.toast) GN.toast((lang==="zh"?"已定位到 ":"Đã định vị ")+best[lang],"success");
+  },()=>{
+    if(!silent && window.GN&&GN.toast) GN.toast(lang==="zh"?"定位失败，请手动选择":"Định vị thất bại","error");
+  },{enableHighAccuracy:false,timeout:8000,maximumAge:60000});
+}
+function restoreCity(){
+  const v=localStorage.getItem("gn_city");
+  if(v){const c=CITIES.find(x=>x.vi===v); if(c) APP[lang].loc=c[lang];}
+}
+
+/* ===================== AGENT / MERCHANT RECRUIT ===================== */
+let agentSheetEl=null, agentMaskEl=null;
+function mountAgentSheet(){
+  if(agentSheetEl) return;
+  agentMaskEl=document.createElement("div"); agentMaskEl.className="city-mask";
+  agentSheetEl=document.createElement("div"); agentSheetEl.className="city-sheet";
+  agentMaskEl.onclick=closeAgentSheet;
+  $("#device").appendChild(agentMaskEl); $("#device").appendChild(agentSheetEl);
+}
+function renderAgentSheet(){
+  const zh=lang==="zh";
+  let h=`<div class="sheet-head"><h4>🤝 ${zh?"招商加盟 · 区域代理":"Hợp tác kinh doanh"}</h4><span class="sheet-x" data-x="1">✕</span></div>`;
+  h+=`<p class="agent-lead">${zh?"加入 GIAONHANH，共建越南同城配送网络，0 佣金 + 平台补贴。":"Gia nhập GIAONHANH – mạng lưới giao hàng nội thành Việt Nam, 0% hoa hồng + trợ giá."}</p>`;
+  h+=`<div class="agent-cards">`;
+  const cards=[
+    ["0%", zh?"平台零佣金":"Phí nền tảng 0%", zh?"商家入驻永久免抽成":"Miễn phí hoa hồng cho merchant"],
+    ["📦", zh?"配送补贴":"Trợ giá giao hàng", zh?"平台补贴骑手，用户免运费":"Nền tảng trợ giá shipper, miễn ship"],
+    ["🌏", zh?"区域独家":"Độc quyền khu vực", zh?"代理享所在城市独家运营权":"Độc quyền vận hành tại thành phố"],
+    ["🛠️", zh?"技术赋能":"Hỗ trợ công nghệ", zh?"APP/后台/支付一栈式":"App / admin / thanh toán tích hợp"],
+  ];
+  cards.forEach(c=>{ h+=`<div class="agent-card"><div class="ac-b">${c[0]}</div><div class="ac-t">${c[1]}</div><div class="ac-d">${c[2]}</div></div>`; });
+  h+=`</div>`;
+  const phone = "0900 000 088";
+  h+=`<div class="agent-cta" data-agent-cta="1">${zh?"招商合作："+phone+"（Zalo） →":"Hợp tác: "+phone+" (Zalo) →"}</div>`;
+  agentSheetEl.innerHTML=h;
+  agentSheetEl.querySelector("[data-x]").onclick=closeAgentSheet;
+  agentSheetEl.querySelector("[data-agent-cta]").onclick=()=>{
+    if(window.GN&&GN.toast) GN.toast((zh?"已复制招商电话 ":"Đã sao chép: ")+phone,"success");
+    try{ navigator.clipboard&&navigator.clipboard.writeText(phone); }catch(e){}
+    closeAgentSheet();
+  };
+}
+function openAgentSheet(){ mountAgentSheet(); renderAgentSheet(); requestAnimationFrame(()=>{agentMaskEl.classList.add("show");agentSheetEl.classList.add("show");}); }
+function closeAgentSheet(){ if(agentSheetEl){agentSheetEl.classList.remove("show");agentMaskEl.classList.remove("show");} }
+
+/* ===================== SEARCH ===================== */
+let searchEl=null, searchMaskEl=null, searchInputEl=null, searchResultsEl=null, searchScope=null;
+function mountSearch(){
+  if(searchEl) return;
+  searchMaskEl=document.createElement("div"); searchMaskEl.className="search-mask";
+  searchEl=document.createElement("div"); searchEl.className="search-modal";
+  searchMaskEl.onclick=closeSearch;
+  searchEl.innerHTML=`<div class="search-input">🔍 <input type="search" id="gnSearchInput" /><span id="gnSearchCancel" style="color:var(--dim);font-size:18px;cursor:pointer;padding:0 4px;">✕</span></div><div class="search-results" id="gnSearchResults"></div>`;
+  $("#device").appendChild(searchMaskEl); $("#device").appendChild(searchEl);
+  searchInputEl=searchEl.querySelector("#gnSearchInput");
+  searchResultsEl=searchEl.querySelector("#gnSearchResults");
+  searchInputEl.oninput=()=>renderSearchResults(searchInputEl.value);
+  searchEl.querySelector("#gnSearchCancel").onclick=closeSearch;
+}
+function openSearch(scope){
+  searchScope=scope||null;
+  mountSearch();
+  searchInputEl.placeholder = scope ? (APP[lang].search_ph_store||"搜索本店商品") : APP[lang].search_ph;
+  searchInputEl.value=""; renderSearchResults("");
+  requestAnimationFrame(()=>{ searchMaskEl.classList.add("show"); searchEl.classList.add("show"); try{searchInputEl.focus();}catch(e){} });
+}
+function closeSearch(){ if(searchEl){ searchEl.classList.remove("show"); searchMaskEl.classList.remove("show"); } }
+function renderSearchResults(q){
+  q=(q||"").trim().toLowerCase();
+  const entries=[];
+  if(searchScope){
+    const s=STORES.find(x=>x.id===searchScope);
+    if(s) s.prods.forEach(p=>entries.push({type:"prod",store:s,prod:p}));
+  } else {
+    STORES.forEach(s=>{ entries.push({type:"store",store:s}); s.prods.forEach(p=>entries.push({type:"prod",store:s,prod:p})); });
+  }
+  const hit=e=>{
+    if(!q) return true;
+    if(e.type==="store"){ const s=e.store; return s.nm.vi.toLowerCase().includes(q)||s.nm.zh.toLowerCase().includes(q)||(s.cat&&s.cat.toLowerCase().includes(q)); }
+    const p=e.prod; return p.nm.vi.toLowerCase().includes(q)||p.nm.zh.toLowerCase().includes(q);
+  };
+  const list=entries.filter(hit);
+  if(!list.length){ searchResultsEl.innerHTML=`<div class="sr-empty">${APP[lang].search_empty||"没有找到相关结果"}</div>`; return; }
+  searchResultsEl.innerHTML=list.slice(0,50).map(e=>{
+    if(e.type==="store"){ const s=e.store;
+      return `<div class="sr-item" data-store="${s.id}"><div class="se">${s.e}</div><div><div class="sn">${s.nm[lang]}</div><div class="sm">★ ${s.rate} · 🛵 ${s.time}</div></div></div>`;
+    }
+    const p=e.prod, s=e.store;
+    return `<div class="sr-item" data-store="${s.id}"><div class="se">${p.e}</div><div><div class="sn">${p.nm[lang]}</div><div class="sm">${fmt(p.pr)} · ${s.nm[lang]}</div></div></div>`;
+  }).join("");
+  searchResultsEl.querySelectorAll(".sr-item").forEach(el=>el.onclick=()=>{ const sid=el.dataset.store; closeSearch(); openStore(sid); });
+}
+
+const $ = s => document.querySelector(s);
+const fmt = v => v.toLocaleString("vi-VN") + " ₫";
+
+function setLang(l){ lang=l; localStorage.setItem("gn_app_lang",l); document.documentElement.setAttribute("lang",l); restoreCity(); applyText();
+  if(current==="store") renderStore();
+  else if(current==="cart") renderCart();
+  else if(current==="order") renderOrder();
+}
+function setTheme(t){ theme=t; localStorage.setItem("gn_app_theme",t);
+  document.documentElement.setAttribute("data-theme",t);
+  document.body.classList.toggle("light-body", t==="light");
+  document.querySelectorAll("#tabbar .tab, .menu .mi").forEach(()=>{}); // noop keep
+}
+function applyText(){
+  document.querySelectorAll("[data-a]").forEach(el=>{const k=el.getAttribute("data-a"); if(APP[lang][k]!=null) el.textContent=APP[lang][k];});
+  document.querySelectorAll("#tabbar .tab").forEach(t=>{const k=t.dataset.tab; const map={home:"tab_home",category:"tab_cat",order:"tab_order",profile:"tab_pf"}; t.querySelector("div:last-child").textContent=APP[lang][map[k]];});
+  if($("#quickGrid")) renderQuick();
+  if($("#flashRow")) renderFlash();
+  if($("#storeList")) renderStores();
+  if($("#catLeft")) renderCats();
+  if($("#pfMenu")) renderProfileMenu();
+}
+
+/* ===================== NAV ===================== */
+let current="splash"; let backStack=[];
+function _show(name){
+  // Leaving the order screen? Stop its background timers (demo + live) to avoid leaks.
+  if(name!=="order"){
+    if(trackTimer){ clearInterval(trackTimer); trackTimer=null; }
+    if(orderPoll){ clearInterval(orderPoll); orderPoll=null; }
+    if(window._gnLeafletMap){ try{ window._gnLeafletMap.remove(); }catch(e){} window._gnLeafletMap=null; window._gnRiderMarker=null; }
+  }
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  $("#screen-"+name).classList.add("active");
+  const noTab=["splash","store","cart","order"].includes(name);
+  $("#device").classList.toggle("no-tab",noTab);
+  current=name;
+  if(name==="store") renderStore();
+  if(name==="cart") renderCart();
+  if(name==="order") renderOrder();
+}
+function go(name){ backStack.push(current); _show(name); }
+function back(){ if(backStack.length) _show(backStack.pop()); else _show("home"); }
+function tab(name){ backStack=[]; _show(name);
+  document.querySelectorAll("#tabbar .tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===name)); }
+
+/* ===================== RENDER ===================== */
+function renderQuick(){
+  $("#quickGrid").innerHTML = QUICK.map((q,i)=>`<div class="q" data-quick="${i}"><div class="e">${q.e}</div><small>${APP[lang].q_labels[q.k]}</small></div>`).join("");
+  $("#quickGrid").querySelectorAll(".q").forEach(el=>el.onclick=()=>{ openStore(STORES[(+el.dataset.quick)%3].id); });
+}
+function renderFlash(){
+  $("#flashRow").innerHTML = FLASH.map((f,i)=>`<div class="f" data-flash="${i}"><div class="ph">${esc(f.e)}</div><div class="nm">${esc(f.nm[lang])}</div><div class="pr">${fmt(f.pr)}<s>${fmt(f.old)}</s></div><div class="bar"><i style="width:${f.sold}%"></i></div></div>`).join("");
+  $("#flashRow").querySelectorAll(".f").forEach(el=>el.onclick=()=>{ const f=FLASH[+el.dataset.flash]; addToCart({storeId:"flash",id:"f"+el.dataset.flash,e:f.e,nm:f.nm,pr:f.pr}); });
+}
+function renderStores(){
+  $("#storeList").innerHTML = STORES.map(s=>`
+    <div class="store" data-store="${s.id}">
+      <div class="logo">${esc(s.e)}</div>
+      <div class="info">
+        <div class="nm">${esc(s.nm[lang])}</div>
+        <div class="meta"><span class="star">★ ${s.rate}</span><span>🛵 ${s.time}</span><span>📦 ${s.fee}</span></div>
+        <div class="tags"><span class="tg">${s.cat}</span><span class="tg">${lang==="vi"?"Đơn tối thiểu 0₫":"起送 0₫"}</span></div>
+      </div>
+    </div>`).join("");
+  $("#storeList").querySelectorAll(".store").forEach(el=>el.onclick=()=>openStore(el.dataset.store));
+}
+function renderCats(){
+  $("#catLeft").innerHTML = CATS.map((c,i)=>`<div class="c ${i===0?"active":""}" data-cat="${i}">${esc(c.e)}<br>${esc(c.nm[lang])}</div>`).join("");
+  $("#catLeft").querySelectorAll(".c").forEach(el=>el.onclick=()=>{
+    $("#catLeft").querySelectorAll(".c").forEach(x=>x.classList.remove("active")); el.classList.add("active"); renderCatRight(+el.dataset.cat);
+  });
+  renderCatRight(0);
+}
+function renderCatRight(i){
+  const c=CATS[i];
+  $("#catRight").innerHTML = `<div class="blk"><div class="bh">${esc(c.nm[lang])}</div><div class="grid">${
+    c.subs.map((s,si)=>`<div class="gi" data-store="${STORES[i%STORES.length].id}"><div class="ge">${esc(c.e)}</div><small>${esc(s[lang==="vi"?0:1])}</small></div>`).join("")
+  }</div></div>`;
+  $("#catRight").querySelectorAll(".gi").forEach(el=>el.onclick=()=>openStore(el.dataset.store));
+}
+function openStore(id){ currentStoreId=id; go("store"); }
+
+let currentStoreId=null;
+function renderStore(){
+  const s=STORES.find(x=>x.id===currentStoreId); if(!s) return;
+  $("#storeDetail").innerHTML = `
+    <div class="st-hero">
+      <div class="nm">${esc(s.nm[lang])}</div>
+      <div class="m"><span>★ ${s.rate}</span><span>🛵 ${s.time}</span><span>📦 ${s.fee}</span></div>
+      <div class="coupon">${APP[lang].store_coupon}</div>
+    </div>
+    ${s.prods.map(p=>{
+      const it=cart.find(c=>c.storeId===s.id&&c.id===p.id); const q=it?it.qty:0;
+      return `<div class="prod"><div class="pe">${p.e}</div><div class="pi"><div class="pn">${p.nm[lang]}</div><div class="pp">${fmt(p.pr)}</div></div>
+        <div class="stepper">${q>0?`<button class="minus" data-dec="${p.id}">−</button><span class="qty">${q}</span>`:""}<button class="plus" data-inc="${p.id}">+</button></div></div>`;
+    }).join("")}`;
+  $("#storeDetail").querySelectorAll("[data-inc]").forEach(b=>b.onclick=()=>{ const p=s.prods.find(x=>x.id===b.dataset.inc); addToCart({storeId:s.id,id:p.id,e:p.e,nm:p.nm,pr:p.pr}); });
+  $("#storeDetail").querySelectorAll("[data-dec]").forEach(b=>b.onclick=()=>{ decCart(s.id,b.dataset.dec); });
+  updateStoreCartBar();
+}
+function updateStoreCartBar(){
+  const items=cart.filter(c=>c.storeId===currentStoreId);
+  const qty=items.reduce((a,b)=>a+b.qty,0);
+  const total=items.reduce((a,b)=>a+b.pr*b.qty,0);
+  const bar=$("#storeCartBar");
+  if(qty>0){ bar.style.display="flex"; $("#storeBadge").textContent=qty; $("#storeTotal").textContent=fmt(total); }
+  else bar.style.display="none";
+}
+
+function addToCart(item){
+  const ex=cart.find(c=>c.storeId===item.storeId&&c.id===item.id);
+  if(ex) ex.qty++; else cart.push({...item,qty:1});
+  if(current==="store") updateStoreCartBar();
+  if(current==="cart") renderCart();
+  if(current==="home"||current==="category") tab("home");
+}
+function decCart(storeId,id){
+  const ex=cart.find(c=>c.storeId===storeId&&c.id===id);
+  if(!ex) return; ex.qty--; if(ex.qty<=0) cart=cart.filter(c=>!(c.storeId===storeId&&c.id===id));
+  if(current==="store") renderStore();
+  if(current==="cart") renderCart();
+}
+
+function renderCart(){
+  if(cart.length===0){
+    $("#cartBody").innerHTML=`<div class="empty"><div class="e">🛒</div>${APP[lang].cart_empty}<br><span style="font-size:12.5px">${APP[lang].cart_empty_s}</span></div>`;
+    return;
+  }
+  // group by store
+  const groups={};
+  cart.forEach(c=>{ (groups[c.storeId]=groups[c.storeId]||[]).push(c); });
+  let html="";
+  Object.keys(groups).forEach(sid=>{
+    const s=STORES.find(x=>x.id===sid); const items=groups[sid];
+    const sub=items.reduce((a,b)=>a+b.pr*b.qty,0);
+    html+=`<div class="cgroup"><div class="gh"><div class="gl">${s?s.e:"🎁"}</div><b>${s?s.nm[lang]:"Flash Sale"}</b></div>`;
+    items.forEach(it=>{
+      html+=`<div class="row"><div class="re">${it.e}</div><div class="ri"><div class="rn">${it.nm[lang]}</div><div class="rp">${fmt(it.pr*it.qty)}</div></div>
+        <div class="stepper"><button class="minus" data-dstore="${it.storeId}" data-did="${it.id}">−</button><span class="qty">${it.qty}</span><button class="plus" data-istore="${it.storeId}" data-iid="${it.id}">+</button></div></div>`;
+    });
+    html+=`</div>`;
+  });
+  // address + delivery + coupon + summary
+  const total=cart.reduce((a,b)=>a+b.pr*b.qty,0);
+  const couponTotal=Object.values(cartCoupon).reduce((s,d)=>s+((d&&d.discount)||0),0);
+  const grand=Math.max(0,total-couponTotal);
+  html+=`
+    <div class="addr"><div class="ai">📍</div><div class="at"><div class="al">${APP[lang].addr_label}</div><div class="av">${lang==="vi"?"123 Đường Tràng Tiền, Hoàn Kiếm, Hà Nội":"河内还剑郡长前路123号"}</div></div><div class="ar">›</div></div>
+    <div class="opt"><div class="o ${deliMode==="now"?"on":""}" data-mode="now">⚡ ${APP[lang].deli_now}</div><div class="o ${deliMode==="book"?"on":""}" data-mode="book">📅 ${APP[lang].deli_book}</div></div>
+    <div class="coupon-row">
+      <input id="couponInput" class="coupon-input" placeholder="${APP[lang].coupon_ph}" value="${couponInputVal}">
+      <button id="couponApply" class="coupon-btn">${APP[lang].coupon_apply}</button>
+    </div>
+    <div id="couponMsg" class="coupon-msg"></div>
+    <div class="summ">
+      <div class="line"><span>${APP[lang].subtotal}</span><b>${fmt(total)}</b></div>
+      <div class="line"><span>${APP[lang].ship}</span><b>${lang==="vi"?"0₫ (Trợ giá)":"0₫（平台补贴）"}</b></div>
+      <div class="line"><span>${APP[lang].discount}</span><b style="color:var(--accent)">-${fmt(Math.round(couponTotal))}</b></div>
+      <div class="line tot"><span>${APP[lang].total}</span><b>${fmt(Math.round(grand))}</b></div>
+    </div>
+    <button class="btn-block" data-place="1">${APP[lang].place_order} · ${fmt(Math.round(grand))}</button>`;
+  $("#cartBody").innerHTML=html;
+  $("#cartBody").querySelectorAll("[data-dstore]").forEach(b=>b.onclick=()=>decCart(b.dataset.dstore,b.dataset.did));
+  $("#cartBody").querySelectorAll("[data-istore]").forEach(b=>{const ex=cart.find(c=>c.storeId===b.dataset.istore&&c.id===b.dataset.iid); if(ex){ex.qty++; renderCart();} });
+  $("#cartBody").querySelectorAll(".opt .o").forEach(o=>o.onclick=()=>{deliMode=o.dataset.mode;renderCart();});
+  $("#cartBody").querySelector("[data-place]").onclick=()=>startOrder();
+  const ci=document.getElementById("couponInput");
+  if(ci) ci.oninput=()=>{ couponInputVal=ci.value; };
+  const ca=document.getElementById("couponApply");
+  if(ca) ca.onclick=applyCoupon;
+}
+
+let currentOrder=null;
+
+function showCouponMsg(msg, ok){
+  const el=document.getElementById("couponMsg");
+  if(!el) return;
+  el.textContent=msg||"";
+  el.className="coupon-msg"+(ok===true?" ok":ok===false?" bad":"");
+}
+
+// Verify a coupon against every store in the cart (a merchant code only
+// applies to its own merchant). Valid discounts are cached in cartCoupon and
+// shown in the summary; the code is consumed only at order creation.
+async function applyCoupon(){
+  const ci=document.getElementById("couponInput");
+  const code=(ci?ci.value:"").trim();
+  couponInputVal=code;
+  if(!code){ cartCoupon={}; showCouponMsg(""); renderCart(); return; }
+  const stores={};
+  cart.forEach(c=>{ if(c.storeId && c.storeId!=="flash"){ stores[c.storeId]=(stores[c.storeId]||0)+c.pr*c.qty; } });
+  const valid={}; let any=false;
+  if(GN_CONFIG.useApi && GN_CONFIG.apiBase){
+    for(const sid in stores){
+      try{
+        const r=await GN.API.verifyCoupon(code, sid, stores[sid]);
+        if(r&&r.valid){ valid[sid]={code, discount:r.discount}; any=true; }
+      }catch(e){ /* not valid for this store */ }
+    }
+  }
+  cartCoupon=valid;
+  showCouponMsg(any?APP[lang].coupon_applied:APP[lang].coupon_invalid, any);
+  renderCart();
+}
+async function startOrder(){
+  const total=cart.reduce((a,b)=>a+b.pr*b.qty,0);
+  const couponTotal=Object.values(cartCoupon).reduce((s,d)=>s+((d&&d.discount)||0),0);
+  const grand=Math.max(0,total-couponTotal);
+
+  /* ---- LIVE path: create a real backend order + pay ---- */
+  if(GN_CONFIG.useApi && GN_CONFIG.apiBase && LIVE && LIVE.ready && GN.token){
+    try{
+      const loc = await getLoc();
+      const groups={}; cart.forEach(c=>{ (groups[c.storeId]=groups[c.storeId]||[]).push(c); });
+      const storeIds=Object.keys(groups).filter(s=>s!=="flash"); // flash items lack a real merchant in live mode
+      if(storeIds.length){
+        const method='cod'; // prototype default; gateway methods open pay_url then poll
+        let primary=null;
+        for(const sid of storeIds){
+          const items=groups[sid].map(c=>({product_id:c.id, qty:c.qty}));
+          const payload={
+            merchant_id:sid, items, pay_method:method,
+            address:(lang==="vi"?"123 Đường Tràng Tiền, Hoàn Kiếm, Hà Nội":"河内还剑郡长前路123号"),
+            lat: loc?loc.lat:null, lng: loc?loc.lng:null,
+            contact_name:"Nguyen Van A", contact_phone:"0900000002",
+            delivery_type: deliMode==="now"?"instant":"appointment",
+          };
+          if(cartCoupon[sid]) payload.coupon_code=cartCoupon[sid].code; // merchant coupon for this store
+          const r=await GN.API.createOrder(payload);
+          if(!r||r.offline||!r.order_no) throw new Error("create failed");
+          const pr=await GN.pay({method, amount:r.amount, orderNo:r.order_no});
+          let paid=pr&&pr.paid;
+          if(pr&&pr.pending){ const w=await GN.waitForPayment(r.order_no); paid=w&&w.paid; }
+          if(paid && !primary) primary=r;
+        }
+          if(primary){
+          const det=await GN.API.order(primary.order_no);
+          currentOrder = (det&&!det.offline) ? liveToOrder(det)
+            : {_live:true, orderNo:primary.order_no, status:"paid", steps:ORDER_STEPS, currentIndex:1, eta:30, merchant:"", address:""};
+          if(window.GN && GN.voice) GN.voice.say('order_placed');
+          cart=[]; tab("order"); return;
+        }
+      }
+      throw new Error("no live order");
+    }catch(e){ console.warn("[GN] live order failed, fallback to demo", e); }
+  }
+
+  /* ---- OFFLINE demo path ---- */
+  currentOrder={items:[...cart],total:Math.round(grand),mode:deliMode,eta:32,step:0};
+  if(window.GN && GN.voice) GN.voice.say('order_placed');
+  cart=[]; tab("order");
+}
+function renderOrder(){
+  if(!currentOrder){ $("#orderBody").innerHTML=`<div class="empty"><div class="e">🧾</div>${APP[lang].empty_order}</div>`; return; }
+  if(currentOrder._live){ renderOrderLive(); return; }
+  const o=currentOrder;
+  $("#orderBody").innerHTML=`
+    <div class="track-status">
+      <div class="eta">${APP[lang].track_eta} <b id="etaMin">${o.eta}</b> ${lang==="vi"?"phút":"分钟"}</div>
+      <div class="st" id="trackSt">🛵 ${APP[lang].deli_now}</div>
+    </div>
+    <div class="map"><div class="grid-bg"></div>
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M10,82 C30,70 45,72 60,55 C75,40 85,35 92,15" fill="none" stroke="var(--brand)" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.7"/></svg>
+      <div class="store-p">🏪</div><div class="home-p">🏠</div>
+      <div class="rider" id="rider">🛵</div>
+    </div>
+    <div class="steps" id="trackSteps">
+      ${[["📝",lang==="vi"?"Đã đặt đơn":"已下单"],["🏪",lang==="vi"?"Nhà bán nhận đơn":"商家接单"],["🛵",lang==="vi"?"Shipper lấy hàng":"骑手取货"],["🚀",lang==="vi"?"Đang giao":"配送中"],["✅",lang==="vi"?"Đã giao":"已送达"]].map((s,i)=>`<div class="step" data-step="${i}"><div class="dot">${i<o.step?"✓":i+1}</div><div class="tx"><b>${s[1]}</b><span class="stx"></span></div></div>`).join("")}
+    </div>
+    <button class="btn-block" data-back-home="1">${APP[lang].back_home}</button>`;
+  $("#orderBody").querySelector("[data-back-home]").onclick=()=>tab("home");
+  startTracking();
+}
+function startTracking(){
+  if(trackTimer) clearInterval(trackTimer);
+  const rider=$("#rider");
+  const wp=[[8,80],[30,68],[52,58],[72,38],[90,16]];
+  let i=0;
+  const apply=()=>{
+    const o=currentOrder; if(!o) return;
+    o.step=i+1;
+    rider.style.left=wp[i][0]+"%"; rider.style.top=wp[i][1]+"%";
+    document.querySelectorAll("#trackSteps .step").forEach((st,si)=>{
+      st.classList.toggle("done",si<=i);
+      st.querySelector(".dot").textContent= si<i?"✓":(si+1);
+      const sp=st.querySelector(".stx"); if(sp) sp.textContent = si<i ? (lang==="vi"?"Xong":"已完成") : "";
+    });
+    const labels=[lang==="vi"?"Đã đặt đơn":"已下单",lang==="vi"?"Nhà bán nhận đơn":"商家接单",lang==="vi"?"Shipper lấy hàng":"骑手取货",lang==="vi"?"Đang giao":"配送中",lang==="vi"?"Đã giao":"已送达"];
+    $("#trackSt").textContent=(i===4?"✅ ":"🛵 ")+labels[i];
+    $("#etaMin").textContent=Math.max(0,o.eta-(i+1)*7);
+    if(i>=wp.length-1){ clearInterval(trackTimer); $("#trackSt").textContent="✅ "+APP[lang].track_done; }
+  };
+  apply();
+  trackTimer=setInterval(()=>{ i++; if(i<wp.length) apply(); else clearInterval(trackTimer); },2400);
+}
+function renderProfileMenu(){
+  const modeLabel = (GN_CONFIG.useApi ? (lang==="vi"?"Trực tuyến":"在线") : (lang==="vi"?"Demo":"演示"));
+  const voiceOn = !(window.GN && GN.voice && GN.voice.isMuted());
+  const voiceState = voiceOn ? (lang==="vi"?"Bật":"开") : (lang==="vi"?"Tắt":"关");
+  const items=[
+    ["🤝",APP[lang].menu_agent,"›"],
+    ["🏪",lang==="vi"?"Giao diện Merchant":"商家端","›"],
+    ["🛵",lang==="vi"?"Giao diện Shipper":"骑手端","›"],
+    ["🎟️",APP[lang].coupon_entry,"›"],
+    ["💰",APP[lang].wallet_entry,"›"],
+    ["📍",APP[lang].addr_entry,"›"],
+    ["🔊",(lang==="vi"?"Thông báo giọng nói":"语音提醒")+"：<b style='color:var(--brand)'>"+voiceState+"</b>","›"],
+    ["⚙️",APP[lang].mode_label+"：<b style='color:var(--brand)'>"+modeLabel+"</b>","›"],
+    ["🌐",APP[lang].lang_entry,"›"],
+    ["🎨",APP[lang].theme_entry,"›"],
+  ];
+  $("#pfMenu").innerHTML=items.map(it=>`<div class="mi" data-mi="${it[0]}"><div class="mi-ic">${it[0]}</div><div class="mi-t">${it[1]}</div><div class="mi-a">${it[2]}</div></div>`).join("");
+  $("#pfMenu").querySelectorAll(".mi").forEach(m=>m.onclick=()=>{
+    const k=m.dataset.mi;
+    if(k==="🌐"){ setLang(lang==="vi"?"zh":"vi"); }
+    else if(k==="🎨"){ setTheme(theme==="dark"?"light":"dark"); }
+    else if(k==="🤝"){ openAgentSheet(); }
+    else if(k==="🏪"){ location.href="merchant.html"; }
+    else if(k==="🛵"){ location.href="rider.html"; }
+    else if(k==="🔊"){ if(window.GN && GN.voice){ const m=GN.voice.toggle(); if(!m) GN.voice.beep(880,160); renderProfileMenu(); } }
+    else if(k==="⚙️"){ if(window.GN && GN.openDataModeOverlay) GN.openDataModeOverlay(); }
+    else if(k==="🎟️"||k==="💰"||k==="📍"){
+      const msg = k==="🎟️" ? (lang==="vi"?"Coupon: chưa mở ở bản demo":"优惠券：演示版暂未开放")
+                : k==="💰" ? (lang==="vi"?"Ví: chưa mở ở bản demo":"我的钱包：演示版暂未开放")
+                : (lang==="vi"?"Địa chỉ: chưa mở ở bản demo":"收货地址：演示版暂未开放");
+      if(window.GN && GN.toast) GN.toast(msg,"info"); else alert(msg);
+    }
+  });
+}
+/* ===================== EVENTS ===================== */
+document.querySelectorAll("[data-back]").forEach(b=>b.onclick=()=>back());
+document.querySelectorAll("[data-open-cart]").forEach(b=>b.onclick=()=>go("cart"));
+document.querySelectorAll("#tabbar .tab").forEach(t=>t.onclick=()=>tab(t.dataset.tab));
+
+/* ===================== CLOCK ===================== */
+function tick(){ const d=new Date(); const h=String(d.getHours()).padStart(2,"0"); const m=String(d.getMinutes()).padStart(2,"0"); $("#clock").textContent=h+":"+m; }
+setInterval(tick,10000); tick();
+
+/* ===================== LIVE INTEGRATION ===================== */
+let LIVE = { ready:false };
+const ORDER_STEPS = ['pending_payment','paid','accepted','picked','delivering','delivered'];
+const ORDER_STEP_LABEL = {
+  pending_payment:{vi:"Chờ thanh toán",zh:"待支付"},
+  paid:{vi:"Đã thanh toán",zh:"已支付"},
+  accepted:{vi:"Nhà bán nhận đơn",zh:"商家接单"},
+  picked:{vi:"Shipper lấy hàng",zh:"骑手取货"},
+  delivering:{vi:"Đang giao",zh:"配送中"},
+  delivered:{vi:"Đã giao",zh:"已送达"},
+  cancelled:{vi:"Đã hủy",zh:"已取消"},
+};
+/* Resolve device GPS via native bridge (Capacitor) or browser fallback. */
+async function getLoc(){
+  try{ if(window.GN && GN.native && GN.native.getLocation){ const l=await GN.native.getLocation(); if(l&&l.lat) return l; } }catch(e){}
+  return null;
+}
+function mapMerchants(arr){ return arr.map(m=>({
+  id:String(m.id), e:(m.category&&m.category.icon)||"🏪",
+  nm:{vi:m.name||"",zh:m.name||""},
+  cat:(m.category&&(m.category.name||m.category.name_vi))||"Cửa hàng",
+  rate:String(m.rating!=null?m.rating:"4.8"),
+  time:(m.avg_delivery_min||30)+"分钟",
+  fee:(m.delivery_fee?Number(m.delivery_fee).toLocaleString("vi-VN")+" ₫":"0₫"),
+  prods:[],
+})); }
+function mapProducts(arr){ return arr.map(p=>({
+  id:String(p.id), e:"🛒",
+  nm:{vi:p.name_vi||"",zh:p.name_zh||""},
+  pr:Math.round(p.effective_price!=null?p.effective_price:(p.price||0)),
+})); }
+function mapFlash(arr){ return arr.map(f=>({
+  e:"🛍️", nm:{vi:f.name_vi||"",zh:f.name_zh||""},
+  pr:Math.round(f.flash_price||f.price||0), old:Math.round(f.price||0),
+  sold:Math.min(95,(f.flash_stock||0)%50+40),
+})); }
+function liveToOrder(det){
+  const steps=(det.tracking&&det.tracking.steps)||ORDER_STEPS;
+  const idx=(det.tracking&&det.tracking.current_index!=null)?det.tracking.current_index:0;
+  const m=det.merchant||{};
+  return { _live:true, orderNo:det.order_no, status:det.status, steps,
+    currentIndex: idx<0?-1:idx, eta:Math.max(6,30-idx*5),
+    merchant:(m.name)||"", address:det.address||"",
+    lat: det.lat??null, lng: det.lng??null,
+    merchantLat: m.lat??null, merchantLng: m.lng??null };
+}
+/* Load catalogue + flash from the backend and replace the static demo
+   data in-place so the existing render funcs keep working. */
+async function loadLiveData(){
+  if(!(GN_CONFIG.useApi && GN_CONFIG.apiBase)) return;
+  try{
+    const logged = await GN.demoLoginAs('0900000002','customer');
+    if(!logged || logged.offline || !logged.token) return;
+    const loc = await getLoc();
+    const qs = loc ? `?lat=${loc.lat}&lng=${loc.lng}` : '';
+    const [mRes, fRes] = await Promise.all([ GN.API.merchants(qs), GN.API.flashSales(qs) ]);
+    if(mRes && !mRes.offline && Array.isArray(mRes) && mRes.length){
+      const mapped = await Promise.all(mRes.map(async m=>{
+        const s = mapMerchants([m])[0];
+        try{ const pr = await GN.API.merchantProducts(m.id); if(pr && !pr.offline && Array.isArray(pr)) s.prods = mapProducts(pr); }catch(e){}
+        return s;
+      }));
+      STORES = mapped; LIVE.ready = true;
+    }
+    if(fRes && !fRes.offline && Array.isArray(fRes) && fRes.length){ FLASH = mapFlash(fRes); }
+    if($("#quickGrid")) renderQuick();
+    if($("#storeList")) renderStores();
+    if($("#flashRow")) renderFlash();
+  }catch(e){ console.warn('[GN] live data load failed', e); }
+}
+/* ---- live order tracking screen ---- */
+function renderOrderLive(){
+  const o=currentOrder;
+  const cancelled = o.status==='cancelled';
+  const delivered = o.currentIndex>=5 || o.status==='delivered';
+  const steps = o.steps.map((s,i)=>({
+    s, done:i<o.currentIndex, cur:(i===o.currentIndex&&!delivered&&!cancelled),
+    label:(ORDER_STEP_LABEL[s]&&ORDER_STEP_LABEL[s][lang])||s,
+  }));
+  const headTxt = cancelled ? (lang==="vi"?"Đã hủy":"已取消")
+    : delivered ? (lang==="vi"?"Đã giao xong":"已送达")
+    : APP[lang].track_eta+" <b id='etaMin'>"+Math.max(0,o.eta-(o.currentIndex*5))+"</b> "+(lang==="vi"?"phút":"分钟");
+  const stTxt = delivered ? "✅ "+(lang==="vi"?"Đã giao":"已送达")
+    : cancelled ? "⛔ "+(lang==="vi"?"Đã hủy":"已取消")
+    : "🛵 "+(steps[o.currentIndex]?steps[o.currentIndex].label:"");
+  const hasMap = !!(o.lat && o.lng && o.merchantLat && o.merchantLng);
+  $("#orderBody").innerHTML = `
+    <div class="track-status"><div class="eta">${headTxt}</div><div class="st" id="trackSt">${stTxt}</div></div>
+    ${ hasMap ? `<div id="orderMap"></div>` : `<div class="map"><div class="grid-bg"></div><div class="store-p">🏪</div><div class="home-p">🏠</div><div class="rider" id="rider">🛵</div></div>` }
+    ${o.merchant?`<div style="padding:8px 16px 0;font-size:13px;color:var(--dim)">🏪 ${o.merchant}</div>`:""}
+    ${o.address?`<div style="padding:2px 16px 6px;font-size:13px;color:var(--dim)">📍 ${o.address}</div>`:""}
+    <div class="steps" id="trackSteps">
+      ${steps.map((s,i)=>`<div class="step ${s.done?"done":""} ${s.cur?"cur":""}"><div class="dot">${s.done?"✓":(i+1)}</div><div class="tx"><b>${s.label}</b><span>${s.done?(lang==="vi"?"Xong":"已完成"):""}</span></div></div>`).join("")}
+    </div>
+    <button class="btn-block" data-back-home="1">${APP[lang].back_home}</button>`;
+  $("#orderBody").querySelector("[data-back-home]").onclick=()=>{ if(orderPoll) clearInterval(orderPoll); tab("home"); };
+  startTrackingLive();
+}
+let orderPoll=null;
+function ensureLeaflet(){
+  if(window.L) return Promise.resolve(true);
+  return new Promise((res)=>{
+    let fin=false; const done=(v)=>{ if(fin) return; fin=true; res(v); };
+    const s=document.createElement('script'); s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; s.crossOrigin='anonymous';
+    s.onload=()=>done(true); s.onerror=()=>done(false);
+    document.head.appendChild(s);
+    const c=document.createElement('link'); c.rel='stylesheet'; c.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(c);
+    setTimeout(()=>done(!!window.L),4500);
+  });
+}
+function mountOrderMap(o){
+  const el=$("#orderMap"); if(!el) return Promise.resolve(false);
+  return ensureLeaflet().then(ok=>{
+    if(!ok || !window.L){ // graceful fallback: decorative SVG map inside the slot
+      el.outerHTML=`<div class="map"><div class="grid-bg"></div><div class="store-p">🏪</div><div class="home-p">🏠</div><div class="rider" id="rider">🛵</div></div>`;
+      return false;
+    }
+    const L=window.L;
+    const mLat=+o.merchantLat, mLng=+o.merchantLng, cLat=+o.lat, cLng=+o.lng;
+    const map=L.map(el,{zoomControl:false,attributionControl:false,scrollWheelZoom:false}).setView([(mLat+cLat)/2,(mLng+cLng)/2],14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+    L.polyline([[mLat,mLng],[cLat,cLng]],{color:'#ff6a2b',weight:4,dashArray:'6 8',opacity:.85}).addTo(map);
+    const pin=(lat,lng,cls,emoji)=>{
+      const icon=L.divIcon({className:'',html:`<div class="gm-p-in ${cls}"><span>${emoji}</span></div>`,iconSize:[30,30],iconAnchor:[15,28]});
+      return L.marker([lat,lng],{icon}).addTo(map);
+    };
+    pin(mLat,mLng,'gm-store','🏪'); pin(cLat,cLng,'gm-home','🏠');
+    const rIcon=L.divIcon({className:'',html:`<div class="gm-p-in gm-rider"><span>🛵</span></div>`,iconSize:[26,26],iconAnchor:[13,24]});
+    const rMarker=L.marker([mLat,mLng],{icon:rIcon}).addTo(map);
+    window._gnLeafletMap=map; window._gnRiderMarker=rMarker;
+    const pct=Math.max(0,Math.min(1,o.currentIndex/5));
+    rMarker.setLatLng([mLat+(cLat-mLat)*pct, mLng+(cLng-mLng)*pct]);
+    setTimeout(()=>{ try{ map.invalidateSize(); }catch(e){} },80);
+    return true;
+  });
+}
+function startTrackingLive(){
+  if(orderPoll) clearInterval(orderPoll);
+  const hasMap = !!(currentOrder && currentOrder.lat && currentOrder.lng && currentOrder.merchantLat && currentOrder.merchantLng);
+  if(hasMap){ mountOrderMap(currentOrder); }
+  else {
+    const rider=$("#rider");
+    if(rider){
+      rider.style.left="8%"; rider.style.top="80%";
+      requestAnimationFrame(()=>{ const pct=Math.max(0,Math.min(1,currentOrder.currentIndex/5)); rider.style.left=(8+82*pct)+"%"; rider.style.top=(80-66*pct)+"%"; });
+    }
+  }
+  orderPoll=setInterval(async ()=>{
+    if(!currentOrder||!currentOrder._live){ clearInterval(orderPoll); return; }
+    try{
+      const det=await GN.API.order(currentOrder.orderNo);
+      if(det && !det.offline){
+        const upd=liveToOrder(det);
+        if(upd.currentIndex!==currentOrder.currentIndex || upd.status==='delivered' || upd.status==='cancelled'){
+          currentOrder=upd; updateLiveProgress();
+          if(upd.status==='delivered'||upd.status==='cancelled') clearInterval(orderPoll);
+        }
+      }
+    }catch(e){}
+  },4000);
+}
+function updateLiveProgress(){
+  const o=currentOrder; if(!o) return;
+  const delivered=o.currentIndex>=5||o.status==='delivered';
+  const cancelled=o.status==='cancelled';
+  document.querySelectorAll("#trackSteps .step").forEach((st,si)=>{
+    const done=si<o.currentIndex; st.classList.toggle("done",done);
+    const dot=st.querySelector(".dot"); if(dot) dot.textContent=done?"✓":(si+1);
+  });
+  // Rider marker — Leaflet when map present, else the decorative SVG rider.
+  if(window._gnRiderMarker && o.lat!=null && o.merchantLat!=null){
+    const pct=Math.max(0,Math.min(1,o.currentIndex/5));
+    const rLat=+o.merchantLat+(+o.lat-+o.merchantLat)*pct, rLng=+o.merchantLng+(+o.lng-+o.merchantLng)*pct;
+    window._gnRiderMarker.setLatLng([rLat,rLng]);
+    if(window._gnLeafletMap) try{ window._gnLeafletMap.panTo([rLat,rLng]); }catch(e){}
+  } else {
+    const rider=$("#rider");
+    if(rider){ const pct=Math.max(0,Math.min(1,o.currentIndex/5)); rider.style.left=(8+82*pct)+"%"; rider.style.top=(80-66*pct)+"%"; }
+  }
+  const st=$("#trackSt");
+  if(st){
+    if(delivered) st.textContent="✅ "+(lang==="vi"?"Đã giao":"已送达");
+    else if(cancelled) st.textContent="⛔ "+(lang==="vi"?"Đã hủy":"已取消");
+    else { const lbl=(ORDER_STEP_LABEL[o.steps[o.currentIndex]]&&ORDER_STEP_LABEL[o.steps[o.currentIndex]][lang])||""; st.textContent="🛵 "+lbl; }
+  }
+  const eta=$("#etaMin");
+  if(eta) eta.textContent=Math.max(0,o.eta-(o.currentIndex*5));
+}
+
+/* ===================== INIT ===================== */
+setTheme(theme); setLang(lang);
+$(".loc").onclick=openCitySheet;
+$('[data-search="home"]').onclick=()=>openSearch(null);
+$('[data-search="store"]').onclick=()=>openSearch(currentStoreId);
+if(!localStorage.getItem("gn_city")){ try{ autoLocate(true); }catch(e){} } // best-effort auto locate on first open
+loadLiveData(); // fire-and-forget; replaces demo data when useApi:true
+setTimeout(()=>{ if($("#pfMenu")) renderProfileMenu(); }, 0); // refresh voice-mute state after GN.voice loads
+// splash -> landing screen (honour a #hash so "返回消费者端" lands on 我的, not home)
+setTimeout(()=>{
+  const h=(location.hash||"").replace(/^#/,"");
+  const target=(["home","category","order","profile"].includes(h))?h:"home";
+  _show(target);
+  document.querySelectorAll("#tabbar .tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===target));
+  if(h) history.replaceState(null,"",location.pathname+location.search); // clear the return-hash after landing
+},1600);
+</script>
+<script src="native-bridge.js" defer></script>
+<script src="settings-overlay.js" defer></script>
+<script src="payment.js" defer></script>
+<script src="api.js" defer></script>
+</body>
+</html>

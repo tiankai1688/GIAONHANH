@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GIAONHANH · 越南全域小时达 — 全城商家火热招商</title>
+<meta name="description" content="越南全域小时达 — 0门槛免费入驻、0平台佣金、0配送费补贴。全城流量扶持，30–60分钟极速达。诚招越南区域代理商。" />
+<style>
+  /* ============ Design Tokens ============ */
+  :root {
+    --brand: #ff6a2b;
+    --brand-2: #ffb020;
+    --brand-glow: rgba(255, 106, 43, 0.45);
+    --accent: #2bd4a7;
+    --radius: 22px;
+    --radius-sm: 14px;
+    --maxw: 1180px;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --font: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  /* Dark (default) */
+  html[data-theme="dark"] {
+    --bg: #0a0c12;
+    --bg-2: #11141d;
+    --surface: rgba(255, 255, 255, 0.04);
+    --surface-2: rgba(255, 255, 255, 0.06);
+    --border: rgba(255, 255, 255, 0.10);
+    --border-strong: rgba(255, 255, 255, 0.18);
+    --text: #f4f6fb;
+    --text-dim: #aab2c5;
+    --text-faint: #6b7488;
+    --glass: rgba(20, 24, 34, 0.55);
+    --shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.8);
+    --hero-grad-1: rgba(255, 106, 43, 0.22);
+    --hero-grad-2: rgba(43, 212, 167, 0.14);
+  }
+
+  /* Light */
+  html[data-theme="light"] {
+    --bg: #f6f7fb;
+    --bg-2: #eef1f7;
+    --surface: rgba(255, 255, 255, 0.7);
+    --surface-2: rgba(255, 255, 255, 0.9);
+    --border: rgba(15, 23, 42, 0.08);
+    --border-strong: rgba(15, 23, 42, 0.14);
+    --text: #131722;
+    --text-dim: #4a5468;
+    --text-faint: #8a93a6;
+    --glass: rgba(255, 255, 255, 0.65);
+    --shadow: 0 30px 70px -34px rgba(40, 50, 90, 0.35);
+    --hero-grad-1: rgba(255, 106, 43, 0.16);
+    --hero-grad-2: rgba(43, 212, 167, 0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    transition: background 0.5s var(--ease), color 0.4s var(--ease);
+  }
+  ::selection { background: var(--brand); color: #fff; }
+
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+  .gradient-text {
+    background: linear-gradient(100deg, var(--brand) 0%, var(--brand-2) 55%, var(--accent) 120%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--brand);
+    padding: 7px 14px; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--border);
+  }
+
+  .section { padding: 100px 0; position: relative; }
+  .section-head { text-align: center; max-width: 680px; margin: 0 auto 56px; }
+  .section-head h2 {
+    font-size: clamp(28px, 4vw, 44px); font-weight: 800; letter-spacing: -0.02em;
+    margin: 18px 0 14px; line-height: 1.15;
+  }
+  .section-head p { color: var(--text-dim); font-size: 17px; }
+
+  /* ============ Nav ============ */
+  header.nav {
+    position: sticky; top: 0; z-index: 60;
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    background: var(--glass);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.4s var(--ease), border-color 0.4s var(--ease);
+  }
+  .nav-inner { display: flex; align-items: center; gap: 18px; height: 68px; }
+  .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; font-size: 19px; letter-spacing: -0.01em; }
+  .brand .logo {
+    width: 38px; height: 38px; border-radius: 11px;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    display: grid; place-items: center; font-size: 20px;
+    box-shadow: 0 8px 22px -6px var(--brand-glow);
+  }
+  .brand small { display: block; font-size: 10px; font-weight: 600; color: var(--text-faint); letter-spacing: 0.18em; }
+  .nav-links { display: flex; gap: 6px; margin-left: auto; }
+  .nav-links a {
+    padding: 8px 14px; border-radius: 10px; font-size: 14.5px; font-weight: 500;
+    color: var(--text-dim); transition: all 0.25s var(--ease);
+  }
+  .nav-links a:hover { color: var(--text); background: var(--surface); }
+
+  .seg {
+    display: inline-flex; padding: 4px; gap: 2px; border-radius: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+  }
+  .seg button {
+    width: 34px; height: 30px; border: none; background: transparent; cursor: pointer;
+    border-radius: 9px; font-size: 15px; color: var(--text-dim);
+    display: grid; place-items: center; transition: all 0.25s var(--ease);
+  }
+  .seg button.active { background: var(--brand); color: #fff; box-shadow: 0 6px 16px -6px var(--brand-glow); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    padding: 12px 22px; border-radius: 13px; font-weight: 700; font-size: 15px;
+    cursor: pointer; border: 1px solid transparent; transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), background 0.3s var(--ease);
+    will-change: transform;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: #fff; box-shadow: 0 14px 34px -12px var(--brand-glow);
+  }
+  .btn-primary:hover { box-shadow: 0 18px 44px -10px var(--brand-glow); }
+  .btn-ghost {
+    background: var(--surface); color: var(--text); border-color: var(--border);
+  }
+  .btn-ghost:hover { background: var(--surface-2); border-color: var(--border-strong); }
+  .btn-lg { padding: 16px 30px; font-size: 16.5px; border-radius: 15px; }
+
+  /* ============ Hero ============ */
+  .hero { position: relative; min-height: 92vh; display: flex; align-items: center; overflow: hidden; }
+  #particles { position: absolute; inset: 0; z-index: 0; opacity: 0.9; }
+  .hero::before {
+    content: ""; position: absolute; inset: 0; z-index: 1;
+    background:
+      radial-gradient(60% 60% at 18% 22%, var(--hero-grad-1), transparent 70%),
+      radial-gradient(55% 55% at 82% 78%, var(--hero-grad-2), transparent 70%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: relative; z-index: 2; display: grid; grid-template-columns: 1.1fr 0.9fr;
+    gap: 50px; align-items: center; width: 100%; padding: 60px 0;
+  }
+  .hero h1 {
+    font-size: clamp(38px, 6vw, 68px); font-weight: 850; line-height: 1.05; letter-spacing: -0.03em;
+    margin: 22px 0 20px;
+  }
+  .hero p.lead { font-size: 19px; color: var(--text-dim); max-width: 540px; }
+  .hero-cta { display: flex; gap: 14px; margin: 32px 0 34px; flex-wrap: wrap; }
+
+  .perks { display: flex; gap: 12px; flex-wrap: wrap; }
+  .perk {
+    display: flex; align-items: center; gap: 9px; padding: 11px 16px; border-radius: 13px;
+    background: var(--surface); border: 1px solid var(--border); font-weight: 600; font-size: 14.5px;
+    backdrop-filter: blur(10px);
+  }
+  .perk .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+
+  /* Hero visual card stack */
+  .hero-visual { position: relative; height: 420px; }
+  .float-card {
+    position: absolute; background: var(--glass); backdrop-filter: blur(20px);
+    border: 1px solid var(--border); border-radius: 18px; padding: 18px 20px;
+    box-shadow: var(--shadow); animation: floaty 6s ease-in-out infinite;
+  }
+  .float-card .ic { font-size: 26px; }
+  .float-card .t { font-weight: 700; margin-top: 6px; font-size: 15px; }
+  .float-card .s { font-size: 12.5px; color: var(--text-dim); }
+  .fc1 { top: 6%; left: 4%; animation-delay: 0s; }
+  .fc2 { top: 36%; right: 2%; animation-delay: 1.5s; }
+  .fc3 { bottom: 6%; left: 16%; animation-delay: 3s; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+
+  .stats-bar {
+    position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 18px; margin-top: 14px;
+  }
+  .stat {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 20px; text-align: center; backdrop-filter: blur(10px);
+  }
+  .stat .num { font-size: 30px; font-weight: 850; letter-spacing: -0.02em; }
+  .stat .lbl { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+
+  /* ============ Cards generic ============ */
+  .glass-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 30px; backdrop-filter: blur(14px); transition: transform 0.4s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
+  }
+  .glass-card:hover { transform: translateY(-6px); border-color: var(--border-strong); box-shadow: var(--shadow); }
+
+  .benefits-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .benefit .ic {
+    width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; font-size: 28px;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2)); margin-bottom: 18px;
+    box-shadow: 0 12px 28px -10px var(--brand-glow);
+  }
+  .benefit h3 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .benefit p { color: var(--text-dim); font-size: 15px; }
+  .benefit .zero { font-size: 46px; font-weight: 900; line-height: 1; margin-bottom: 6px; }
+
+  /* Categories */
+  .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .cat {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 22px; transition: transform 0.35s var(--ease), border-color 0.35s var(--ease), background 0.35s var(--ease);
+    cursor: default; position: relative; overflow: hidden;
+  }
+  .cat::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; opacity: 0;
+    background: radial-gradient(120% 80% at 0% 0%, var(--hero-grad-1), transparent 60%);
+    transition: opacity 0.4s var(--ease);
+  }
+  .cat:hover { transform: translateY(-5px); border-color: var(--border-strong); }
+  .cat:hover::after { opacity: 1; }
+  .cat .top { display: flex; align-items: center; gap: 13px; position: relative; z-index: 1; }
+  .cat .emoji {
+    width: 48px; height: 48px; border-radius: 13px; display: grid; place-items: center; font-size: 25px;
+    background: var(--surface-2); border: 1px solid var(--border); flex-shrink: 0;
+  }
+  .cat .name { font-weight: 700; font-size: 16.5px; }
+  .cat .sub { font-size: 12.5px; color: var(--brand); font-weight: 600; }
+  .cat .tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 15px; position: relative; z-index: 1; }
+  .cat .tag {
+    font-size: 12.5px; padding: 4px 11px; border-radius: 999px; color: var(--text-dim);
+    background: var(--surface-2); border: 1px solid var(--border);
+  }
+
+  /* Advantages */
+  .adv-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+  .adv {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 24px 20px; text-align: center; transition: transform 0.35s var(--ease), border-color 0.35s var(--ease);
+  }
+  .adv:hover { transform: translateY(-6px); border-color: var(--border-strong); }
+  .adv .n {
+    width: 42px; height: 42px; border-radius: 12px; margin: 0 auto 14px; display: grid; place-items: center;
+    font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    box-shadow: 0 10px 22px -8px var(--brand-glow);
+  }
+  .adv h4 { font-size: 15.5px; font-weight: 700; margin-bottom: 7px; line-height: 1.35; }
+  .adv p { font-size: 13px; color: var(--text-dim); }
+
+  /* Process */
+  .process-track { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; position: relative; }
+  .process-track::before {
+    content: ""; position: absolute; top: 27px; left: 6%; right: 6%; height: 2px;
+    background: linear-gradient(90deg, var(--brand), var(--accent)); opacity: 0.4;
+  }
+  .step { text-align: center; position: relative; z-index: 1; }
+  .step .dot {
+    width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 14px; display: grid; place-items: center;
+    font-size: 22px; background: var(--glass); border: 2px solid var(--brand);
+    backdrop-filter: blur(10px); box-shadow: 0 0 0 6px var(--bg), 0 10px 26px -10px var(--brand-glow);
+  }
+  .step h4 { font-size: 15px; font-weight: 700; }
+  .step .vi { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+
+  /* Agent */
+  .agent {
+    border-radius: 30px; overflow: hidden; position: relative;
+    background:
+      radial-gradient(80% 120% at 100% 0%, var(--hero-grad-1), transparent 60%),
+      linear-gradient(135deg, var(--bg-2), var(--bg));
+    border: 1px solid var(--border); padding: 56px;
+  }
+  .agent::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(50% 80% at 0% 100%, var(--hero-grad-2), transparent 60%);
+    pointer-events: none;
+  }
+  .agent-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: center; }
+  .agent h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 850; letter-spacing: -0.02em; margin: 16px 0 14px; }
+  .agent p.lead { color: var(--text-dim); font-size: 17px; max-width: 520px; }
+  .agent-feats { display: flex; flex-direction: column; gap: 14px; margin-top: 26px; }
+  .agent-feat { display: flex; align-items: center; gap: 13px; padding: 16px 18px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); }
+  .agent-feat .ic { font-size: 22px; }
+  .agent-feat b { font-weight: 700; }
+  .agent-feat span { color: var(--text-dim); font-size: 13.5px; display: block; }
+  .agent-card {
+    background: var(--glass); border: 1px solid var(--border-strong); border-radius: 20px; padding: 30px;
+    text-align: center; backdrop-filter: blur(16px); box-shadow: var(--shadow);
+  }
+  .agent-card .price { font-size: 40px; font-weight: 900; letter-spacing: -0.02em; }
+  .agent-card .price small { font-size: 14px; font-weight: 600; color: var(--text-dim); }
+  .agent-card .who { color: var(--text-dim); font-size: 14px; margin: 10px 0 22px; }
+
+  /* Form */
+  .form-wrap { max-width: 640px; margin: 0 auto; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .field { display: flex; flex-direction: column; gap: 7px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-size: 13.5px; font-weight: 600; color: var(--text-dim); }
+  .field input, .field select {
+    padding: 13px 15px; border-radius: 12px; font-size: 15px; font-family: inherit;
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+  }
+  .field input:focus, .field select:focus {
+    outline: none; border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-glow);
+  }
+  .field .err { font-size: 12.5px; color: #ff5a6a; min-height: 1px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(120%);
+    background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border-strong);
+    padding: 15px 24px; border-radius: 14px; font-weight: 600; z-index: 200;
+    box-shadow: var(--shadow); transition: transform 0.5s var(--ease); display: flex; align-items: center; gap: 10px;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Footer */
+  footer { border-top: 1px solid var(--border); padding: 44px 0; background: var(--bg-2); }
+  .foot-inner { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .foot-inner .small { color: var(--text-faint); font-size: 13.5px; }
+
+  /* Reveal animation */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* Responsive */
+  @media (max-width: 980px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 30px; }
+    .hero-visual { height: 320px; }
+    .benefits-grid, .cat-grid { grid-template-columns: repeat(2, 1fr); }
+    .adv-grid { grid-template-columns: repeat(3, 1fr); }
+    .process-track { grid-template-columns: repeat(3, 1fr); gap: 26px 14px; }
+    .process-track::before { display: none; }
+    .agent-grid { grid-template-columns: 1fr; }
+    .agent { padding: 36px 26px; }
+  }
+  @media (max-width: 620px) {
+    .section { padding: 70px 0; }
+    .nav-links { display: none; }
+    .benefits-grid, .cat-grid, .adv-grid, .form-grid { grid-template-columns: 1fr; }
+    .process-track { grid-template-columns: repeat(2, 1fr); }
+    .stats-bar { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a href="#top" class="brand">
+      <span class="logo">⚡</span>
+      <span>GIAONHANH<small data-i18n="brand_sub">越南全域小时达</small></span>
+    </a>
+    <nav class="nav-links">
+      <a href="#benefits" data-i18n="nav.benefits">三大福利</a>
+      <a href="#categories" data-i18n="nav.categories">招商品类</a>
+      <a href="#advantages" data-i18n="nav.advantages">平台优势</a>
+      <a href="#process" data-i18n="nav.process">入驻流程</a>
+      <a href="#agent" data-i18n="nav.agent">区域代理</a>
+    </nav>
+    <div class="seg" id="themeSeg" title="主题">
+      <button data-set="light" title="浅色">☀️</button>
+      <button data-set="dark" title="深色">🌙</button>
+      <button data-set="system" title="跟随系统">🖥️</button>
+    </div>
+    <div class="seg" id="langSeg" title="语言">
+      <button data-set="vi" style="font-size:12px;font-weight:700;">VI</button>
+      <button data-set="zh" style="font-size:12px;font-weight:700;">中</button>
+    </div>
+    <a href="#join" class="btn btn-primary magnetic" data-i18n="nav.join">立即入驻</a>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="top">
+  <canvas id="particles"></canvas>
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">🔥 <span data-i18n="hero.badge">全城商家火热招商</span></span>
+      <h1>
+        <span data-i18n="hero.title1">越南全域小时达</span><br />
+        <span class="gradient-text" data-i18n="hero.title2">30–60分钟极速达</span>
+      </h1>
+      <p class="lead" data-i18n="hero.lead">0门槛免费入驻 · 0平台佣金抽成 · 0配送费商家补贴。全城流量扶持，自有骑手团队，让您利润更高、回款更快。</p>
+      <div class="hero-cta">
+        <a href="#join" class="btn btn-primary btn-lg magnetic" data-i18n="hero.cta1">🚀 立即免费入驻</a>
+        <a href="#agent" class="btn btn-ghost btn-lg magnetic" data-i18n="hero.cta2">了解区域代理</a>
+      </div>
+      <div class="perks">
+        <div class="perk"><span class="dot"></span><span data-i18n="perk1">无加盟费</span></div>
+        <div class="perk"><span class="dot"></span><span data-i18n="perk2">无押金</span></div>
+        <div class="perk"><span class="dot"></span><span data-i18n="perk3">无隐形收费</span></div>
+        <div class="perk"><span class="dot"></span><span data-i18n="perk4">一对一帮扶开店</span></div>
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="float-card fc1"><div class="ic">🛒</div><div class="t" data-i18n="fc1t">全品类招商</div><div class="s" data-i18n="fc1s">11大品类火热入驻中</div></div>
+      <div class="float-card fc2"><div class="ic">🛵</div><div class="t" data-i18n="fc2t">极速送达</div><div class="s" data-i18n="fc2s">自有骑手 30–60分钟</div></div>
+      <div class="float-card fc3"><div class="ic">💰</div><div class="t" data-i18n="fc3t">全额到账</div><div class="s" data-i18n="fc3s">0佣金 利润更高</div></div>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="stats-bar reveal">
+      <div class="stat"><div class="num gradient-text">12,000+</div><div class="lbl" data-i18n="stat1">已入驻商家</div></div>
+      <div class="stat"><div class="num gradient-text">20+</div><div class="lbl" data-i18n="stat2">覆盖城市</div></div>
+      <div class="stat"><div class="num gradient-text">5,000+</div><div class="lbl" data-i18n="stat3">骑手团队</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BENEFITS ===== -->
+<section class="section" id="benefits">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">🎁 <span data-i18n="benefits.eyebrow">平台三大福利</span></span>
+      <h2 data-i18n="benefits.title">入驻即享 · 真零成本起步</h2>
+      <p data-i18n="benefits.sub">从开店到接单，平台全程为您兜底，让您轻装上阵、专注经营。</p>
+    </div>
+    <div class="benefits-grid" id="benefitsGrid"></div>
+  </div>
+</section>
+
+<!-- ===== CATEGORIES ===== -->
+<section class="section" id="categories" style="background:var(--bg-2);">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">📦 <span data-i18n="cat.eyebrow">全品类招商入驻</span></span>
+      <h2 data-i18n="cat.title">11大品类 · 全城热招</h2>
+      <p data-i18n="cat.sub">无论您经营什么，这里都有属于您的一席之地。</p>
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+</section>
+
+<!-- ===== ADVANTAGES ===== -->
+<section class="section" id="advantages">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">💎 <span data-i18n="adv.eyebrow">入驻平台五大优势</span></span>
+      <h2 data-i18n="adv.title">为什么选择我们</h2>
+      <p data-i18n="adv.sub">流量、履约、结算、运营 —— 全链路护航您的生意。</p>
+    </div>
+    <div class="adv-grid" id="advGrid"></div>
+  </div>
+</section>
+
+<!-- ===== PROCESS ===== -->
+<section class="section" id="process" style="background:var(--bg-2);">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">📝 <span data-i18n="proc.eyebrow">入驻流程</span></span>
+      <h2 data-i18n="proc.title">六步开店 · 简单高效</h2>
+      <p data-i18n="proc.sub">一对一专属帮扶，最快当天即可上线接单。</p>
+    </div>
+    <div class="process-track" id="processTrack"></div>
+  </div>
+</section>
+
+<!-- ===== AGENT ===== -->
+<section class="section" id="agent">
+  <div class="wrap">
+    <div class="agent reveal">
+      <div class="agent-grid">
+        <div>
+          <span class="eyebrow">🤝 <span data-i18n="agent.eyebrow">诚招越南区域代理商</span></span>
+          <h2 data-i18n="agent.title">区域独家授权 · 共享增长红利</h2>
+          <p class="lead" data-i18n="agent.lead">把握越南本地生活服务风口，与平台共同成长，享受长期可持续的收益分成。</p>
+          <div class="agent-feats">
+            <div class="agent-feat"><span class="ic">🏆</span><div><b data-i18n="agent.f1t">区域独家授权</b><span data-i18n="agent.f1s">指定城市/区域独家经营权，先到先得</span></div></div>
+            <div class="agent-feat"><span class="ic">💸</span><div><b data-i18n="agent.f2t">永久商家分成</b><span data-i18n="agent.f2s">区域内商家长期流水分成，收益可持续</span></div></div>
+            <div class="agent-feat"><span class="ic">🎨</span><div><b data-i18n="agent.f3t">品牌物料全支持</b><span data-i18n="agent.f3s">统一视觉、培训、运营物料一站配齐</span></div></div>
+          </div>
+        </div>
+        <div class="agent-card">
+          <div class="price">VIP<small data-i18n="agent.card">区域代理</small></div>
+          <p class="who" data-i18n="agent.who">适合实体店主、创业者、有团队渠道的合作伙伴</p>
+          <a href="#join" class="btn btn-primary btn-lg magnetic" style="width:100%;" data-i18n="agent.cta">申请区域代理</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== JOIN FORM ===== -->
+<section class="section" id="join" style="background:var(--bg-2);">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">✍️ <span data-i18n="form.eyebrow">入驻意向登记</span></span>
+      <h2 data-i18n="form.title">立即登记 · 专属顾问 1对1联系</h2>
+      <p data-i18n="form.sub">填写以下信息，我们的招商团队将在 24 小时内与您联系。</p>
+    </div>
+    <div class="glass-card form-wrap reveal">
+      <form id="leadForm" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label data-i18n="form.name">联系人姓名 *</label>
+            <input type="text" name="name" autocomplete="name" />
+            <span class="err" data-err="name"></span>
+          </div>
+          <div class="field">
+            <label data-i18n="form.phone">联系电话 / Zalo *</label>
+            <input type="text" name="phone" inputmode="tel" />
+            <span class="err" data-err="phone"></span>
+          </div>
+          <div class="field">
+            <label data-i18n="form.city">所在城市 *</label>
+            <input type="text" name="city" />
+            <span class="err" data-err="city"></span>
+          </div>
+          <div class="field">
+            <label data-i18n="form.type">经营品类</label>
+            <select name="type" id="typeSelect"></select>
+            <span class="err"></span>
+          </div>
+          <div class="field full">
+            <label data-i18n="form.note">备注（选填）</label>
+            <input type="text" name="note" placeholder="" />
+            <span class="err"></span>
+          </div>
+        </div>
+        <div style="margin-top:22px; display:flex; gap:14px; flex-wrap:wrap; align-items:center;">
+          <button type="submit" class="btn btn-primary btn-lg magnetic" data-i18n="form.submit">提交入驻意向</button>
+          <span class="small" style="color:var(--text-faint);font-size:13px;" data-i18n="form.privacy">我们承诺信息仅用于招商联系，绝不外泄。</span>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="wrap foot-inner">
+    <a href="#top" class="brand">
+      <span class="logo">⚡</span>
+      <span>GIAONHANH<small data-i18n="brand_sub">越南全域小时达</small></span>
+    </a>
+    <span class="small" data-i18n="footer">© 2026 GIAONHANH · 越南全域小时达 · 全城商家火热招商</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast"><span>✅</span><span id="toastMsg"></span></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ===================== I18N ===================== */
+const I18N = {
+  vi: {
+    "brand_sub": "Giao Nhanh Toàn Việt",
+    "nav.benefits": "3 Ưu đãi", "nav.categories": "Ngành hàng", "nav.advantages": "Lợi thế",
+    "nav.process": "Quy trình", "nav.agent": "Đại lý", "nav.join": "Tham gia ngay",
+    "hero.badge": "Tuyển nhà bán hàng toàn thành phố",
+    "hero.title1": "Giao Nhanh Toàn Việt", "hero.title2": "Giao trong 30–60 phút",
+    "hero.lead": "Tham gia miễn phí không điều kiện · 0% hoa hồng nền tảng · Trợ giá phí ship 0đ. Hỗ trợ lưu lượng toàn thành phố, đội shipper riêng, lợi nhuận cao hơn và thu hồi vốn nhanh hơn.",
+    "hero.cta1": "🚀 Tham gia miễn phí", "hero.cta2": "Về đại lý khu vực",
+    "perk1": "Không phí nhượng quyền", "perk2": "Không tiền cọc", "perk3": "Không phí ẩn", "perk4": "Hỗ trợ mở hàng 1-1",
+    "fc1t": "Tuyển toàn ngành", "fc1s": "11 ngành hàng đang hot",
+    "fc2t": "Giao siêu tốc", "fc2s": "Shipper riêng 30–60 phút",
+    "fc3t": "Nhận đủ tiền", "fc3s": "0% hoa hồng, lời hơn",
+    "stat1": "Nhà bán đã tham gia", "stat2": "Thành phố phủ sóng", "stat3": "Đội ngũ shipper",
+    "benefits.eyebrow": "3 Ưu đãi lớn từ nền tảng", "benefits.title": "Tham gia là có · Khởi đầu thật 0 đồng",
+    "benefits.sub": "Từ mở hàng đến nhận đơn, nền tảng lo từ A đến Z để bạn nhẹ gánh, tập trung kinh doanh.",
+    "cat.eyebrow": "Tuyển toàn ngành hàng", "cat.title": "11 ngành hàng · Tuyển khắp thành phố",
+    "cat.sub": "Dù bạn kinh doanh gì, đây luôn có chỗ cho bạn.",
+    "adv.eyebrow": "5 Lợi thế khi tham gia", "adv.title": "Tại sao chọn chúng tôi",
+    "adv.sub": "Lưu lượng, giao hàng, thanh toán, vận hành — bảo vệ toàn chuỗi giá trị của bạn.",
+    "proc.eyebrow": "Quy trình tham gia", "proc.title": "6 bước mở hàng · Đơn giản hiệu quả",
+    "proc.sub": "Hỗ trợ 1-1 riêng, nhanh nhất trong ngày đã lên kệ nhận đơn.",
+    "agent.eyebrow": "Tìm đại lý khu vực Việt Nam", "agent.title": "Độc quyền khu vực · Chia sẻ tăng trưởng",
+    "agent.lead": "Nắm bắt làn sóng dịch vụ địa phương Việt Nam, cùng nền tảng phát triển và hưởng chia sẻ doanh thu bền vững lâu dài.",
+    "agent.f1t": "Độc quyền khu vực", "agent.f1s": "Quyền kinh doanh độc quyền thành phố/vùng, ai nhanh hơn được",
+    "agent.f2t": "Chia sẻ vĩnh viễn", "agent.f2s": "Chia sẻ doanh thu dòng tiền nhà bán trong vùng, bền vững",
+    "agent.f3t": "Hỗ trợ vật liệu thương hiệu", "agent.f3s": "Hình ảnh, đào tạo, vận hành được trang bị trọn gói",
+    "agent.card": "Đại lý khu vực", "agent.who": "Phù hợp chủ cửa hàng, startup, đối tác có kênh & đội ngũ",
+    "agent.cta": "Đăng ký đại lý",
+    "form.eyebrow": "Đăng ký ý định tham gia", "form.title": "Đăng ký ngay · Tư vấn viên riêng liên hệ 1-1",
+    "form.sub": "Điền thông tin, đội tuyển thương của chúng tôi sẽ liên hệ trong 24h.",
+    "form.name": "Họ tên liên hệ *", "form.phone": "Số điện thoại / Zalo *", "form.city": "Thành phố *",
+    "form.type": "Ngành hàng kinh doanh", "form.note": "Ghi chú (tùy chọn)",
+    "form.submit": "Gửi ý định tham gia", "form.privacy": "Chúng tôi cam kết thông tin chỉ dùng để liên hệ tuyển thương, không rò rỉ.",
+    "footer": "© 2026 GIAONHANH · Giao Nhanh Toàn Việt · Tuyển nhà bán toàn thành phố",
+    "err.required": "Vui lòng điền thông tin này",
+    "toast.ok": "Đã nhận ý định tham gia! Chúng tôi sẽ liên hệ sớm."
+  },
+  zh: {
+    "brand_sub": "越南全域小时达",
+    "nav.benefits": "三大福利", "nav.categories": "招商品类", "nav.advantages": "平台优势",
+    "nav.process": "入驻流程", "nav.agent": "区域代理", "nav.join": "立即入驻",
+    "hero.badge": "全城商家火热招商",
+    "hero.title1": "越南全域小时达", "hero.title2": "30–60分钟极速达",
+    "hero.lead": "0门槛免费入驻 · 0平台佣金抽成 · 0配送费商家补贴。全城流量扶持，自有骑手团队，让您利润更高、回款更快。",
+    "hero.cta1": "🚀 立即免费入驻", "hero.cta2": "了解区域代理",
+    "perk1": "无加盟费", "perk2": "无押金", "perk3": "无隐形收费", "perk4": "一对一帮扶开店",
+    "fc1t": "全品类招商", "fc1s": "11大品类火热入驻中",
+    "fc2t": "极速送达", "fc2s": "自有骑手 30–60分钟",
+    "fc3t": "全额到账", "fc3s": "0佣金 利润更高",
+    "stat1": "已入驻商家", "stat2": "覆盖城市", "stat3": "骑手团队",
+    "benefits.eyebrow": "平台三大福利", "benefits.title": "入驻即享 · 真零成本起步",
+    "benefits.sub": "从开店到接单，平台全程为您兜底，让您轻装上阵、专注经营。",
+    "cat.eyebrow": "全品类招商入驻", "cat.title": "11大品类 · 全城热招",
+    "cat.sub": "无论您经营什么，这里都有属于您的一席之地。",
+    "adv.eyebrow": "入驻平台五大优势", "adv.title": "为什么选择我们",
+    "adv.sub": "流量、履约、结算、运营 —— 全链路护航您的生意。",
+    "proc.eyebrow": "入驻流程", "proc.title": "六步开店 · 简单高效",
+    "proc.sub": "一对一专属帮扶，最快当天即可上线接单。",
+    "agent.eyebrow": "诚招越南区域代理商", "agent.title": "区域独家授权 · 共享增长红利",
+    "agent.lead": "把握越南本地生活服务风口，与平台共同成长，享受长期可持续的收益分成。",
+    "agent.f1t": "区域独家授权", "agent.f1s": "指定城市/区域独家经营权，先到先得",
+    "agent.f2t": "永久商家分成", "agent.f2s": "区域内商家长期流水分成，收益可持续",
+    "agent.f3t": "品牌物料全支持", "agent.f3s": "统一视觉、培训、运营物料一站配齐",
+    "agent.card": "区域代理", "agent.who": "适合实体店主、创业者、有团队渠道的合作伙伴",
+    "agent.cta": "申请区域代理",
+    "form.eyebrow": "入驻意向登记", "form.title": "立即登记 · 专属顾问 1对1联系",
+    "form.sub": "填写以下信息，我们的招商团队将在 24 小时内与您联系。",
+    "form.name": "联系人姓名 *", "form.phone": "联系电话 / Zalo *", "form.city": "所在城市 *",
+    "form.type": "经营品类", "form.note": "备注（选填）",
+    "form.submit": "提交入驻意向", "form.privacy": "我们承诺信息仅用于招商联系，绝不外泄。",
+    "footer": "© 2026 GIAONHANH · 越南全域小时达 · 全城商家火热招商",
+    "err.required": "请填写此项",
+    "toast.ok": "已收到您的入驻意向！我们将尽快与您联系。"
+  }
+};
+
+/* ===================== DATA ===================== */
+const BENEFITS = [
+  { zero: "0đ", icon: "🎁", t: { vi: "Miễn phí tham gia", zh: "0门槛免费入驻" },
+    d: { vi: "Không điều kiện, không phí nhượng quyền, không cọc.", zh: "无加盟费、无押金，轻松开店。" } },
+  { zero: "0%", icon: "💎", t: { vi: "0% hoa hồng nền tảng", zh: "0平台佣金抽成" },
+    d: { vi: "Doanh thu nhận đủ, lợi nhuận thuộc về bạn.", zh: "全额营收到账，利润全归您。" } },
+  { zero: "0đ", icon: "🛵", t: { vi: "Trợ giá phí ship 0đ", zh: "0配送费商家补贴" },
+    d: { vi: "Nền tảng hỗ trợ phí giao hàng cho nhà bán.", zh: "平台补贴配送费，商家零负担。" } }
+];
+
+const CATEGORIES = [
+  { emoji: "🥬", name: { vi: "Siêu thị tươi sống", zh: "生鲜商超" },
+    sub: { vi: "Rau củ · Thịt cá · Gạo dầu", zh: "蔬果 · 肉禽 · 粮油" },
+    tags: { vi: ["Rau củ quả","Thịt & hải sản","Trứng sữa & gạo dầu","Ăn vặt","Đồ uống & rượu","Sữa bột trẻ em"],
+            zh: ["蔬菜水果","肉禽水产","蛋奶粮油","休闲零食","酒水饮料","母婴奶粉"] } },
+  { emoji: "💄", name: { vi: "Mỹ phẩm & cá nhân", zh: "美妆个护" },
+    sub: { vi: "Da · Tóc · Răng miệng", zh: "护肤 · 护发 · 口腔" },
+    tags: { vi: ["Chăm sóc da mặt","Chăm sóc cơ thể","Chăm sóc tóc","Răng miệng"],
+            zh: ["面部护理","身体护理","美发护发","口腔护理"] } },
+  { emoji: "📱", name: { vi: "3C & Điện gia dụng", zh: "3C数码&家电" },
+    sub: { vi: "Điện thoại · Máy tính · Gia dụng", zh: "手机 · 电脑 · 家电" },
+    tags: { vi: ["Phụ kiện điện thoại","Máy tính & văn phòng","Điện gia dụng lớn","Điện nhỏ"],
+            zh: ["手机配件","电脑办公","大家电","小家电"] } },
+  { emoji: "🏠", name: { vi: "Gia dụng & hàng ngày", zh: "家居日用" },
+    sub: { vi: "Bếp · Giường · Vệ sinh", zh: "厨房 · 床品 · 清洁" },
+    tags: { vi: ["Đồ dùng giường","Đồ dùng bếp","Vệ sinh giặt giũ","Trang trí nhà"],
+            zh: ["床上用品","厨房用品","清洁洗护","家居装饰"] } },
+  { emoji: "👗", name: { vi: "Thời trang", zh: "时尚服饰" },
+    sub: { vi: "Nữ · Nam · Trẻ em", zh: "女装 · 男装 · 童装" },
+    tags: { vi: ["Thời trang nữ","Thời trang nam","Thời trang trẻ em","Giày & phụ kiện"],
+            zh: ["女装","男装","童装","鞋包配饰"] } },
+  { emoji: "🍼", name: { vi: "Mẹ & Bé", zh: "母婴用品" },
+    sub: { vi: "Tã · Đồ chơi · Xe đẩy", zh: "纸尿裤 · 玩具 · 推车" },
+    tags: { vi: ["Chăm sóc em bé","Tã & khăn ướt","Xe đẩy & giường","Đồ chơi"],
+            zh: ["婴儿洗护","纸尿裤湿巾","推车床品","玩具"] } },
+  { emoji: "⚽", name: { vi: "Thể thao & Ô tô", zh: "运动户外汽车" },
+    sub: { vi: "Thể thao · Ngoài trời · Xe", zh: "运动 · 户外 · 汽车" },
+    tags: { vi: ["Thiết bị thể thao","Đồ ngoài trời","Phụ kiện ô tô"],
+            zh: ["运动装备","户外用品","汽车用品"] } },
+  { emoji: "🐾", name: { vi: "Thú cưng", zh: "宠物用品" },
+    sub: { vi: "Thức ăn · Chuồng", zh: "主粮 · 窝具" },
+    tags: { vi: ["Thức ăn thú cưng","Chuồng & đồ dùng"],
+            zh: ["主粮零食","日用窝具"] } },
+  { emoji: "🎉", name: { vi: "Giải trí", zh: "休闲娱乐" },
+    sub: { vi: "Karaoke · Spa · Du lịch", zh: "KTV · SPA · 旅游" },
+    tags: { vi: ["Karaoke","Massage & Spa","Khách sạn","Du lịch","Rạp phim tư nhân"],
+            zh: ["KTV","按摩SPA","酒店住宿","旅游出行","私人影院"] } },
+  { emoji: "🍜", name: { vi: "Đồ ăn & Giao hàng", zh: "餐饮外卖" },
+    sub: { vi: "Nhanh · Nướng · Phở", zh: "快餐 · 烧烤 · 米粉" },
+    tags: { vi: ["Tráng miệng & nước","Cơm & ăn nhanh","Đồ ăn nhanh Tây","Nướng & xiên","Phở & mì"],
+            zh: ["甜品饮品","盖饭简餐","西式快餐","烧烤炸串","米粉面食"] } },
+  { emoji: "🚕", name: { vi: "Dịch vụ di chuyển", zh: "出行服务" },
+    sub: { vi: "Gọi xe · Lái hộ", zh: "网约车 · 代驾" },
+    tags: { vi: ["Gọi xe công nghệ","Lái xe hộ chuyên nghiệp"],
+            zh: ["网约车打车","专业代驾"] } }
+];
+
+const ADVANTAGES = [
+  { n: "1", t: { vi: "Hỗ trợ lưu lượng", zh: "全城流量扶持" }, d: { vi: "Đề xuất trang chủ chính xác", zh: "首页推荐精准引流" } },
+  { n: "2", t: { vi: "Giao siêu tốc", zh: "30–60分钟极速达" }, d: { vi: "Đội shipper riêng", zh: "自有骑手团队" } },
+  { n: "3", t: { vi: "Nhận đủ doanh thu", zh: "全额营收到账" }, d: { vi: "0% hoa hồng, lời hơn", zh: "不抽佣金利润更高" } },
+  { n: "4", t: { vi: "Miễn phí lên kệ", zh: "免费装修上架" }, d: { vi: "Hướng dẫn vận hành", zh: "运营全程指导" } },
+  { n: "5", t: { vi: "Thanh toán minh bạch", zh: "资金透明结算" }, d: { vi: "An toàn & ổn định", zh: "安全稳定有保障" } }
+];
+
+const PROCESS = [
+  { icon: "💬", t: { vi: "Tư vấn", zh: "意向咨询" } },
+  { icon: "📄", t: { vi: "Nộp hồ sơ", zh: "提交资料" } },
+  { icon: "✅", t: { vi: "Duyệt", zh: "审核通过" } },
+  { icon: "🏪", t: { vi: "Mở hàng & lên kệ", zh: "开店上架" } },
+  { icon: "🎓", t: { vi: "Đào tạo vận hành", zh: "培训运营" } },
+  { icon: "📦", t: { vi: "Nhận đơn chính thức", zh: "正式接单" } }
+];
+
+/* ===================== STATE ===================== */
+let lang = localStorage.getItem("gn_lang") || "vi";
+let theme = localStorage.getItem("gn_theme") || "system";
+
+function applyTheme() {
+  let t = theme;
+  if (t === "system") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", t);
+  document.querySelectorAll("#themeSeg button").forEach(b => b.classList.toggle("active", b.dataset.set === theme));
+  document.querySelectorAll("#langSeg button").forEach(b => b.classList.toggle("active", b.dataset.set === lang));
+}
+function applyLang() {
+  document.documentElement.setAttribute("lang", lang);
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (I18N[lang][key] != null) el.textContent = I18N[lang][key];
+  });
+  renderDynamic();
+}
+
+/* ===================== RENDER ===================== */
+function renderDynamic() {
+  const L = I18N[lang];
+  // benefits
+  document.getElementById("benefitsGrid").innerHTML = BENEFITS.map(b => `
+    <div class="glass-card benefit reveal">
+      <div class="zero gradient-text">${b.zero}</div>
+      <div class="ic">${b.icon}</div>
+      <h3>${b.t[lang]}</h3>
+      <p>${b.d[lang]}</p>
+    </div>`).join("");
+  // categories
+  document.getElementById("catGrid").innerHTML = CATEGORIES.map(c => `
+    <div class="cat reveal">
+      <div class="top">
+        <div class="emoji">${c.emoji}</div>
+        <div><div class="name">${c.name[lang]}</div><div class="sub">${c.sub[lang]}</div></div>
+      </div>
+      <div class="tags">${c.tags[lang].map(t => `<span class="tag">${t}</span>`).join("")}</div>
+    </div>`).join("");
+  // advantages
+  document.getElementById("advGrid").innerHTML = ADVANTAGES.map(a => `
+    <div class="adv reveal"><div class="n">${a.n}</div><h4>${a.t[lang]}</h4><p>${a.d[lang]}</p></div>`).join("");
+  // process
+  document.getElementById("processTrack").innerHTML = PROCESS.map(p => `
+    <div class="step reveal"><div class="dot">${p.icon}</div><h4>${p.t[lang]}</h4></div>`).join("");
+  // form type select
+  const sel = document.getElementById("typeSelect");
+  if (sel && sel.options.length === 0) {
+    sel.innerHTML = '<option value="">--</option>' + CATEGORIES.map((c,i) => `<option value="${i}">${c.name[lang]}</option>`).join("");
+  } else if (sel) {
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">--</option>' + CATEGORIES.map((c,i) => `<option value="${i}">${c.name[lang]}</option>`).join("");
+    sel.value = cur;
+  }
+  observeReveal();
+}
+
+/* ===================== REVEAL ===================== */
+let io;
+function observeReveal() {
+  if (!io) io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal:not(.in)").forEach(el => io.observe(el));
+}
+
+/* ===================== MAGNETIC ===================== */
+function initMagnetic() {
+  document.querySelectorAll(".magnetic").forEach(el => {
+    el.addEventListener("mousemove", (e) => {
+      const r = el.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width / 2) * 0.25;
+      const y = (e.clientY - r.top - r.height / 2) * 0.35;
+      el.style.transform = `translate(${x}px, ${y}px)`;
+    });
+    el.addEventListener("mouseleave", () => { el.style.transform = ""; });
+  });
+}
+
+/* ===================== FORM ===================== */
+function initForm() {
+  const form = document.getElementById("leadForm");
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    let ok = true;
+    ["name","phone","city"].forEach(n => {
+      const inp = form.elements[n];
+      const err = form.querySelector(`[data-err="${n}"]`);
+      if (!inp.value.trim()) { err.textContent = I18N[lang]["err.required"]; inp.style.borderColor = "#ff5a6a"; ok = false; }
+      else { err.textContent = ""; inp.style.borderColor = ""; }
+    });
+    if (!ok) return;
+    const lead = {
+      name: form.elements.name.value.trim(),
+      phone: form.elements.phone.value.trim(),
+      city: form.elements.city.value.trim(),
+      type: form.elements.type.value,
+      note: form.elements.note.value.trim(),
+      ts: new Date().toISOString()
+    };
+    const store = JSON.parse(localStorage.getItem("gn_leads") || "[]");
+    store.push(lead);
+    localStorage.setItem("gn_leads", JSON.stringify(store));
+    showToast(I18N[lang]["toast.ok"]);
+    form.reset();
+  });
+}
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  document.getElementById("toastMsg").textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3200);
+}
+
+/* ===================== THEME / LANG SEGMENTS ===================== */
+document.getElementById("themeSeg").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  theme = b.dataset.set; localStorage.setItem("gn_theme", theme); applyTheme();
+});
+document.getElementById("langSeg").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  lang = b.dataset.set; localStorage.setItem("gn_lang", lang); applyLang();
+});
+matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => { if (theme === "system") applyTheme(); });
+
+/* ===================== THREE.JS PARTICLES ===================== */
+function initParticles() {
+  if (!window.THREE) return;
+  const canvas = document.getElementById("particles");
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(70, 1, 0.1, 100);
+  camera.position.z = 22;
+
+  const COUNT = 1300;
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(COUNT * 3);
+  const col = new Float32Array(COUNT * 3);
+  const brand = new THREE.Color(0xff6a2b);
+  const accent = new THREE.Color(0x2bd4a7);
+  for (let i = 0; i < COUNT; i++) {
+    pos[i*3] = (Math.random() - 0.5) * 60;
+    pos[i*3+1] = (Math.random() - 0.5) * 40;
+    pos[i*3+2] = (Math.random() - 0.5) * 40;
+    const c = Math.random() > 0.6 ? accent : brand;
+    col[i*3] = c.r; col[i*3+1] = c.g; col[i*3+2] = c.b;
+  }
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+  const mat = new THREE.PointsMaterial({ size: 0.16, vertexColors: true, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending });
+  const points = new THREE.Points(geo, mat);
+  scene.add(points);
+
+  function resize() {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  window.addEventListener("resize", resize); resize();
+
+  let mx = 0, my = 0;
+  window.addEventListener("mousemove", (e) => {
+    mx = (e.clientX / innerWidth - 0.5);
+    my = (e.clientY / innerHeight - 0.5);
+  });
+  function animate() {
+    points.rotation.y += 0.0008;
+    points.rotation.x += 0.0003;
+    camera.position.x += (mx * 4 - camera.position.x) * 0.03;
+    camera.position.y += (-my * 3 - camera.position.y) * 0.03;
+    camera.lookAt(scene.position);
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+/* ===================== INIT ===================== */
+applyTheme();
+applyLang();
+initMagnetic();
+initForm();
+initParticles();
+</script>
+</body>
+</html>

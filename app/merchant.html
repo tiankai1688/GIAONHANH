@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>GIAONHANH · 商家端</title>
+<style>
+  :root{--brand:#ff6a2b;--brand-2:#ffb020;--accent:#2bd4a7;--ease:cubic-bezier(0.16,1,0.3,1);
+    --font:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;}
+  html[data-theme="dark"]{--bg:#0b0d13;--panel:#151821;--surface:rgba(255,255,255,.05);--surface-2:rgba(255,255,255,.09);
+    --border:rgba(255,255,255,.10);--border-strong:rgba(255,255,255,.18);--text:#f4f6fb;--dim:#9aa3b8;--faint:#646d82;
+    --glass:rgba(18,21,30,.6);--shadow:0 20px 50px -24px rgba(0,0,0,.8);}
+  html[data-theme="light"]{--bg:#f4f6fb;--panel:#fff;--surface:rgba(20,30,60,.04);--surface-2:rgba(20,30,60,.07);
+    --border:rgba(15,23,42,.08);--border-strong:rgba(15,23,42,.14);--text:#131722;--dim:#5a6478;--faint:#9aa3b8;
+    --glass:rgba(255,255,255,.7);--shadow:0 20px 44px -26px rgba(40,50,90,.35);}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{height:100%;}
+  body{font-family:var(--font);background:#05060a;color:var(--text);display:flex;justify-content:center;align-items:center;min-height:100vh;transition:background .4s var(--ease);}
+  body.light-body{background:#c9d2e3;}
+  .stage{display:flex;align-items:center;justify-content:center;padding:24px;}
+  .device{position:relative;width:min(430px,100vw);height:min(932px,100vh);background:var(--bg);border-radius:44px;overflow:hidden;
+    box-shadow:0 0 0 12px #0d0f15,0 0 0 14px #2a2f3c,0 50px 100px -34px rgba(0,0,0,.9);transition:background .4s var(--ease);}
+  @media(max-width:479px){
+    html,body{height:100%;overflow:hidden;}
+    body{display:block;min-height:100%;}
+    .stage{padding:0;display:block;height:100%;}
+    .device{width:100vw;height:100vh;height:100dvh;border-radius:0;box-shadow:none;overflow:visible;}
+    .screen{padding-top:100px!important;}
+  }
+  .statusbar{position:absolute;top:0;left:0;right:0;height:46px;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:14px;font-weight:600;pointer-events:none;color:var(--text);}
+  .statusbar .right{display:flex;align-items:center;gap:6px;}
+  .statusbar .bat{width:24px;height:12px;border:1.5px solid currentColor;border-radius:3px;position:relative;opacity:.9;}
+  .statusbar .bat::after{content:"";position:absolute;right:-3px;top:3px;width:2px;height:6px;background:currentColor;border-radius:0 2px 2px 0;}
+  .statusbar .bat i{position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:70%;background:currentColor;border-radius:1px;}
+  .screens{position:absolute;inset:0;}
+  .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-top:46px;padding-bottom:calc(74px + env(safe-area-inset-bottom,0px));display:none;animation:fade .35s var(--ease);}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  .tabbar{position:absolute;left:0;right:0;bottom:0;height:70px;z-index:40;display:flex;background:var(--glass);backdrop-filter:blur(22px) saturate(180%);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom,0px);transition:transform .4s var(--ease),background .4s var(--ease);}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--faint);font-size:11px;font-weight:600;cursor:pointer;transition:color .25s var(--ease);}
+  .tab .ic{font-size:21px;line-height:1;filter:grayscale(.4);transition:.25s var(--ease);}
+  .tab.active{color:var(--brand);} .tab.active .ic{filter:none;transform:translateY(-1px) scale(1.06);}
+  .topbar{position:fixed;top:46px;left:0;right:0;z-index:30;display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--glass);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);height:54px;}
+  @media(min-width:480px){.topbar{position:sticky;top:46px;left:auto;right:auto;height:auto;}}
+  .topbar h1{font-size:17px;font-weight:800;}
+  .pad{padding:16px;}
+
+  /* shop header */
+  .shop{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;padding:22px 18px;display:flex;align-items:center;gap:14px;}
+  .shop .lg{width:60px;height:60px;border-radius:18px;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:32px;}
+  .shop .nm{font-size:20px;font-weight:850;} .shop .sub{font-size:12.5px;opacity:.92;margin-top:3px;}
+  .shop .stat{margin-left:auto;text-align:center;}
+  .shop .stat b{font-size:18px;display:block;} .shop .stat small{font-size:11px;opacity:.9;}
+
+  .sec-title{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 8px;}
+  .sec-title b{font-size:16px;font-weight:800;} .sec-title span{font-size:12.5px;color:var(--dim);}
+
+  /* switch */
+  .sw{position:relative;width:48px;height:28px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);cursor:pointer;transition:.3s var(--ease);flex-shrink:0;}
+  .sw i{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.3s var(--ease);box-shadow:0 2px 6px rgba(0,0,0,.3);}
+  .sw.on{background:linear-gradient(135deg,var(--brand),var(--brand-2));border-color:transparent;}
+  .sw.on i{left:22px;}
+
+  /* order card */
+  .morder{margin:0 14px 12px;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+  .morder .oh{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);}
+  .morder .oh .no{font-weight:800;font-size:14px;} .morder .oh .tm{font-size:12px;color:var(--dim);}
+  .morder .oh .chip{margin-left:auto;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--surface-2);color:var(--dim);}
+  .morder .oh .chip.new{background:rgba(255,106,43,.18);color:var(--brand);}
+  .morder .oh .chip.cook{background:rgba(43,212,167,.16);color:var(--accent);}
+  .morder .oh .chip.done{background:rgba(43,212,167,.14);color:var(--accent);opacity:.7;}
+  .morder .cust{padding:10px 14px;font-size:13px;color:var(--dim);border-bottom:1px solid var(--border);}
+  .morder .cust b{color:var(--text);}
+  .morder .it{padding:8px 14px;font-size:13px;display:flex;justify-content:space-between;border-bottom:1px solid var(--border);}
+  .morder .it .q{color:var(--dim);}
+  .morder .ot{display:flex;align-items:center;padding:12px 14px;}
+  .morder .ot .tot{font-size:16px;font-weight:850;color:var(--brand);}
+  .morder .ot .acts{margin-left:auto;display:flex;gap:8px;}
+  .morder .ot .acts button{border:none;border-radius:11px;padding:9px 16px;font-weight:800;font-size:13px;cursor:pointer;}
+  .morder .ot .acts .acc{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;}
+  .morder .ot .acts .rdy{background:var(--accent);color:#04201a;}
+  .morder .ot .acts .rej{background:var(--surface-2);color:var(--dim);border:1px solid var(--border);}
+  /* collapsible done orders */
+  .morder .mbody{display:block;}
+  .morder.collapsible .mbody{max-height:0;overflow:hidden;opacity:0;transition:max-height .4s var(--ease),opacity .3s var(--ease);}
+  .morder.collapsible.open .mbody{max-height:680px;opacity:1;}
+  .morder.collapsible .chev{margin-left:8px;font-size:12px;color:var(--dim);transition:transform .35s var(--ease);}
+  .morder.collapsible.open .chev{transform:rotate(180deg);}
+  .morder.collapsible .hint{font-size:12px;color:var(--dim);text-align:center;padding:9px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;}
+
+  /* product row */
+  .prow{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border);}
+  .prow .pe{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:24px;background:var(--surface-2);flex-shrink:0;}
+  .prow .pi{flex:1;} .prow .pi .pn{font-size:14.5px;font-weight:700;} .prow .pi .pp{font-size:14px;font-weight:850;color:var(--brand);margin-top:2px;}
+  .prow.off{opacity:.45;}
+  .prow .edit{font-size:12px;color:var(--brand);background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:6px 10px;cursor:pointer;}
+
+  /* earnings */
+  .egrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:4px 14px;}
+  .ecard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 8px;text-align:center;}
+  .ecard .ev{font-size:18px;font-weight:850;} .ecard .el{font-size:11.5px;color:var(--dim);margin-top:4px;}
+  .ecard.hl .ev{color:var(--accent);}
+  .note-box{margin:14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;font-size:13px;color:var(--dim);line-height:1.6;}
+  .note-box b{color:var(--text);}
+  .note-box .k{color:var(--accent);font-weight:800;}
+
+  /* menu / settings */
+  .menu{margin:0 16px 16px;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+  .menu .mi{display:flex;align-items:center;gap:13px;padding:15px 16px;border-bottom:1px solid var(--border);cursor:pointer;}
+  .menu .mi:last-child{border-bottom:none;}
+  .menu .mi .mi-ic{font-size:20px;width:26px;text-align:center;}
+  .menu .mi .mi-t{flex:1;font-size:14.5px;font-weight:600;} .menu .mi .mi-a{color:var(--faint);}
+  .empty{text-align:center;color:var(--dim);padding:60px 20px;font-size:14px;} .empty .e{font-size:46px;margin-bottom:10px;}
+
+  .btn-block{display:block;width:calc(100% - 32px);margin:6px 16px;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;font-weight:800;font-size:15px;cursor:pointer;}
+  .badge-dot{position:absolute;top:6px;right:18px;min-width:18px;height:18px;border-radius:9px;background:#ff3b5c;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 5px;border:2px solid var(--bg);}
+</style>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-og3Vp3+93jOtPzAHjvq4rf/A9zpav5PRl+JqZNWqZFc=' 'sha256-wO+dH9Jp8vw29OU7iKVdsDVA3/Reztf0j+6a9/hornw=' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https: wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'" />
+</head>
+<body>
+<div class="stage"><div class="device" id="device">
+  <div class="statusbar"><span id="clock">19:58</span><span class="right"><span>📶</span><span>🛜</span><span class="bat"><i></i></span></span></div>
+  <div class="screens" id="screens">
+
+    <!-- ORDERS -->
+    <section class="screen active" id="screen-orders">
+      <div class="topbar"><h1 data-a="tab_orders">接单</h1><div style="margin-left:auto;font-size:12px;color:var(--dim)" id="openState">🟢 营业中</div></div>
+      <div class="sec-title"><b data-a="new_orders">新订单</b><span id="newCount"></span></div>
+      <div id="newOrders"></div>
+      <div class="sec-title"><b data-a="cooking">进行中</b><span></span></div>
+      <div id="cookOrders"></div>
+      <div class="sec-title"><b data-a="finished">已完成</b><span></span></div>
+      <div id="doneOrders"></div>
+      <div style="height:10px"></div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section class="screen" id="screen-products">
+      <div class="topbar"><h1 data-a="tab_products">商品</h1></div>
+      <div class="sec-title"><b data-a="my_goods">我的商品</b><span id="onCount"></span></div>
+      <div id="productList"></div>
+      <div style="height:10px"></div>
+    </section>
+
+    <!-- EARNINGS -->
+    <section class="screen" id="screen-earn">
+      <div class="topbar"><h1 data-a="tab_earn">收益</h1></div>
+      <div class="egrid">
+        <div class="ecard hl"><div class="ev" id="eToday">0 ₫</div><div class="el" data-a="e_today">今日结算</div></div>
+        <div class="ecard"><div class="ev" id="ePending">0 ₫</div><div class="el" data-a="e_pending">待结算</div></div>
+        <div class="ecard"><div class="ev" id="eMonth">0</div><div class="el" data-a="e_month">月售单</div></div>
+      </div>
+      <div class="note-box">
+        <b data-a="zero_comm">0 佣金 · 全额到账</b><br>
+        <span data-a="zero_comm_d">平台抽成恒为 0%，商品金额 100% 进您的结算账户；配送费由平台补贴，您无需承担。</span>
+        <div style="margin-top:8px"><span class="k">●</span> <span data-a="subsidy_on">配送补贴：已开启</span></div>
+      </div>
+      <div class="sec-title"><b data-a="settle_list">结算流水</b></div>
+      <div id="settleList"></div>
+      <div style="height:10px"></div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="screen" id="screen-me">
+      <div class="topbar"><h1 data-a="tab_me">我的</h1></div>
+      <div class="shop">
+        <div class="lg">🏪</div>
+        <div><div class="nm" id="meName">GREEN MART</div><div class="sub" id="meCat">生鲜商超 · ★4.8</div></div>
+        <div class="stat"><b id="meOpen">🟢</b><small data-a="open">营业</small></div>
+      </div>
+      <div class="menu" style="margin-top:16px">
+        <div class="mi" id="swOpen"><div class="mi-ic">🟢</div><div class="mi-t" data-a="shop_open">店铺营业</div><div class="sw" id="swOpenEl"><i></i></div></div>
+        <div class="mi" id="swSub"><div class="mi-ic">🚚</div><div class="mi-t" data-a="deli_sub">配送费补贴（0 佣金）</div><div class="sw on" id="swSubEl"><i></i></div></div>
+        <div class="mi" id="swVoice"><div class="mi-ic">🔊</div><div class="mi-t" data-a="voice_entry">语音提醒</div><div class="mi-a" id="voiceState">开</div></div>
+        <div class="mi" id="swSettings"><div class="mi-ic">⚙️</div><div class="mi-t" data-a="settings_entry">数据模式</div><div class="mi-a">›</div></div>
+        <div class="mi" data-mi="lang"><div class="mi-ic">🌐</div><div class="mi-t" data-a="lang_entry">语言</div><div class="mi-a">›</div></div>
+        <div class="mi" data-mi="theme"><div class="mi-ic">🎨</div><div class="mi-t" data-a="theme_entry">主题</div><div class="mi-a">›</div></div>
+        <div class="mi" data-mi="exit"><div class="mi-ic">↩️</div><div class="mi-t" data-a="exit_app">返回消费者端</div><div class="mi-a">›</div></div>
+      </div>
+    </section>
+
+  </div>
+  <div class="tabbar" id="tabbar">
+    <div class="tab active" data-tab="orders"><div class="ic">📥</div><div data-a="tab_orders">接单</div></div>
+    <div class="tab" data-tab="products"><div class="ic">📦</div><div data-a="tab_products">商品</div></div>
+    <div class="tab" data-tab="earn"><div class="ic">💰</div><div data-a="tab_earn">收益</div></div>
+    <div class="tab" data-tab="me"><div class="ic">👤</div><div data-a="tab_me">我的</div></div>
+  </div>
+</div></div>
+
+<script>
+/* Shared config resolver — reads the SAME localStorage keys written by the
+   consumer app's "数据模式" overlay, so one place configures all three ends.
+   URL overrides: ?api= ?live ?demo ?pusher= ?pusherCluster= */
+window.GN_CONFIG = (function(){
+  const q = new URLSearchParams(location.search);
+  const base = (q.get('api') || localStorage.getItem('gn_api_base') || '').trim().replace(/\/+$/,'');
+  let useApi;
+  if(q.has('live')) useApi = true;
+  else if(q.has('demo')) useApi = false;
+  else { const s = localStorage.getItem('gn_use_api'); useApi = s===null ? !!base : s==='1'; }
+  const key = (q.get('pusher') || localStorage.getItem('gn_pusher_key') || '').trim();
+  const cluster = (q.get('pusherCluster') || localStorage.getItem('gn_pusher_cluster') || 'ap1').trim();
+  return { apiBase:base, useApi, pusherKey:key, pusherCluster:cluster };
+})();
+</script>
+<script src="native-bridge.js" defer></script>
+<script src="settings-overlay.js" defer></script>
+<script src="api.js" defer></script>
+<script>
+/* ===================== I18N ===================== */
+const APP = {
+  vi:{
+    tab_orders:"Tiếp đơn", tab_products:"Sản phẩm", tab_earn:"Doanh thu", tab_me:"Của tôi",
+    new_orders:"Đơn mới", cooking:"Đang xử lý", finished:"Đã hoàn tất", my_goods:"Sản phẩm của tôi",
+    e_today:"Thanh toán hôm nay", e_pending:"Chờ thanh toán", e_month:"Đơn/tháng",
+    zero_comm:"0% hoa hồng · Nhận đủ", zero_comm_d:"Nền tảng không thu hoa hồng, tiền hàng vào 100% tài khoản; phí ship do nền tảng trợ giá.",
+    subsidy_on:"Trợ phí ship: Đã bật", settle_list:"Lịch sử thanh toán",
+    shop_open:"Cửa hàng mở", deli_sub:"Trợ phí ship (0% hoa hồng)", open:"Mở", close:"Đóng",
+    lang_entry:"Ngôn ngữ", theme_entry:"Giao diện", exit_app:"Về app khách",
+    voice_entry:"Thông báo giọng nói", voice_on:"Bật", voice_off:"Tắt",
+    settings_entry:"Chế độ dữ liệu",
+    accept:"Nhận đơn", ready:"Đã đóng gói", reject:"Từ chối",
+    empty_orders:"Chưa có đơn mới", empty_prod:"Chưa có sản phẩm",
+    on:"Đang bán", off:"Tạm ẩn", edit:"Sửa", status_new:"Chờ xác nhận", status_cook:"Đang chuẩn bị", status_done:"Đã giao", tap_detail:"Nhấn để xem chi tiết",
+  },
+  zh:{
+    tab_orders:"接单", tab_products:"商品", tab_earn:"收益", tab_me:"我的",
+    new_orders:"新订单", cooking:"进行中", finished:"已完成", my_goods:"我的商品",
+    e_today:"今日结算", e_pending:"待结算", e_month:"月售单",
+    zero_comm:"0 佣金 · 全额到账", zero_comm_d:"平台抽成恒为 0%，商品金额 100% 进您的结算账户；配送费由平台补贴，您无需承担。",
+    subsidy_on:"配送补贴：已开启", settle_list:"结算流水",
+    shop_open:"店铺营业", deli_sub:"配送费补贴（0 佣金）", open:"营业", close:"休息",
+    lang_entry:"语言", theme_entry:"主题", exit_app:"返回消费者端",
+    voice_entry:"语音提醒", voice_on:"开", voice_off:"关",
+    settings_entry:"数据模式",
+    accept:"接单", ready:"完成备货", reject:"拒单",
+    empty_orders:"暂无新订单", empty_prod:"暂无商品",
+    on:"在售", off:"已下架", edit:"改价", status_new:"待接单", status_cook:"备货中", status_done:"已送达", tap_detail:"点击查看详情",
+  }
+};
+
+/* ===================== OFFLINE DEMO DATA ===================== */
+const MERCHANT = { id:1, name:"GREEN MART", category:"生鲜商超", rating:4.8, is_open:true, subsidy:true,
+  e_today:1280000, e_pending:320000, e_month:2300 };
+let ORDERS = [
+  { order_no:"GN20260715A1", status:"paid", customer:"Nguyen Van A", phone:"0901 234 567",
+    address:"123 Tràng Tiền, Hoàn Kiếm", mins:3,
+    items:[{name:"Táo nhập khẩu",qty:2,price:45000},{name:"Sữa tươi",qty:1,price:32000}], amount:122000 },
+  { order_no:"GN20260715A2", status:"paid", customer:"Tran Thi B", phone:"0902 345 678",
+    address:"45 Hàng Bài, Hoàn Kiếm", mins:7,
+    items:[{name:"Nước khoáng",qty:6,price:12000}], amount:72000 },
+  { order_no:"GN20260715A3", status:"accepted", customer:"Le Van C", phone:"0903 456 789",
+    address:"12 Lý Thái Tổ", mins:14,
+    items:[{name:"Sữa tươi",qty:3,price:32000}], amount:96000 },
+];
+const PRODUCTS = [
+  {id:1,e:"🍎",name:"Táo nhập khẩu",price:45000,on:true},
+  {id:2,e:"🥛",name:"Sữa tươi",price:32000,on:true},
+  {id:3,e:"💧",name:"Nước khoáng",price:12000,on:true},
+  {id:4,e:"🍌",name:"Chuối",price:18000,on:false},
+];
+const SETTLE = [
+  {no:"GN20260714B7",amt:154000},{no:"GN20260714B5",amt:98000},{no:"GN20260714B2",amt:210000},
+];
+
+/* ===================== STATE ===================== */
+let lang = localStorage.getItem("gn_merchant_lang") || "vi";
+let theme = localStorage.getItem("gn_merchant_theme") || "dark";
+let current="orders";
+const $ = s => document.querySelector(s);
+const fmt = v => Number(v).toLocaleString("vi-VN")+" ₫";
+
+function setLang(l){ lang=l; localStorage.setItem("gn_merchant_lang",l); document.documentElement.setAttribute("lang",l); applyText(); if(current==="orders")renderOrders(); if(current==="products")renderProducts(); if(current==="earn")renderEarn(); if(current==="me")renderMe(); }
+function setTheme(t){ theme=t; localStorage.setItem("gn_merchant_theme",t); document.documentElement.setAttribute("data-theme",t); document.body.classList.toggle("light-body",t==="light"); }
+function applyText(){ document.querySelectorAll("[data-a]").forEach(el=>{const k=el.getAttribute("data-a"); if(APP[lang][k]!=null) el.textContent=APP[lang][k];});
+  document.querySelectorAll("#tabbar .tab").forEach(t=>{const map={orders:"tab_orders",products:"tab_products",earn:"tab_earn",me:"tab_me"}; t.querySelector("div:last-child").textContent=APP[lang][map[t.dataset.tab]];}); }
+
+function tab(name){ current=name; document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); $("#screen-"+name).classList.add("active"); document.querySelectorAll("#tabbar .tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===name)); if(name==="orders")renderOrders(); if(name==="products")renderProducts(); if(name==="earn")renderEarn(); if(name==="me")renderMe(); }
+
+/* ---- live state ---- */
+let LIVE = null;
+const srcOrders = () => (LIVE && LIVE.orders) ? LIVE.orders : ORDERS;
+const srcProducts = () => (LIVE && LIVE.products) ? LIVE.products : PRODUCTS;
+const srcMerchant = () => (LIVE && LIVE.profile) ? LIVE.profile : MERCHANT;
+
+/* Voice: announce only genuinely NEW incoming paid orders (dedup by order_no).
+   Demo's initial orders are seeded so the cold start stays silent. */
+const announcedM = new Set();
+ORDERS.forEach(o => announcedM.add(o.order_no));
+let merchantSeeded = false;
+function announceNewMerchantOrders(list){
+  if(!list || !list.length) return;
+  const fresh = list.filter(o => !announcedM.has(o.order_no));
+  fresh.forEach(o => announcedM.add(o.order_no));
+  if(fresh.length && window.GN && GN.voice && !GN.voice.isMuted()) GN.voice.say('new_order');
+}
+const deliveredAnnounced = new Set();
+function announceDeliveredMerchantOrders(list){
+  if(!list || !list.length) return;
+  const fresh = list.filter(o => o.status==='delivered' && !deliveredAnnounced.has(o.order_no));
+  fresh.forEach(o => deliveredAnnounced.add(o.order_no));
+  if(fresh.length && window.GN && GN.voice && !GN.voice.isMuted()) GN.voice.say('order_completed');
+}
+
+function mapOrder(o){
+  return {
+    order_no:o.order_no, status:o.status,
+    customer:o.contact_name || "Khách",
+    phone:o.contact_phone || "",
+    address:o.address || "",
+    mins: o.created_at ? Math.max(1, Math.round((Date.now()-new Date(o.created_at).getTime())/60000)) : 5,
+    items:(o.items||[]).map(it=>({name:it.name, qty:it.qty, price:it.price})),
+    amount:o.amount,
+  };
+}
+function mapProduct(p){
+  return { id:p.id, e:p.image||"📦", name:(p['name_'+lang])||p.name_vi||p.name_zh||"", price:p.price, on:p.status==="on" };
+}
+function mapProfile(p){
+  return { id:p.id, name:p.name, category:(p.category&&p.category['name_'+lang])||(p.category&&p.category.name_vi)||"", rating:p.rating, is_open:!!p.is_open, subsidy:!!p.delivery_subsidy };
+}
+
+/* ---- live sync ---- */
+async function tryLive(){
+  if(!(GN_CONFIG.useApi && GN_CONFIG.apiBase)) return;
+  try{
+    const logged = await GN.demoLoginAs('0900000003','merchant');
+    if(!logged || logged.offline || !logged.token) return;
+    const [ord, prods, prof] = await Promise.all([
+      GN.API.merchantOrders(), GN.API.myProducts(), GN.API.merchantProfile()
+    ]);
+    const ordersArr = (ord && Array.isArray(ord.data)) ? ord.data : (Array.isArray(ord)?ord:[]);
+    const prodArr   = Array.isArray(prods) ? prods : (prods&&prods.data)||[];
+    LIVE = {
+      orders: ordersArr.map(mapOrder),
+      products: prodArr.map(mapProduct),
+      profile: (prof && !prof.offline) ? mapProfile(prof) : null,
+    };
+    (LIVE.orders||[]).forEach(o=>{ if(o.status==='delivered') deliveredAnnounced.add(o.order_no); });
+    if(merchantSeeded) { announceNewMerchantOrders(LIVE.orders); announceDeliveredMerchantOrders(LIVE.orders); }
+    else { (LIVE.orders||[]).forEach(o=>announcedM.add(o.order_no)); merchantSeeded=true; }
+    renderOrders(); renderProducts(); renderEarn(); renderMe();
+    initMerchantEcho(); // wire real-time paid-order alerts (best-effort)
+  }catch(e){ /* keep offline demo */ }
+}
+/* ---- real-time: Laravel Echo PRIVATE channel for INSTANT paid-order alerts ----
+   Subscribes to `private:merchant.{id}` (auth via Sanctum Bearer token). When
+   a customer pays, the backend broadcasts OrderPaid; we chime immediately and
+   refresh the order list. Falls back to the 9s poll if Pusher isn't configured.
+   Uses the shared GN.initEcho helper. */
+let merchantEchoTried=false;
+function initMerchantEcho(){
+  if(merchantEchoTried) return;
+  if(!(GN_CONFIG.useApi && GN_CONFIG.apiBase && GN_CONFIG.pusherKey)) return;
+  if(!LIVE || !LIVE.profile || !LIVE.profile.id) return;
+  merchantEchoTried=true;
+  const mid = LIVE.profile.id;
+  GN.initEcho({
+    key: GN_CONFIG.pusherKey,
+    cluster: GN_CONFIG.pusherCluster || 'ap1',
+    authEndpoint: GN_CONFIG.apiBase + '/broadcasting/auth',
+    auth: { headers: { Authorization: 'Bearer ' + (GN.token || ''), Accept: 'application/json' } }
+  }).then(echo=>{
+    if(!echo) return;
+    echo.private('merchant.'+mid).listen('.OrderPaid', (e)=>{
+      if(e && e.order_no && !announcedM.has(e.order_no)) announcedM.add(e.order_no);
+      if(!(window.GN && GN.voice && GN.voice.isMuted())) GN.voice.say('new_order');
+      if(LIVE) refreshOrders().then(()=>renderOrders()).catch(()=>{});
+    });
+  });
+}
+async function refreshOrders(){ const r=await GN.API.merchantOrders(); const a=(r&&Array.isArray(r.data))?r.data:[]; if(LIVE) LIVE.orders=a.map(mapOrder); announceNewMerchantOrders(LIVE?LIVE.orders:[]); announceDeliveredMerchantOrders(LIVE?LIVE.orders:[]); }
+async function refreshProducts(){ const r=await GN.API.myProducts(); const a=Array.isArray(r)?r:(r&&r.data)||[]; if(LIVE) LIVE.products=a.map(mapProduct); }
+async function refreshProfile(){ const p=await GN.API.merchantProfile(); if(p&&!p.offline) LIVE.profile=mapProfile(p); }
+
+/* ---- render orders ---- */
+function renderOrders(){
+  const chipMap={paid:["new",APP[lang].status_new], accepted:["cook",APP[lang].status_cook], picked:["cook",APP[lang].status_cook]};
+  const newO = srcOrders().filter(o=>o.status==="paid");
+  const cookO = srcOrders().filter(o=>["accepted","picked"].includes(o.status));
+  const doneO = srcOrders().filter(o=>["delivered","completed"].includes(o.status));
+  $("#newCount").textContent = newO.length? `(${newO.length})` : "";
+  $("#newOrders").innerHTML = newO.length? newO.map(orderCard).join("") : emptyBox("empty_orders");
+  $("#cookOrders").innerHTML = cookO.length? cookO.map(orderCard).join("") : "";
+  $("#doneOrders").innerHTML = doneO.length? doneO.map(orderCard).join("") : "";
+  // tab badge
+  const tb=document.querySelector('#tabbar .tab[data-tab="orders"]');
+  let dot=tb.querySelector(".badge-dot");
+  if(newO.length){ if(!dot){dot=document.createElement("div");dot.className="badge-dot";tb.appendChild(dot);} dot.textContent=newO.length; } else if(dot) dot.remove();
+
+  document.querySelectorAll("#newOrders .morder, #cookOrders .morder").forEach(card=>{
+    const o=srcOrders().find(x=>x.order_no===card.dataset.no);
+    card.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>orderAction(o,b.dataset.act));
+  });
+  // collapsed "done" cards: tap anywhere (except buttons) to expand/collapse.
+  document.querySelectorAll("#doneOrders .morder.collapsible").forEach(card=>{
+    card.onclick = (e)=>{ if(e.target.closest("[data-act]")) return; card.classList.toggle("open"); };
+  });
+}
+function orderCard(o){
+  let cls,label,acts;
+  if(o.status==="paid"){ cls="new"; label=APP[lang].status_new; acts=`<button class="acc" data-act="accept">${APP[lang].accept}</button><button class="rej" data-act="reject">${APP[lang].reject}</button>`; }
+  else if(o.status==="accepted"||o.status==="picked"){ cls="cook"; label=APP[lang].status_cook; acts=`<button class="rdy" data-act="ready">${APP[lang].ready}</button>`; }
+  else { cls="done"; label=APP[lang].status_done; acts=""; }
+  const collapse = (o.status==="delivered" || o.status==="completed");
+  const chev = collapse ? `<span class="chev">▾</span>` : "";
+  const hint = collapse ? `<div class="hint" data-a="tap_detail">${APP[lang].tap_detail}</div>` : "";
+  return `<div class="morder ${cls}${collapse?" collapsible":""}" data-no="${o.order_no}">
+    <div class="oh"><span class="no">${o.order_no}</span><span class="tm">${o.mins} ${lang==="vi"?"phút trước":"分钟前"}</span><span class="chip ${cls}">${label}</span>${chev}</div>
+    <div class="mbody">
+      <div class="cust">🙍 <b>${esc(o.customer)}</b> · ${esc(o.phone)}<br>📍 ${esc(o.address)}</div>
+      ${o.items.map(it=>`<div class="it"><span>${esc(it.name)} <span class="q">×${it.qty}</span></span><span>${fmt(it.price*it.qty)}</span></div>`).join("")}
+      <div class="ot"><span class="tot">${fmt(o.amount)}</span><div class="acts">${acts}</div></div>
+    </div>
+    ${hint}
+  </div>`;
+}
+function emptyBox(k){ return `<div class="empty"><div class="e">📭</div>${APP[lang][k]}</div>`; }
+async function orderAction(o, act){
+  let ok = false;
+  if(GN_CONFIG.useApi && GN_CONFIG.apiBase && LIVE){
+    try{
+      if(act==="accept") await GN.API.merchantAccept(o.order_no);
+      else if(act==="ready") await GN.API.merchantReady(o.order_no);
+      await refreshOrders(); renderOrders(); ok = true;
+    }catch(e){}
+  }
+  if(!ok){
+    if(act==="accept"){ o.status="accepted"; ok=true; }
+    else if(act==="ready"){ o.status="picked"; ok=true; }
+    else if(act==="reject"){ if(LIVE) LIVE.orders=LIVE.orders.filter(x=>x!==o); else ORDERS=ORDERS.filter(x=>x!==o); ok=true; }
+    renderOrders();
+  }
+  // Voice confirmation for the merchant's own actions (respects mute switch).
+  if(ok && (act==="accept" || act==="ready") && window.GN && GN.voice && !GN.voice.isMuted()){
+    GN.voice.say(act==="accept" ? 'merchant_accepted' : 'order_ready');
+  }
+}
+
+/* ---- products ---- */
+function renderProducts(){
+  const list = srcProducts();
+  const on = list.filter(p=>p.on).length;
+  $("#onCount").textContent = `${on}/${list.length} ${lang==="vi"?"đang bán":"在售"}`;
+  $("#productList").innerHTML = list.map(p=>`
+    <div class="prow ${p.on?"":"off"}" data-id="${p.id}">
+      <div class="pe">${p.e}</div>
+      <div class="pi"><div class="pn">${p.name}</div><div class="pp">${fmt(p.price)}</div></div>
+      <div class="edit" data-edit="${p.id}">${APP[lang].edit}</div>
+      <div class="sw ${p.on?"on":""}" data-toggle="${p.id}"><i></i></div>
+    </div>`).join("");
+  $("#productList").querySelectorAll("[data-toggle]").forEach(s=>s.onclick=async()=>{
+    const p=list.find(x=>x.id==s.dataset.toggle); p.on=!p.on; renderProducts();
+    if(LIVE){ try{ await GN.API.updateProduct(p.id,{status:p.on?"on":"off"}); await refreshProducts(); }catch(e){} }
+  });
+  $("#productList").querySelectorAll("[data-edit]").forEach(b=>b.onclick=async()=>{
+    const p=list.find(x=>x.id==b.dataset.edit); const v=prompt(lang==="vi"?"Giá mới (₫):":"新价格(₫):", p.price);
+    if(v&&!isNaN(+v)){ p.price=+v; renderProducts(); if(LIVE){ try{ await GN.API.updateProduct(p.id,{price:+v}); await refreshProducts(); }catch(e){} } }
+  });
+}
+
+/* ---- earnings ---- */
+function renderEarn(){
+  const list = srcOrders();
+  const settled = list.filter(o=>["accepted","picked","delivering","delivered"].includes(o.status));
+  const sum = settled.reduce((s,o)=>s+(o.amount||0),0);
+  $("#eToday").textContent=fmt(sum||MERCHANT.e_today);
+  $("#ePending").textContent=fmt(MERCHANT.e_pending);
+  $("#eMonth").textContent=MERCHANT.e_month.toLocaleString("vi-VN");
+  const rows = settled.length ? settled.slice(0,8) : SETTLE;
+  $("#settleList").innerHTML = rows.map(s=>{
+    const no=s.order_no||s.no, amt=s.amount||s.amt;
+    return `<div class="it" style="padding:12px 16px;font-size:13px;display:flex;justify-content:space-between;border-bottom:1px solid var(--border)"><span>${no}</span><b style="color:var(--accent)">+${fmt(amt)}</b></div>`;
+  }).join("");
+}
+
+/* ---- profile ---- */
+function renderMe(){
+  const m = srcMerchant();
+  $("#meName").textContent=m.name;
+  $("#meCat").textContent=`${m.category} · ★${m.rating}`;
+  $("#meOpen").textContent = m.is_open?"🟢":"⚪";
+  $("#openState").textContent = m.is_open? (lang==="vi"?"🟢 Đang mở":"🟢 营业中") : (lang==="vi"?"⚪ Đóng":"⚪ 休息中");
+  $("#swOpenEl").classList.toggle("on",m.is_open);
+  $("#swSubEl").classList.toggle("on",m.subsidy);
+}
+
+/* ---- events ---- */
+document.querySelectorAll("#tabbar .tab").forEach(t=>t.onclick=()=>tab(t.dataset.tab));
+$("#swOpen").onclick=async()=>{ const m=srcMerchant(); m.is_open=!m.is_open; renderMe(); if(LIVE){ try{ await GN.API.updateMerchantProfile({is_open:m.is_open}); await refreshProfile(); }catch(e){} } };
+$("#swSub").onclick=async()=>{ const m=srcMerchant(); m.subsidy=!m.subsidy; renderMe(); if(LIVE){ try{ await GN.API.updateMerchantProfile({delivery_subsidy:m.subsidy}); await refreshProfile(); }catch(e){} } };
+document.querySelectorAll(".menu .mi").forEach(m=>m.onclick=()=>{ const k=m.dataset.mi;
+  if(k==="lang") setLang(lang==="vi"?"zh":"vi");
+  else if(k==="theme") setTheme(theme==="dark"?"light":"dark");
+  else if(k==="exit") location.href="index.html#profile";
+});
+/* voice mute toggle (dedicated handler so the forEach above can't override it) */
+$("#swVoice").onclick=()=>{ if(window.GN && GN.voice){ const m=GN.voice.toggle(); if(!m) GN.voice.beep(880,160); renderVoiceState(); } };
+$("#swSettings").onclick=()=>{ if(window.GN && GN.openDataModeOverlay) GN.openDataModeOverlay(); };
+function renderVoiceState(){
+  const el=$("#voiceState"); if(!el) return;
+  const muted = window.GN && GN.voice ? GN.voice.isMuted() : false;
+  el.textContent = muted ? APP[lang].voice_off : APP[lang].voice_on;
+}
+
+function tick(){ const d=new Date(); $("#clock").textContent=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+setInterval(tick,10000); tick();
+
+setTheme(theme); setLang(lang); renderOrders();
+setTimeout(renderVoiceState, 0); // refresh label after GN.voice (deferred bridge) loads
+if(GN_CONFIG.useApi && GN_CONFIG.apiBase){
+  setInterval(async ()=>{ try{ await refreshOrders(); renderOrders(); }catch(e){} }, 9000);
+}
+tryLive();
+</script>
+</body>
+</html>

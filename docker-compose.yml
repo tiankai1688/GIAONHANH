@@ -1,0 +1,116 @@
+version: "3.8"
+
+# GIAONHANH production stack (Phase A enabler).
+# Builds the Laravel API image, runs MySQL + Redis, exposes the API on :8080.
+# For production set APP_URL and terminate TLS at a reverse proxy / load balancer
+# in front of this stack (or add certs in infra/nginx/default.conf).
+#
+# Scheduling: the Laravel task scheduler (`php artisan schedule:run`, which runs
+# the orders:reconcile self-heal every 5 min) is executed by the in-container
+# supervisor `gn-scheduler` program (see backend/infra/supervisor.conf) — no
+# separate scheduler container is needed. The web/queue/scheduler share one
+# `app` container. The schedule is registered with `->withoutOverlapping()` so
+# it stays safe if you later scale `app` to multiple replicas or extract the
+# scheduler into its own singleton service (commented example at the bottom).
+#
+# NETWORK ISOLATION (2026-08-01 fix): MySQL and Redis live ONLY on the
+# `internal` network (driver: bridge, internal: true) — they are NEVER published
+# to the host and have NO outbound internet access, so the data tier cannot be
+# port-scanned from outside the stack and cannot exfiltrate. Only `app` is on
+# both `edge` (published :8080) and `internal` (reaches db/redis).
+
+networks:
+  edge:
+    driver: bridge
+  internal:
+    driver: bridge
+    internal: true
+
+services:
+  app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: giaonhanh-app:latest
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    env_file:
+      - ./backend/.env
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      REDIS_HOST: redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - app_storage:/var/www/html/storage
+    networks:
+      - edge
+      - internal
+    # Horizontal scaling (stateless API + Redis-backed cache/session/queue):
+    # uncomment to run N API replicas behind your reverse proxy / LB.
+    # deploy:
+    #   replicas: 3
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: giaonhanh
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-change_this_root}
+      MYSQL_USER: giaonhanh
+      MYSQL_PASSWORD: ${DB_PASSWORD:-change_this_app}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - internal
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - internal
+
+# ---------------------------------------------------------------------------
+# OPTIONAL: dedicated scheduler singleton (uncomment to scale `app` freely).
+# When enabled, remove the `gn-scheduler` program from backend/infra/supervisor.conf
+# to avoid running the scheduler twice. `withoutOverlapping()` on the schedule
+# already makes a duplicate run harmless, but extracting it is cleaner at scale.
+# ---------------------------------------------------------------------------
+#  scheduler:
+#    build:
+#      context: ./backend
+#      dockerfile: Dockerfile
+#    image: giaonhanh-app:latest
+#    restart: unless-stopped
+#    command: sh -c "while true; do php artisan schedule:run; sleep 60; done"
+#    env_file:
+#      - ./backend/.env
+#    environment:
+#      APP_ENV: production
+#      APP_DEBUG: "false"
+#      DB_HOST: mysql
+#      DB_PORT: "3306"
+#      REDIS_HOST: redis
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#      redis:
+#        condition: service_started
+#    networks:
+#      - internal
+
+volumes:
+  mysql_data:
+  app_storage:

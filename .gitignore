@@ -1,0 +1,29 @@
+# ===== Dependencies (must NOT commit) =====
+/node_modules
+/mobile/node_modules
+/backend/vendor
+
+# ===== Laravel framework =====
+/backend/storage/*.key
+/backend/.phpunit.result.cache
+/backend/npm-debug.log
+/backend/bootstrap/cache/*.php
+/backend/storage/clockwork/
+
+# ===== Env / secrets (must NOT commit) =====
+.env
+.env.*
+!.env.example
+/backend/.env
+/backend/.env.*
+!/backend/.env.example
+
+# ===== WorkBuddy internal data (do NOT commit) =====
+.workbuddy/
+
+# ===== Editor / OS =====
+.idea/
+.vscode/
+*.log
+.DS_Store
+Thumbs.db

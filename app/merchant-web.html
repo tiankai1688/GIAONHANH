@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GIAONHANH · Cổng Merchant (M Web)</title>
+<!-- Reuse the L-admin design system so both web consoles stay visually unified -->
+<link rel="stylesheet" href="admin.css" />
+<style>
+  /* ---- M-web specific helpers (admin.css has no toggle switch / form rows) ---- */
+  .sw{position:relative;width:46px;height:26px;border-radius:999px;background:var(--surface-2);
+    border:1px solid var(--border);cursor:pointer;transition:.25s var(--ease);flex-shrink:0;display:inline-block;}
+  .sw i{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;
+    transition:.25s var(--ease);box-shadow:0 1px 3px rgba(15,23,42,.25);}
+  .sw.on{background:linear-gradient(135deg,var(--brand),var(--brand-strong));border-color:transparent;}
+  .sw.on i{left:22px;}
+  .price-input{width:128px;font-family:inherit;font-size:13.5px;font-weight:750;color:var(--text);
+    background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:7px 10px;outline:none;
+    text-align:right;font-variant-numeric:tabular-nums;transition:.16s var(--ease);}
+  .price-input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft-2);}
+  .add-badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:800;padding:2px 8px;
+    border-radius:999px;background:var(--warn-soft);color:#B45309;margin-left:8px;vertical-align:middle;}
+  .shop-chip{display:flex;align-items:center;gap:10px;}
+  .shop-chip .lg{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-strong));
+    color:#fff;display:grid;place-items:center;font-size:20px;box-shadow:0 6px 14px -6px rgba(249,115,22,.6);flex-shrink:0;}
+  .shop-chip .nm{font-weight:800;font-size:14.5px;line-height:1.15;}
+  .shop-chip .cat{font-size:11.5px;color:var(--dim);font-weight:600;}
+  .open-pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:750;padding:7px 13px;
+    border-radius:999px;border:1px solid var(--border);background:var(--surface);cursor:pointer;
+    transition:.16s var(--ease);user-select:none;white-space:nowrap;}
+  .open-pill:hover{border-color:var(--border-strong);background:var(--surface-2);}
+  .open-pill .dot{width:9px;height:9px;border-radius:50%;}
+  .open-pill.on .dot{background:var(--ok);box-shadow:0 0 0 4px var(--ok-soft);}
+  .open-pill.off .dot{background:var(--faint);}
+  .field-row{display:grid;grid-template-columns:140px 1fr;gap:12px 16px;align-items:center;margin-bottom:14px;}
+  .field-row label{font-size:13px;font-weight:650;color:var(--dim);}
+  .field-row input{width:100%;font-family:inherit;font-size:14px;color:var(--text);background:var(--surface);
+    border:1px solid var(--border);border-radius:12px;padding:11px 14px;outline:none;transition:.16s var(--ease);}
+  .field-row input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft-2);}
+  .switch-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;
+    border-bottom:1px solid var(--border);}
+  .switch-row:last-child{border-bottom:none;}
+  .switch-row .k{font-size:14px;font-weight:700;}
+  .switch-row .k small{display:block;font-size:12px;color:var(--dim);font-weight:500;margin-top:2px;line-height:1.4;}
+  .note-box{background:var(--brand-soft);border:1px solid var(--brand-soft-2);border-radius:12px;
+    padding:14px 16px;font-size:12.5px;color:var(--brand-deep);line-height:1.6;}
+  .note-box b{color:var(--brand-deep);}
+  .store-preview{background:linear-gradient(135deg,var(--brand),var(--brand-strong));border-radius:14px;
+    padding:20px;color:#fff;box-shadow:var(--shadow-md);}
+  .store-preview .sp-h{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .store-preview .sp-lg{width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.22);
+    display:grid;place-items:center;font-size:28px;flex-shrink:0;}
+  .store-preview .sp-nm{font-size:18px;font-weight:850;}
+  .store-preview .sp-cat{font-size:12.5px;opacity:.9;}
+  .store-preview .sp-badge{display:inline-block;margin-top:10px;font-size:11.5px;font-weight:800;
+    background:rgba(255,255,255,.2);padding:4px 11px;border-radius:999px;}
+  .store-preview .sp-prod{background:rgba(255,255,255,.14);border-radius:10px;padding:9px 12px;
+    display:flex;justify-content:space-between;font-size:13px;margin-top:8px;}
+  /* ---- M-web: timeline + ranking (for order-detail & data screens) ---- */
+  .timeline{display:flex;align-items:flex-start;margin:6px 0 18px;}
+  .tl-step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;text-align:center;}
+  .tl-step .dot{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:14px;
+    background:var(--surface-2);color:var(--faint);border:2px solid var(--border);z-index:2;font-weight:800;}
+  .tl-step.done .dot{background:linear-gradient(135deg,var(--brand),var(--brand-strong));color:#fff;border-color:transparent;}
+  .tl-step.cur .dot{background:var(--brand-soft);color:var(--brand-strong);border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft-2);}
+  .tl-step.cancel .dot{background:var(--bad-soft);color:var(--bad);border-color:transparent;}
+  .tl-step .lb{font-size:12px;font-weight:650;margin-top:8px;color:var(--dim);}
+  .tl-step.done .lb,.tl-step.cur .lb{color:var(--text);}
+  .tl-step::before{content:"";position:absolute;top:15px;left:-50%;width:100%;height:3px;background:var(--border);z-index:1;}
+  .tl-step:first-child::before{display:none;}
+  .tl-step.done::before{background:var(--brand);}
+  .top-row{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--border);}
+  .top-row:last-child{border-bottom:none;}
+  .top-row .rk{width:26px;height:26px;border-radius:8px;background:var(--brand-soft);color:var(--brand-strong);
+    display:grid;place-items:center;font-weight:850;font-size:13px;flex-shrink:0;}
+  .top-row .nm{flex:1;font-weight:650;font-size:13.5px;}
+  .top-row .qt{font-weight:750;font-variant-numeric:tabular-nums;}
+  .bar-mini{height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden;flex:1;max-width:120px;}
+  .bar-mini i{display:block;height:100%;background:linear-gradient(135deg,var(--brand),var(--brand-strong));}
+</style>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Tk3B7bOq5xwL4KPSldnYSqSsbmNSGSOQrwzGrhvVfQ4=' 'sha256-dctUtLggfPv4UsisltnWT4YZNnSIRiYW3YS47q63l5s=' 'sha256-BbyBnapZ3ALvDP3SkBiZo+ScDwb8RUdBat1CMIy3S5A=' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https: wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'" />
+</head>
+<body>
+
+<!-- ===================== LOGIN GATE ===================== -->
+<div class="login" id="login">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="logo">G</div>
+      <div class="bn">GIAONHANH<small data-a="m_console">Cổng Merchant · Giờ vàng Việt Nam</small></div>
+    </div>
+    <h1 data-a="m_login_title">Đăng nhập Merchant</h1>
+    <p class="lead" data-a="m_login_lead">Quản lý đơn hàng, thực đơn &amp; đối soát trên máy tính.</p>
+    <div class="login-err" id="loginErr" data-a="m_login_err">Sai tài khoản hoặc mật khẩu.</div>
+    <div class="field">
+      <label data-a="m_login_phone">Số điện thoại</label>
+      <input id="loginPhone" value="0900000003" inputmode="numeric" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label data-a="m_login_pass">Mật khẩu</label>
+      <input id="loginPass" type="password" value="demo123" autocomplete="current-password" />
+    </div>
+    <button class="btn btn-primary" id="loginBtn" style="width:100%" data-a="m_login_btn">Đăng nhập</button>
+    <p class="hint" data-a="m_login_hint">Demo: <b>0900000003</b> / demo123</p>
+  </div>
+</div>
+
+<!-- ===================== APP SHELL ===================== -->
+<div class="app-shell" id="app" style="display:none">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">G</div>
+      <div class="bn">GIAONHANH<small data-a="m_console_short">Merchant</small></div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-label" data-a="nav_label">Vận hành cửa hàng</div>
+      <div class="nav-item active" data-page="dashboard">
+        <span class="ic">__IC_DASHBOARD__</span>
+        <span class="tx">Tổng quan<span class="zh" data-a="nav_dashboard_zh">概览</span></span>
+      </div>
+      <div class="nav-item" data-page="products">
+        <span class="ic">__IC_BOX__</span>
+        <span class="tx">Sản phẩm<span class="zh" data-a="nav_products_zh">商品/菜单</span></span>
+      </div>
+      <div class="nav-item" data-page="orders">
+        <span class="ic">__IC_RECEIPT__</span>
+        <span class="tx">Đơn hàng<span class="zh" data-a="nav_orders_zh">订单</span></span>
+        <span class="dot" id="navOrderDot" style="display:none">0</span>
+      </div>
+      <div class="nav-item" data-page="settlement">
+        <span class="ic">__IC_WALLET__</span>
+        <span class="tx">Đối soát<span class="zh" data-a="nav_settlement_zh">结算对账</span></span>
+      </div>
+      <div class="nav-item" data-page="settings">
+        <span class="ic">__IC_SETTINGS__</span>
+        <span class="tx">Cài đặt cửa hàng<span class="zh" data-a="nav_settings_zh">店铺设置</span></span>
+      </div>
+      <div class="nav-label" data-a="nav_label_m2">Mở rộng</div>
+      <div class="nav-item" data-page="order-detail">
+        <span class="ic">__IC_RECEIPT__</span>
+        <span class="tx">Chi tiết đơn<span class="zh" data-a="nav_orderdetail_zh">订单详情</span></span>
+      </div>
+      <div class="nav-item" data-page="product-edit">
+        <span class="ic">__IC_BOX__</span>
+        <span class="tx">Sửa / thêm món<span class="zh" data-a="nav_productedit_zh">商品编辑</span></span>
+      </div>
+      <div class="nav-item" data-page="m-coupons">
+        <span class="ic">__IC_COUPON__</span>
+        <span class="tx">Mã giảm giá<span class="zh" data-a="nav_mcoupons_zh">商家优惠券</span></span>
+      </div>
+      <div class="nav-item" data-page="m-data">
+        <span class="ic">__IC_CHART__</span>
+        <span class="tx">Dữ liệu<span class="zh" data-a="nav_mdata_zh">数据看板</span></span>
+      </div>
+    </nav>
+    <div class="side-foot">
+      <div class="admin-card" id="logoutBtn">
+        <div class="av" style="background:linear-gradient(135deg,var(--brand),var(--brand-strong))">M</div>
+        <div>
+          <div class="nm" id="sideShopName">GREEN MART</div>
+          <div class="rl" data-a="side_role">Chủ cửa hàng</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <div class="shop-chip" id="shopChip">
+        <div class="lg" id="topLogo">🛒</div>
+        <div>
+          <div class="nm" id="topShopName">GREEN MART</div>
+          <div class="cat" id="topShopCat">Siêu thị / Tạp hóa</div>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <div class="open-pill on" id="openPill" title="Trạng thái kinh doanh">
+        <span class="dot"></span><span id="openPillTxt">Đang mở</span>
+      </div>
+      <div class="lang-pill" id="langPill">
+        <button data-lang="vi" class="on">VI</button>
+        <button data-lang="zh">中文</button>
+      </div>
+      <div class="icon-btn" id="themeBtn" title="Giao diện">__IC_SUN__</div>
+      <div class="admin-card" style="padding:0;cursor:default">
+        <div class="av" style="width:38px;height:38px;background:linear-gradient(135deg,var(--brand),var(--brand-strong))">M</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- ============ DASHBOARD ============ -->
+      <section class="page active" id="page-dashboard">
+        <div class="kpi-grid" id="kpiGrid"></div>
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head">
+              <h3 data-a="chart_title">Xu hướng đơn hôm nay</h3>
+              <span class="sub" id="chartMax"></span>
+            </div>
+            <div class="chart" id="chartToday"></div>
+            <div class="chart-legend">
+              <span class="lg"><span class="sw" style="background:linear-gradient(180deg,var(--brand),var(--brand-strong))"></span><span data-a="chart_orders">Số đơn</span></span>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <h3 data-a="dash_pending">Cần xử lý</h3>
+              <span class="sub" id="dashPendingCount"></span>
+            </div>
+            <div id="dashPending"></div>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:18px">
+          <div class="panel-head">
+            <h3 data-a="recent_orders">Đơn hàng gần đây</h3>
+            <button class="btn btn-ghost btn-sm act" data-goto="orders" data-a="view_all">Xem tất cả</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr>
+                <th data-a="col_order">Mã đơn</th>
+                <th data-a="col_user">Khách</th>
+                <th class="right" data-a="col_amount">Tiền</th>
+                <th data-a="col_status">Trạng thái</th>
+                <th data-a="col_time">Thời gian</th>
+              </tr></thead>
+              <tbody id="recentOrders"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PRODUCTS ============ -->
+      <section class="page" id="page-products">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_products">Sản phẩm / Thực đơn</h2>
+            <p data-a="prod_desc">Chỉnh giá &amp; bật/tắt bán trực tiếp. 0% hoa hồng — tiền hàng 100% về bạn.</p>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" id="btnAddProduct">__IC_PLUS__ <span data-a="add_product">Thêm sản phẩm</span></button>
+        </div>
+        <div class="toolbar">
+          <input class="input" id="prodSearch" data-a="search_ph" placeholder="Tìm món..." />
+          <select class="select" id="prodCat">
+            <option value="" data-a="cat_all">Tất cả danh mục</option>
+          </select>
+          <div class="spacer"></div>
+          <span class="tag" id="prodCountTag"></span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th data-a="col_product">Sản phẩm</th>
+              <th data-a="col_category">Danh mục</th>
+              <th class="right" data-a="col_price">Giá (₫)</th>
+              <th class="right" data-a="col_stock">Tồn kho</th>
+              <th data-a="col_status">Đang bán</th>
+              <th class="right" data-a="col_action">Thao tác</th>
+            </tr></thead>
+            <tbody id="prodTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ ORDERS ============ -->
+      <section class="page" id="page-orders">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_orders">Đơn hàng</h2>
+            <p data-a="orders_desc">Nhận đơn, đóng gói &amp; theo dõi giao hàng theo thời gian thực.</p>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="tabs" id="orderTabs">
+            <button class="on" data-s="all" data-a="tab_all">Tất cả</button>
+            <button data-s="paid" data-a="tab_new">Chờ nhận</button>
+            <button data-s="accepted" data-a="tab_cooking">Đang xử lý</button>
+            <button data-s="delivering" data-a="tab_delivering">Đang giao</button>
+            <button data-s="delivered" data-a="tab_done">Hoàn tất</button>
+            <button data-s="cancelled" data-a="tab_cancel">Đã hủy</button>
+          </div>
+          <input class="input" id="orderSearch" data-a="search_ph" placeholder="Tìm mã đơn..." />
+          <div class="spacer"></div>
+          <span class="tag" id="orderCountTag"></span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th data-a="col_order">Mã đơn</th>
+              <th data-a="col_user">Khách</th>
+              <th class="right" data-a="col_items">Số món</th>
+              <th class="right" data-a="col_amount">Tiền</th>
+              <th data-a="col_status">Trạng thái</th>
+              <th data-a="col_time">Thời gian</th>
+              <th class="right" data-a="col_action">Thao tác</th>
+            </tr></thead>
+            <tbody id="orderTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ SETTLEMENT ============ -->
+      <section class="page" id="page-settlement">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_settlement">Đối soát &amp; Thanh toán</h2>
+            <p data-a="settle_desc">Mô hình 0% hoa hồng · nền tảng trợ phí giao hàng. Đối soát doanh thu của bạn.</p>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" id="btnExport">__IC_DOWNLOAD__ <span data-a="export">Xuất đối soát</span></button>
+        </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="kpi"><div class="top"><div class="ic o">__IC_WALLET__</div>
+            <div class="lab"><span data-a="settle_payable">Phải thu kỳ này</span><small data-a="settle_payable_zh">本期应收</small></div></div>
+            <div class="val" id="settlePayable">0 ₫</div></div>
+          <div class="kpi"><div class="top"><div class="ic t">__IC_CHECK__</div>
+            <div class="lab"><span data-a="settle_paid">Đã thanh toán</span><small data-a="settle_paid_zh">已结</small></div></div>
+            <div class="val" id="settlePaid" style="color:var(--ok)">0 ₫</div></div>
+          <div class="kpi"><div class="top"><div class="ic w">__IC_SUBSIDY__</div>
+            <div class="lab"><span data-a="settle_subsidy">Trợ phí giao hàng</span><small data-a="settle_subsidy_zh">平台补贴</small></div></div>
+            <div class="val" id="settleSubsidy">0 ₫</div></div>
+          <div class="kpi"><div class="top"><div class="ic b">__IC_ZERO__</div>
+            <div class="lab"><span data-a="settle_commission">Hoa hồng nền tảng</span><small data-a="settle_commission_zh">平台佣金</small></div></div>
+            <div class="val" id="settleCommission" style="color:var(--ok)">0 ₫</div></div>
+        </div>
+        <div class="split">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h3 data-a="settle_list">Đối soát theo kỳ</h3>
+                <span class="sub" id="settleDateLabel"></span>
+              </div>
+              <button class="btn btn-primary" id="btnConfirmSettle">Xác nhận đối soát</button>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr>
+                  <th data-a="col_period">Kỳ</th>
+                  <th class="right" data-a="col_orders">Đơn</th>
+                  <th class="right" data-a="col_gmv">GMV</th>
+                  <th class="right" data-a="col_payable">Phải thu</th>
+                  <th class="right" data-a="col_subsidy">Trợ phí</th>
+                  <th data-a="col_settle_status">Trạng thái</th>
+                </tr></thead>
+                <tbody id="settleTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3 data-a="reconcile">Tổng hợp</h3></div>
+            <div style="padding:6px 18px 18px">
+              <div class="stat-line"><span class="k" data-a="recon_gmv">Tổng GMV</span><span class="v" id="reconGmv">0 ₫</span></div>
+              <div class="stat-line"><span class="k" data-a="recon_payable">Phải thu merchant</span><span class="v" id="reconPayable">0 ₫</span></div>
+              <div class="stat-line"><span class="k" data-a="recon_subsidy">Chi phí trợ giá</span><span class="v" id="reconSubsidy">0 ₫</span></div>
+              <div class="stat-line"><span class="k" data-a="recon_commission">Hoa hồng thu được</span><span class="v" style="color:var(--ok)" id="reconCommission">0 ₫</span></div>
+              <div class="note-box" style="margin-top:14px" data-a="model_note">
+                Mô hình: hoa hồng nền tảng = 0%. Tiền hàng 100% về merchant; phí giao hàng do nền tảng trợ giá. Lợi nhuận đến từ trợ giá đối tác &amp; quảng cáo.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SETTINGS ============ -->
+      <section class="page" id="page-settings">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_settings">Cài đặt cửa hàng</h2>
+            <p data-a="settings_desc">Cập nhật thông tin shop, trạng thái kinh doanh &amp; tham gia trợ phí giao hàng.</p>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn btn-ghost" id="btnPreview">__IC_SHOP__ <span data-a="set_preview">Xem trang招商</span></button>
+          <button class="btn btn-primary" id="btnSaveSettings">__IC_CHECK__ <span data-a="set_save">Lưu</span></button>
+        </div>
+        <div class="split">
+          <div class="panel">
+            <div class="panel-head"><h3 data-a="set_basic">Thông tin cơ bản</h3></div>
+            <div style="padding:18px">
+              <div class="field-row"><label data-a="set_name">Tên cửa hàng</label><input id="setName" /></div>
+              <div class="field-row"><label data-a="set_phone">Số điện thoại</label><input id="setPhone" /></div>
+              <div class="field-row"><label data-a="set_addr">Địa chỉ</label><input id="setAddr" /></div>
+              <div class="field-row"><label data-a="set_hours">Giờ mở cửa</label><input id="setHours" placeholder="08:00 – 22:00" /></div>
+              <div class="field-row"><label data-a="set_rating">Đánh giá</label><input id="setRating" disabled style="background:var(--surface-2)" /></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3 data-a="set_ops">Vận hành</h3></div>
+            <div style="padding:8px 18px 14px">
+              <div class="switch-row">
+                <div class="k"><span data-a="set_open">Cửa hàng mở</span><small data-a="set_open_sub">Bật để nhận đơn từ khách.</small></div>
+                <div class="sw on" id="setOpenSw"><i></i></div>
+              </div>
+              <div class="switch-row">
+                <div class="k"><span data-a="set_subsidy">Trợ phí giao hàng (0% hoa hồng)</span><small data-a="set_subsidy_sub">Nền tảng trợ phí ship — bạn không mất phí.</small></div>
+                <div class="sw on" id="setSubSw"><i></i></div>
+              </div>
+              <div class="note-box" style="margin-top:6px" data-a="set_subsidy_note">
+                Khi bật, đơn của bạn được ưu tiên giao nhanh với phí ship do GIAONHANH tài trợ.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ ORDER DETAIL (desktop) ============ -->
+      <section class="page" id="page-order-detail">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_orderdetail">Chi tiết đơn hàng</h2>
+            <p data-a="morder_desc">Thông tin đơn, địa chỉ giao, thanh toán &amp; trạng thái theo thời gian thực.</p>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn btn-ghost" data-goto="orders" data-a="back_orders">← Đơn hàng</button>
+        </div>
+        <div id="orderDetailBody"></div>
+      </section>
+
+      <!-- ============ PRODUCT EDIT ============ -->
+      <section class="page" id="page-product-edit">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_productedit">Sửa / thêm món</h2>
+            <p data-a="mpedit_desc">Cập nhật tên, giá, tồn kho, hình đại diện &amp; trạng thái bán.</p>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn btn-ghost" id="btnNewMProduct" data-a="mpedit_new">+ Thêm mới</button>
+          <button class="btn btn-primary" id="btnSaveMProduct" data-a="mpedit_save">Lưu</button>
+        </div>
+        <div class="split">
+          <div class="panel">
+            <div class="panel-head"><h3 data-a="mpedit_basic">Thông tin món</h3></div>
+            <div style="padding:18px">
+              <div class="field-row"><label data-a="mpedit_name_vi">Tên (VI)</label><input id="mpNameVi" /></div>
+              <div class="field-row"><label data-a="mpedit_name_zh">Tên (ZH)</label><input id="mpNameZh" /></div>
+              <div class="field-row"><label data-a="mpedit_cat">Danh mục</label><input id="mpCat" /></div>
+              <div class="field-row"><label data-a="mpedit_price">Giá (₫)</label><input id="mpPrice" type="text" inputmode="numeric" /></div>
+              <div class="field-row"><label data-a="mpedit_stock">Tồn kho</label><input id="mpStock" type="text" inputmode="numeric" /></div>
+              <div class="field-row"><label data-a="mpedit_emoji">Icon</label><input id="mpEmoji" maxlength="2" placeholder="📦" /></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3 data-a="mpedit_media">Hình &amp; trạng thái</h3></div>
+            <div style="padding:18px">
+              <div class="field-row"><label data-a="mpedit_img">Hình đại diện</label>
+                <div class="m-logo" id="mpImgPrev" style="width:64px;height:64px;font-size:32px">📦</div></div>
+              <div class="switch-row">
+                <div class="k"><span data-a="mpedit_onsale">Đang bán</span><small data-a="mpedit_onsale_sub">Hiển thị trên storefront.</small></div>
+                <div class="sw on" id="mpOnSw"><i></i></div>
+              </div>
+              <div class="note-box" style="margin-top:6px" data-a="mpedit_note">Lưu sẽ gọi updateProduct (sửa) hoặc createProduct (thêm). Dữ liệu demo nếu backend thiếu.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ MERCHANT COUPONS ============ -->
+      <section class="page" id="page-m-coupons">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_mcoupons">Mã giảm giá cửa hàng</h2>
+            <p data-a="mcoupon_desc">Merchant tự phát hành coupon (demo — backend chưa có API merchant coupon).</p>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" id="btnNewMCoupon" data-a="mcoupon_new">Tạo mã</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th data-a="col_coupon_name">Tên mã</th>
+              <th data-a="col_coupon_type">Loại</th>
+              <th class="right" data-a="col_coupon_value">Mệnh giá</th>
+              <th class="right" data-a="col_coupon_cond">Điều kiện</th>
+              <th class="right" data-a="col_coupon_claim">Đã dùng</th>
+              <th data-a="col_status">Trạng thái</th>
+            </tr></thead>
+            <tbody id="mCouponTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ MERCHANT DATA ============ -->
+      <section class="page" id="page-m-data">
+        <div class="page-head">
+          <div>
+            <h2 data-a="nav_mdata">Dữ liệu kinh doanh</h2>
+            <p data-a="mdata_desc">Xu hướng doanh thu, top món,客单价 &amp; tỷ lệ mua lại (tổng hợp từ đơn hàng).</p>
+          </div>
+        </div>
+        <div class="kpi-grid" id="mDataKpi"></div>
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head"><h3 data-a="mdata_trend">Xu hướng doanh thu 7 ngày</h3><span class="sub" id="mDataTrendMax"></span></div>
+            <div class="chart" id="mDataChart"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3 data-a="mdata_top">Top món bán chạy</h3></div>
+            <div id="mDataTop"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DRAWER ===================== -->
+<div class="overlay" id="drawerOverlay"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div class="dh-ic" id="drawerIc">🧾</div>
+    <div><h3 id="drawerTitle"></h3><p id="drawerSub"></p></div>
+    <button class="x" id="drawerClose">__IC_X__</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-foot" id="drawerFoot"></div>
+</aside>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ===================== CONFIG + SCRIPTS ===================== -->
+<script>
+/* Shared config resolver — reads the SAME localStorage keys as the other ends.
+   URL overrides: ?api= ?live ?demo */
+window.GN_CONFIG = (function(){
+  const q = new URLSearchParams(location.search);
+  const base = (q.get('api') || localStorage.getItem('gn_api_base') || '').trim().replace(/\/+$/,'');
+  let useApi;
+  if(q.has('live')) useApi = true;
+  else if(q.has('demo')) useApi = false;
+  else { const s = localStorage.getItem('gn_use_api'); useApi = s===null ? !!base : s==='1'; }
+  return { apiBase:base, useApi, pusherKey:(q.get('pusher')||localStorage.getItem('gn_pusher_key')||'').trim(), pusherCluster:(q.get('pusherCluster')||localStorage.getItem('gn_pusher_cluster')||'ap1').trim() };
+})();
+</script>
+<script src="api.js"></script>
+<script>
+/* ===================== ICONS ===================== */
+const ICONS = {
+  dashboard:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg>',
+  receipt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18l2-1 2 1 2-1 2 1 2-1 2 1V3l-2 1-2-1-2 1-2-1-2 1z"/><path d="M9 8h6M9 12h6"/></svg>',
+  wallet:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h15a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 7V5a2 2 0 0 1 2-2h11"/><circle cx="17" cy="13" r="1.4"/></svg>',
+  settings:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  shop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>',
+  chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+  sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15l7-7 7 7"/></svg>',
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>',
+  subsidy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h13a3 3 0 1 0-3-3"/><path d="M3 12v6h13"/><path d="M16 9l3-3 3 3"/></svg>',
+  zero:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9.5a3 3 0 0 0 0 5M15 14.5a3 3 0 0 0 0-5"/></svg>',
+  chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6"/></svg>',
+  coupon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4z"/><path d="M12 7v10" stroke-dasharray="2 2"/></svg>',
+  gift:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16v9H4z"/><path d="M12 11v9M12 11C12 8 10 6 8 6S4 8 4 11M12 11c0-3 2-5 4-5s4 2 4 5"/></svg>',
+};
+document.body.innerHTML = document.body.innerHTML
+  .replace(/__IC_DASHBOARD__/g, ICONS.dashboard)
+  .replace(/__IC_BOX__/g, ICONS.box)
+  .replace(/__IC_RECEIPT__/g, ICONS.receipt)
+  .replace(/__IC_WALLET__/g, ICONS.wallet)
+  .replace(/__IC_SETTINGS__/g, ICONS.settings)
+  .replace(/__IC_SHOP__/g, ICONS.shop)
+  .replace(/__IC_CHECK__/g, ICONS.check)
+  .replace(/__IC_SEARCH__/g, ICONS.search)
+  .replace(/__IC_BELL__/g, ICONS.bell)
+  .replace(/__IC_SUN__/g, ICONS.sun)
+  .replace(/__IC_X__/g, ICONS.x)
+  .replace(/__IC_PLUS__/g, ICONS.plus)
+  .replace(/__IC_DOWNLOAD__/g, ICONS.download)
+  .replace(/__IC_SUBSIDY__/g, ICONS.subsidy)
+  .replace(/__IC_ZERO__/g, ICONS.zero)
+  .replace(/__IC_CHART__/g, ICONS.chart)
+  .replace(/__IC_COUPON__/g, ICONS.coupon)
+  .replace(/__IC_GIFT__/g, ICONS.gift);
+</script>
+<script>
+/* ===================== I18N ===================== */
+const APP = {
+  vi:{
+    m_console:"Cổng Merchant · Giờ vàng Việt Nam", m_console_short:"Merchant",
+    m_login_title:"Đăng nhập Merchant", m_login_lead:"Quản lý đơn hàng, thực đơn & đối soát trên máy tính.",
+    m_login_phone:"Số điện thoại", m_login_pass:"Mật khẩu", m_login_btn:"Đăng nhập",
+    m_login_err:"Sai tài khoản hoặc mật khẩu.", m_login_hint:"Demo: 0900000003 / demo123",
+    side_role:"Chủ cửa hàng",
+    nav_label:"Vận hành cửa hàng",
+    nav_dashboard_zh:"概览", nav_products_zh:"商品/菜单", nav_orders_zh:"订单", nav_settlement_zh:"结算对账", nav_settings_zh:"店铺设置",
+    chart_title:"Xu hướng đơn hôm nay", chart_orders:"Số đơn",
+    dash_pending:"Cần xử lý", recent_orders:"Đơn hàng gần đây", view_all:"Xem tất cả",
+    col_order:"Mã đơn", col_user:"Khách", col_product:"Sản phẩm", col_category:"Danh mục",
+    col_price:"Giá (₫)", col_stock:"Tồn kho", col_status:"Trạng thái", col_time:"Thời gian",
+    col_amount:"Tiền", col_items:"Số món", col_action:"Thao tác", col_period:"Kỳ", col_orders:"Đơn",
+    col_gmv:"GMV", col_payable:"Phải thu", col_subsidy:"Trợ phí", col_settle_status:"Trạng thái",
+    kpi_orders:"Đơn hôm nay", kpi_orders_zh:"今日订单", kpi_pending:"Chờ nhận", kpi_pending_zh:"待接订单",
+    kpi_gmv:"Doanh thu hôm nay", kpi_gmv_zh:"今日营收", kpi_onsale:"Đang bán", kpi_onsale_zh:"在售商品",
+    kpi_status:"Trạng thái KD", kpi_status_zh:"营业状态", vs_yesterday:"so với hôm qua",
+    prod_desc:"Chỉnh giá & bật/tắt bán trực tiếp. 0% hoa hồng — tiền hàng 100% về bạn.",
+    add_product:"Thêm sản phẩm", search_ph:"Tìm kiếm...", cat_all:"Tất cả danh mục",
+    on:"Đang bán", off:"Tạm ẩn", save:"Lưu", cancel:"Hủy",
+    new_product_title:"Thêm món mới", np_name:"Tên món", np_cat:"Danh mục", np_price:"Giá (₫)", np_emoji:"Icon",
+    add_product_demo:"Đã kết nối backend sẽ tạo thật; không thì lưu demo.",
+    p2_gap:"P2: thiếu API tạo món",
+    orders_desc:"Nhận đơn, đóng gói & theo dõi giao hàng theo thời gian thực.",
+    tab_all:"Tất cả", tab_new:"Chờ nhận", tab_cooking:"Đang xử lý", tab_delivering:"Đang giao", tab_done:"Hoàn tất", tab_cancel:"Đã hủy",
+    accept:"Nhận đơn", ready:"Đóng gói xong",
+    order_title:"Chi tiết đơn hàng", order_items:"Sản phẩm", order_addr:"Địa chỉ giao",
+    order_pay:"Thanh toán", order_customer:"Khách hàng", order_total:"Tổng cộng",
+    settle_desc:"Mô hình 0% hoa hồng · nền tảng trợ phí giao hàng. Đối soát doanh thu của bạn.",
+    settle_payable:"Phải thu kỳ này", settle_payable_zh:"本期应收",
+    settle_paid:"Đã thanh toán", settle_paid_zh:"已结",
+    settle_subsidy:"Trợ phí giao hàng", settle_subsidy_zh:"平台补贴",
+    settle_commission:"Hoa hồng nền tảng", settle_commission_zh:"平台佣金",
+    settle_list:"Đối soát theo kỳ", reconcile:"Tổng hợp",
+    model_note:"Mô hình: hoa hồng nền tảng = 0%. Tiền hàng 100% về merchant; phí giao hàng do nền tảng trợ giá. Lợi nhuận đến từ trợ giá đối tác & quảng cáo.",
+    export:"Xuất đối soát", recon_gmv:"Tổng GMV", recon_payable:"Phải thu merchant", recon_subsidy:"Chi phí trợ giá", recon_commission:"Hoa hồng thu được",
+    settings_desc:"Cập nhật thông tin shop, trạng thái kinh doanh & tham gia trợ phí giao hàng.",
+    set_basic:"Thông tin cơ bản", set_ops:"Vận hành",
+    set_name:"Tên cửa hàng", set_phone:"Số điện thoại", set_addr:"Địa chỉ", set_hours:"Giờ mở cửa", set_rating:"Đánh giá",
+    set_open:"Cửa hàng mở", set_open_sub:"Bật để nhận đơn từ khách.",
+    set_subsidy:"Trợ phí giao hàng (0% hoa hồng)", set_subsidy_sub:"Nền tảng trợ phí ship — bạn không mất phí.",
+    set_subsidy_note:"Khi bật, đơn của bạn được ưu tiên giao nhanh với phí ship do GIAONHANH tài trợ.",
+    set_preview:"Xem trang cửa hàng", set_save:"Lưu",
+    status_paid:"Chờ xác nhận", status_pending:"Chờ duyệt", status_new:"Đơn mới",
+    status_accepted:"Đã nhận", status_picked:"Đã lấy hàng", status_delivering:"Đang giao",
+    status_delivered:"Đã giao", status_cancelled:"Đã hủy",
+    settle_paid_st:"Đã chi", settle_unpaid_st:"Chờ chi",
+    open:"Đang mở", close:"Đóng",
+    pay_momo:"MoMo", pay_zalo:"ZaloPay", pay_cod:"COD", pay_wallet:"Ví GIAONHANH",
+    empty:"Không có dữ liệu", logout:"Đăng xuất",
+    toast_login:"Đăng nhập thành công", toast_live:"Đã kết nối dữ liệu thật", toast_demo:"Đang chạy dữ liệu demo",
+    toast_price:"Đã cập nhật giá", toast_status:"Đã cập nhật trạng thái", toast_accept:"Đã nhận đơn", toast_ready:"Đã đóng gói xong",
+    toast_saved:"Đã lưu cài đặt", toast_added:"Đã thêm món (demo)", toast_export:"Đã xuất file đối soát",
+    toast_open:"Đã mở cửa hàng", toast_close:"Đã đóng cửa hàng",
+  },
+  zh:{
+    m_console:"商家控制台 · 越南小时达", m_console_short:"商家端",
+    m_login_title:"商家登录", m_login_lead:"在电脑上管理订单、菜单与对账。",
+    m_login_phone:"手机号", m_login_pass:"密码", m_login_btn:"登录",
+    m_login_err:"账号或密码错误。", m_login_hint:"演示账号：0900000003 / demo123",
+    side_role:"店长",
+    nav_label:"门店运营",
+    nav_dashboard_zh:"概览", nav_products_zh:"商品/菜单", nav_orders_zh:"订单", nav_settlement_zh:"结算对账", nav_settings_zh:"店铺设置",
+    chart_title:"今日订单趋势", chart_orders:"订单数",
+    dash_pending:"待处理", recent_orders:"近期订单", view_all:"查看全部",
+    col_order:"订单号", col_user:"客户", col_product:"商品", col_category:"分类",
+    col_price:"价格(₫)", col_stock:"库存", col_status:"状态", col_time:"时间",
+    col_amount:"金额", col_items:"件数", col_action:"操作", col_period:"周期", col_orders:"单数",
+    col_gmv:"GMV", col_payable:"应收", col_subsidy:"补贴", col_settle_status:"状态",
+    kpi_orders:"今日订单", kpi_orders_zh:"今日订单", kpi_pending:"待接订单", kpi_pending_zh:"待接订单",
+    kpi_gmv:"今日营收", kpi_gmv_zh:"今日营收", kpi_onsale:"在售商品", kpi_onsale_zh:"在售商品",
+    kpi_status:"营业状态", kpi_status_zh:"营业状态", vs_yesterday:"较昨日",
+    prod_desc:"直接改价、上/下架。0 佣金——货款 100% 归你。",
+    add_product:"新增商品", search_ph:"搜索...", cat_all:"全部分类",
+    on:"在售", off:"已下架", save:"保存", cancel:"取消",
+    new_product_title:"新增商品", np_name:"商品名", np_cat:"分类", np_price:"价格(₫)", np_emoji:"图标",
+    add_product_demo:"已连接后端则真实创建；否则保存为演示数据。",
+    p2_gap:"P2：缺创建商品接口",
+    orders_desc:"接单、备货并实时跟踪配送。",
+    tab_all:"全部", tab_new:"待接单", tab_cooking:"进行中", tab_delivering:"配送中", tab_done:"已完成", tab_cancel:"已取消",
+    accept:"接单", ready:"完成备货",
+    order_title:"订单详情", order_items:"商品", order_addr:"配送地址",
+    order_pay:"支付方式", order_customer:"客户", order_total:"合计",
+    settle_desc:"0 佣金模式 · 平台补贴配送费。核对你的营收。",
+    settle_payable:"本期应收", settle_payable_zh:"本期应收",
+    settle_paid:"已结", settle_paid_zh:"已结",
+    settle_subsidy:"配送补贴", settle_subsidy_zh:"平台补贴",
+    settle_commission:"平台佣金", settle_commission_zh:"平台佣金",
+    settle_list:"按周期对账", reconcile:"汇总",
+    model_note:"模式：平台佣金 = 0%。货款 100% 归商家；配送费由平台补贴。利润来自伙伴补贴与广告。",
+    export:"导出对账单", recon_gmv:"总 GMV", recon_payable:"应付商户", recon_subsidy:"补贴成本", recon_commission:"已收佣金",
+    settings_desc:"更新店铺信息、营业状态与是否参与配送补贴。",
+    set_basic:"基础信息", set_ops:"运营",
+    set_name:"店铺名称", set_phone:"联系电话", set_addr:"地址", set_hours:"营业时间", set_rating:"评分",
+    set_open:"店铺营业", set_open_sub:"开启后接收客户订单。",
+    set_subsidy:"配送费补贴（0 佣金）", set_subsidy_sub:"平台补贴运费——你无需承担。",
+    set_subsidy_note:"开启后，你的订单优先快速配送，运费由 GIAONHANH 补贴。",
+    set_preview:"预览招商页", set_save:"保存",
+    status_paid:"待接单", status_pending:"待审核", status_new:"新订单",
+    status_accepted:"已接单", status_picked:"已取货", status_delivering:"配送中",
+    status_delivered:"已送达", status_cancelled:"已取消",
+    settle_paid_st:"已打款", settle_unpaid_st:"待打款",
+    open:"营业中", close:"休息中",
+    pay_momo:"MoMo", pay_zalo:"ZaloPay", pay_cod:"货到付款", pay_wallet:"GIAONHANH 钱包",
+    empty:"暂无数据", logout:"退出登录",
+    toast_login:"登录成功", toast_live:"已连接真实数据", toast_demo:"正在运行演示数据",
+    toast_price:"已更新价格", toast_status:"已更新状态", toast_accept:"已接单", toast_ready:"已完成备货",
+    toast_saved:"已保存设置", toast_added:"已新增商品（演示）", toast_export:"已导出对账单",
+    toast_open:"已开启营业", toast_close:"已关闭营业",
+    /* ---- new M screens (zh) ---- */
+    nav_label_m2:"扩展",
+    nav_orderdetail_zh:"订单详情", nav_productedit_zh:"商品编辑", nav_mcoupons_zh:"商家优惠券", nav_mdata_zh:"数据看板",
+    morder_desc:"订单信息、配送地址、支付方式与实时状态。",
+    back_orders:"← 订单",
+    mpedit_desc:"更新名称、价格、库存、主图与在售状态。",
+    mpedit_new:"+ 新增", mpedit_save:"保存", mpedit_basic:"商品信息", mpedit_media:"图片与状态",
+    mpedit_name_vi:"名称(越)", mpedit_name_zh:"名称(中)", mpedit_cat:"分类", mpedit_price:"价格(₫)", mpedit_stock:"库存", mpedit_emoji:"图标",
+    mpedit_img:"主图", mpedit_onsale:"在售", mpedit_onsale_sub:"在店铺展示。", mpedit_note:"保存将调用 updateProduct（编辑）或 createProduct（新增）。后端缺失时为演示数据。",
+    mpedit_title_new:"新增商品", mpedit_title_edit:"编辑商品",
+    mcoupon_desc:"商家自行发券（演示——后端暂无商家券接口）。", mcoupon_new:"新建券",
+    mdata_desc:"营收趋势、热销商品、客单价与复购率（由订单聚合）。",
+    mdata_trend:"近 7 日营收趋势", mdata_top:"热销商品 TOP",
+    mdata_aov:"客单价 (AOV)", mdata_aov_zh:"客单价", mdata_rebuy:"复购率", mdata_rebuy_zh:"复购率",
+    mdata_rev7:"近 7 日营收", mdata_rev7_zh:"7日营收", mdata_orders7:"近 7 日订单", mdata_orders7_zh:"7日订单",
+    mcoupon_cash:"代金券", mcoupon_percent:"折扣券", mcoupon_new_title:"新建商家券",
+    mc_name:"券名称", mc_type:"类型", mc_value:"优惠", mc_cond:"最低订单", mc_expire:"有效期", mc_funded:"商家自担",
+    toast_mproduct:"已保存商品（演示）", toast_mcoupon:"已创建券（演示）",
+    od_timeline:"订单状态", od_items:"商品", od_addr:"配送地址", od_pay:"支付方式",
+    od_customer:"客户", od_total:"合计", od_accept:"接单", od_ready:"完成备货", od_deliver:"标记送达", od_cancel:"取消",
+    od_new:"新订单", od_picked:"已取货",
+  }
+};
+
+/* ===================== DEMO DATA ===================== */
+function fmtDT(d){ const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
+function mkOrder(no, status, daysAgo, h, m, customer, phone, address, pay, items){
+  const d=new Date(); d.setDate(d.getDate()-daysAgo); d.setHours(h,m,0,0);
+  const amount=items.reduce((s,i)=>s+i.qty*i.price,0);
+  return { order_no:no, status, created_at:fmtDT(d), customer, phone, address, pay, items, amount };
+}
+const MERCHANT = { id:3, name:"GREEN MART", logo:"🛒", category:"Siêu thị / Tạp hóa", phone:"0903 000 003",
+  address:"12 Hàng Bài, Hoàn Kiếm, Hà Nội", rating:4.8, is_open:true, delivery_subsidy:true,
+  business_hours:"08:00 – 22:00", joined:"2026-05-12" };
+let PRODUCTS = [
+  {id:1, emoji:"🍎", name:"Táo nhập khẩu", category:"Trái cây", price:45000, stock:120, status:"on"},
+  {id:2, emoji:"🥛", name:"Sữa tươi", category:"Sữa", price:32000, stock:80, status:"on"},
+  {id:3, emoji:"💧", name:"Nước khoáng", category:"Đồ uống", price:12000, stock:200, status:"on"},
+  {id:4, emoji:"🍌", name:"Chuối", category:"Trái cây", price:18000, stock:0, status:"off"},
+  {id:5, emoji:"🍞", name:"Bánh mì", category:"Bánh", price:15000, stock:60, status:"on"},
+  {id:6, emoji:"☕", name:"Cà phê hạt", category:"Đồ uống", price:90000, stock:40, status:"off"},
+];
+let ORDERS = [
+  mkOrder("GN20260731A1","paid",0,9,12,"Nguyen Van A","0901 234 567","123 Tràng Tiền, Hoàn Kiếm","pay_wallet",[{name:"Táo nhập khẩu",qty:2,price:45000},{name:"Sữa tươi",qty:1,price:32000}]),
+  mkOrder("GN20260731A2","paid",0,9,40,"Tran Thi B","0902 345 678","45 Hàng Bài, Hoàn Kiếm","pay_momo",[{name:"Nước khoáng",qty:6,price:12000}]),
+  mkOrder("GN20260731A3","accepted",0,10,5,"Le Van C","0903 456 789","12 Lý Thái Tổ","pay_zalo",[{name:"Sữa tươi",qty:3,price:32000}]),
+  mkOrder("GN20260731A4","picked",0,10,20,"Pham D","0904 567 890","88 Nguyễn Huệ, Q1, HCM","pay_wallet",[{name:"Bánh mì",qty:4,price:15000},{name:"Cà phê hạt",qty:1,price:90000}]),
+  mkOrder("GN20260731A5","delivering",0,10,31,"Hoang E","0905 678 901","200 Cầu Giấy, HN","pay_cod",[{name:"Táo nhập khẩu",qty:3,price:45000}]),
+  mkOrder("GN20260731A6","delivered",0,8,55,"Vu F","0906 789 012," ,"10 Lý Tự Trọng, HCM","pay_momo",[{name:"Sữa tươi",qty:2,price:32000},{name:"Chuối",qty:4,price:18000}]),
+  mkOrder("GN20260731A7","delivered",0,11,15,"Do G","0907 890 123","33 Tôn Đức Thắng, HCM","pay_wallet",[{name:"Nước khoáng",qty:10,price:12000},{name:"Bánh mì",qty:3,price:15000}]),
+  mkOrder("GN20260731A8","cancelled",0,12,0,"Ngo H","0908 901 234","5 Chợ Đồng Xuân, HN","pay_wallet",[{name:"Cà phê hạt",qty:1,price:90000}]),
+  mkOrder("GN20260729B1","paid",2,14,2,"Bui I","0909 012 345","99 Thái Hà, HN","pay_zalo",[{name:"Táo nhập khẩu",qty:1,price:45000}]),
+  mkOrder("GN20260728B2","delivered",3,19,30,"Ly J","0910 123 456","22 Hai Bà Trưng, HCM","pay_cod",[{name:"Sữa tươi",qty:5,price:32000},{name:"Nước khoáng",qty:6,price:12000}]),
+];
+let SETTLEMENTS = [
+  {period:"2026-07-31", orders:8, gmv:1240000, payable:1240000, paid:0, subsidy:96000, commission:0, status:"unpaid"},
+  {period:"2026-07-30", orders:14, gmv:2180000, payable:2180000, paid:2180000, subsidy:142000, commission:0, status:"paid"},
+  {period:"2026-07-29", orders:11, gmv:1760000, payable:1760000, paid:1760000, subsidy:118000, commission:0, status:"paid"},
+  {period:"2026-07-28", orders:9, gmv:1490000, payable:1490000, paid:1490000, subsidy:101000, commission:0, status:"paid"},
+];
+
+/* ===================== NEW M SCREENS — DEMO DATA ===================== */
+let MCOUPONS = [
+  {id:1,name:"Freeship đơn 80K",type:"cash",value:15000,cond:80000,used:420,status:"active"},
+  {id:2,name:"Giảm 15K đơn 120K",type:"cash",value:15000,cond:120000,used:260,status:"active"},
+  {id:3,name:"Mua 2 tặng 1",type:"percent",value:10,cond:0,used:88,status:"paused"},
+];
+const MDATA = {
+  rev7:[620000,880000,540000,1020000,1180000,1240000,960000],
+  days:["T2","T3","T4","T5","T6","T7","CN"],
+};
+
+/* ===================== STATE ===================== */
+let lang = localStorage.getItem("gn_mweb_lang") || "vi";
+let theme = localStorage.getItem("gn_mweb_theme") || "light";
+let current = "dashboard";
+let LIVE = null;
+const NEEDS_ACCEPT = ["paid","pending","new"];
+const READY_SET = ["accepted","picked"];
+
+const $ = s => document.querySelector(s);
+const fmtVND = v => (v||0).toLocaleString("vi-VN") + " ₫";
+const fmtNum = v => (v||0).toLocaleString("vi-VN");
+const t = k => (APP[lang] && APP[lang][k]!=null) ? APP[lang][k] : (APP.vi[k]||k);
+const todayStr = () => { const d=new Date(); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; };
+
+/* ===================== TEXT ===================== */
+function applyText(){
+  document.documentElement.setAttribute("lang", lang);
+  document.querySelectorAll("[data-a]").forEach(el=>{ const k=el.getAttribute("data-a"); if(APP[lang][k]!=null) el.textContent=APP[lang][k]; });
+  document.getElementById("langPill").querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.lang===lang));
+  if(current==="dashboard") setHead("dashboard");
+  else if(current==="products") setHead("products");
+  else if(current==="orders") setHead("orders");
+  else if(current==="settlement") setHead("settlement");
+  else if(current==="settings") setHead("settings");
+  else if(current==="order-detail") setHead("order-detail");
+  else if(current==="product-edit") setHead("product-edit");
+  else if(current==="m-coupons") setHead("m-coupons");
+  else if(current==="m-data") setHead("m-data");
+  renderAll();
+}
+function setLang(l){ lang=l; localStorage.setItem("gn_mweb_lang",l); applyText(); }
+function setTheme(tm){ theme=tm; localStorage.setItem("gn_mweb_theme",tm); document.documentElement.setAttribute("data-theme",tm); }
+
+/* ===================== TOAST ===================== */
+function toast(msg, kind="ok"){
+  const w=$("#toastWrap");
+  const el=document.createElement("div");
+  el.className="toast "+(kind==="bad"?"bad":"ok");
+  el.innerHTML=`<span class="ti">${kind==="bad"?"!":"✓"}</span><span>${msg}</span>`;
+  w.appendChild(el);
+  setTimeout(()=>{ el.style.opacity="0"; el.style.transform="translateX(40px)"; setTimeout(()=>el.remove(),300); }, 2600);
+}
+
+/* ===================== STATUS PILLS ===================== */
+function statusPill(s){
+  const map={paid:["amber",t("status_paid")],pending:["amber",t("status_pending")],new:["amber",t("status_new")],
+    accepted:["blue",t("status_accepted")],picked:["blue",t("status_picked")],
+    delivering:["teal",t("status_delivering")],delivered:["green",t("status_delivered")],cancelled:["red",t("status_cancelled")]};
+  const [c,l]=map[s]||["gray",s]; return `<span class="pill ${c}">${l}</span>`;
+}
+function settlePill(s){ return s==="paid" ? `<span class="pill green">${t("settle_paid_st")}</span>` : `<span class="pill amber">${t("settle_unpaid_st")}</span>`; }
+
+/* ===================== PAGE HEAD ===================== */
+function setHead(page){
+  const titles={
+    dashboard:["Tổng quan","概览 · 运营全景"],
+    products:["Sản phẩm / Thực đơn","商品与菜单管理"],
+    orders:["Đơn hàng","实时订单总览"],
+    settlement:["Đối soát & Thanh toán","分账结算与对账"],
+    settings:["Cài đặt cửa hàng","店铺设置"],
+    "order-detail":["Chi tiết đơn hàng","订单详情"],
+    "product-edit":["Sửa / thêm món","商品编辑"],
+    "m-coupons":["Mã giảm giá cửa hàng","商家优惠券"],
+    "m-data":["Dữ liệu kinh doanh","数据看板"],
+  };
+  $("#pageTitle") && ($("#pageTitle").textContent=titles[page][0]);
+}
+
+/* ===================== NAV ===================== */
+function switchPage(page){
+  current=page;
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.toggle("active", n.dataset.page===page));
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  $("#page-"+page).classList.add("active");
+  setHead(page);
+}
+document.querySelectorAll(".nav-item").forEach(n=>n.onclick=()=>switchPage(n.dataset.page));
+document.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>switchPage(b.dataset.goto));
+
+/* ===================== TREND HELPERS ===================== */
+const upTrend = txt => `<span class="trend up">${ICONS.up}${txt}</span>`;
+const downTrend = txt => `<span class="trend down">${ICONS.down}${txt}</span>`;
+const neutTrend = txt => `<span class="trend" style="background:var(--neutral-soft);color:var(--neutral)">${txt}</span>`;
+
+/* ===================== RENDER: DASHBOARD ===================== */
+function renderDashboard(){
+  const today=todayStr();
+  const todays=ORDERS.filter(o=>o.created_at.slice(0,10)===today);
+  const todayOrders=todays.length;
+  const pending=ORDERS.filter(o=>NEEDS_ACCEPT.includes(o.status)).length;
+  const todayGmv=todays.filter(o=>o.status==="delivered").reduce((s,o)=>s+o.amount,0);
+  const onSale=PRODUCTS.filter(p=>p.status==="on").length;
+  const open=MERCHANT.is_open;
+  const cards=[
+    {ic:"receipt",cls:"o",lab:t("kpi_orders"),zh:t("kpi_orders_zh"),val:fmtNum(todayOrders),trend:upTrend("+12% "+t("vs_yesterday"))},
+    {ic:"clock",cls:"w",lab:t("kpi_pending"),zh:t("kpi_pending_zh"),val:fmtNum(pending),trend:downTrend(pending+" "+t("kpi_pending_zh"))},
+    {ic:"wallet",cls:"o",lab:t("kpi_gmv"),zh:t("kpi_gmv_zh"),val:fmtVND(todayGmv),trend:upTrend("+8% "+t("vs_yesterday"))},
+    {ic:"box",cls:"r",lab:t("kpi_onsale"),zh:t("kpi_onsale_zh"),val:fmtNum(onSale),trend:neutTrend(`${onSale}/${PRODUCTS.length} ${t("on")}`)},
+  ];
+  let html=cards.map(c=>`
+    <div class="kpi">
+      <div class="top"><div class="ic ${c.cls}">${ICONS[c.ic]}</div>
+        <div class="lab">${c.lab}<small>${c.zh}</small></div></div>
+      <div class="val">${c.val}</div>
+      ${c.trend}
+    </div>`).join("");
+  // 5th KPI: business status with toggle
+  html+=`
+    <div class="kpi">
+      <div class="top"><div class="ic t">${ICONS.shop}</div>
+        <div class="lab">${t("kpi_status")}<small>${t("kpi_status_zh")}</small></div></div>
+      <div style="display:flex;align-items:center;gap:11px;margin-top:10px">
+        <div class="sw ${open?'on':''}" id="kpiOpenSw" title="Toggle"><i></i></div>
+        <div class="val" style="font-size:19px">${open?t("open"):t("close")}</div>
+      </div>
+    </div>`;
+  $("#kpiGrid").innerHTML=html;
+  $("#kpiOpenSw").onclick=()=>toggleOpen();
+
+  // chart: today's orders by hour bucket
+  const buckets=[["00–06",0,6],["06–09",6,9],["09–12",9,12],["12–15",12,15],["15–18",15,18],["18–21",18,21],["21–24",21,24]];
+  const counts=buckets.map(b=>todays.filter(o=>{const h=+o.created_at.slice(11,13); return h>=b[1]&&h<b[2];}).length);
+  const max=Math.max(1,...counts);
+  $("#chartToday").innerHTML=buckets.map((b,i)=>`
+    <div class="bar-col"><div class="bar" style="height:${Math.round(counts[i]/max*100)}%">
+      <span class="tip">${counts[i]} ${t("chart_orders").toLowerCase()}</span></div>
+      <div class="x">${b[0]}</div></div>`).join("");
+  $("#chartMax").textContent=`${t("chart_orders")}: ${fmtNum(max)}`;
+
+  // pending list (orders needing accept)
+  const pend=ORDERS.filter(o=>NEEDS_ACCEPT.includes(o.status)).slice(0,6);
+  $("#dashPendingCount").textContent=pend.length?`(${pend.length})`:"";
+  $("#dashPending").innerHTML=pend.length?pend.map(o=>`
+    <div class="list-row" data-order="${o.order_no}">
+      <div class="lr-ic warn">${ICONS.receipt.replace('<svg','<svg width="18" height="18"')}</div>
+      <div class="lr-meta"><b>${o.order_no}</b><span>${o.customer} · ${fmtVND(o.amount)}</span></div>
+      <div class="lr-act"><span class="mini-act ok" data-accept="${o.order_no}">${t("accept")}</span></div>
+    </div>`).join(""):`<div class="empty">🎉 ${t("empty")}</div>`;
+  $("#dashPending").querySelectorAll("[data-accept]").forEach(b=>b.onclick=e=>{e.stopPropagation();orderAction(b.dataset.accept,"accept");});
+  $("#dashPending").querySelectorAll("[data-order]").forEach(r=>r.onclick=()=>openOrder(r.dataset.order));
+
+  // recent orders
+  const rec=[...ORDERS].sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,6);
+  $("#recentOrders").innerHTML=rec.map(o=>`
+    <tr data-order="${o.order_no}">
+      <td class="num">${o.order_no}</td>
+      <td>${o.customer}</td>
+      <td class="right num">${fmtVND(o.amount)}</td>
+      <td>${statusPill(o.status)}</td>
+      <td class="muted">${o.created_at.slice(5)}</td>
+    </tr>`).join("");
+  $("#recentOrders").querySelectorAll("tr").forEach(tr=>tr.onclick=()=>openOrder(tr.dataset.order));
+}
+
+/* ===================== RENDER: PRODUCTS ===================== */
+function renderProducts(){
+  const q=($("#prodSearch").value||"").toLowerCase();
+  const cat=$("#prodCat").value;
+  // populate category select once
+  const sel=$("#prodCat");
+  if(sel.options.length<=1){
+    [...new Set(PRODUCTS.map(p=>p.category))].forEach(c=>{ const o=document.createElement("option"); o.value=c; o.textContent=c; sel.appendChild(o); });
+  }
+  let list=PRODUCTS.filter(p=>{
+    if(cat && p.category!==cat) return false;
+    if(q && !p.name.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  $("#prodCountTag").textContent=`${list.filter(p=>p.status==="on").length}/${list.length} ${t("on")}`;
+  $("#prodTableBody").innerHTML=list.length?list.map(p=>`
+    <tr data-id="${p.id}">
+      <td><div class="m-cell"><div class="m-logo">${p.emoji||"📦"}</div>
+        <div class="m-meta"><b>${p.name}</b>${p.demoAdded?`<span class="add-badge">P2</span>`:`<span>${p.category}</span>`}</div></div></td>
+      <td>${p.category}</td>
+      <td class="right"><input class="price-input" type="text" inputmode="numeric" value="${fmtNum(p.price)}" data-price="${p.id}"></td>
+      <td class="right muted">${p.stock}</td>
+      <td><div class="sw ${p.status==="on"?"on":""}" data-toggle="${p.id}"><i></i></div></td>
+      <td class="right"><span class="pill ${p.status==="on"?"green":"gray"}">${p.status==="on"?t("on"):t("off")}</span></td>
+    </tr>`).join(""):`<tr><td colspan="6"><div class="empty">${t("empty")}</div></td></tr>`;
+
+  $("#prodTableBody").querySelectorAll("[data-price]").forEach(inp=>inp.onchange=async()=>{
+    const id=+inp.dataset.price; const p=PRODUCTS.find(x=>x.id===id); if(!p) return;
+    const v=parseInt((inp.value||"").replace(/\D/g,""))||0;
+    p.price=v; inp.value=fmtNum(v);
+    if(LIVE){ try{ await GN.API.updateProduct(id,{price:v}); }catch(e){} }
+    toast(t("toast_price"),"ok");
+  });
+  $("#prodTableBody").querySelectorAll("[data-toggle]").forEach(sw=>sw.onclick=async()=>{
+    const id=+sw.dataset.toggle; const p=PRODUCTS.find(x=>x.id===id); if(!p) return;
+    p.status=p.status==="on"?"off":"on"; renderProducts();
+    if(LIVE){ try{ await GN.API.updateProduct(id,{status:p.status}); }catch(e){} }
+    toast(t("toast_status"),"ok");
+  });
+}
+
+/* ===================== RENDER: ORDERS ===================== */
+let orderFilter="all";
+function renderOrders(){
+  const q=($("#orderSearch").value||"").toLowerCase();
+  let list=ORDERS.filter(o=>{
+    if(orderFilter!=="all" && o.status!==orderFilter) return false;
+    if(q && !o.order_no.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  $("#orderCountTag").textContent=`${list.length} ${lang==="vi"?"đơn":"单"}`;
+  $("#orderTableBody").innerHTML=list.length?list.map(o=>{
+    const itemCount=o.items.reduce((s,i)=>s+i.qty,0);
+    let acts="";
+    if(NEEDS_ACCEPT.includes(o.status)) acts+=`<button class="btn btn-primary btn-xs" data-accept="${o.order_no}">${t("accept")}</button>`;
+    if(READY_SET.includes(o.status)) acts+=`<button class="btn btn-ghost btn-xs" data-ready="${o.order_no}" style="margin-left:6px;border-color:var(--teal);color:#0F766E">${t("ready")}</button>`;
+    return `<tr data-order="${o.order_no}">
+      <td class="num">${o.order_no}</td>
+      <td>${o.customer}</td>
+      <td class="right num">${itemCount}</td>
+      <td class="right num">${fmtVND(o.amount)}</td>
+      <td>${statusPill(o.status)}</td>
+      <td class="muted">${o.created_at}</td>
+      <td class="right">${acts||'<span class="muted">—</span>'}</td>
+    </tr>`;
+  }).join(""):`<tr><td colspan="7"><div class="empty">${t("empty")}</div></td></tr>`;
+  $("#orderTableBody").querySelectorAll("tr").forEach(tr=>tr.onclick=()=>{ selectedOrderNo=tr.dataset.order; switchPage("order-detail"); });
+  $("#orderTableBody").querySelectorAll("[data-accept]").forEach(b=>b.onclick=e=>{e.stopPropagation();orderAction(b.dataset.accept,"accept");});
+  $("#orderTableBody").querySelectorAll("[data-ready]").forEach(b=>b.onclick=e=>{e.stopPropagation();orderAction(b.dataset.ready,"ready");});
+  // nav badge
+  const pn=ORDERS.filter(o=>NEEDS_ACCEPT.includes(o.status)).length;
+  const dot=$("#navOrderDot");
+  if(pn){ dot.style.display="grid"; dot.textContent=pn; } else dot.style.display="none";
+}
+document.querySelectorAll("#orderTabs button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#orderTabs button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); orderFilter=b.dataset.s; renderOrders();
+});
+$("#orderSearch").oninput=renderOrders;
+$("#prodSearch").oninput=renderProducts;
+$("#prodCat").onchange=renderProducts;
+
+/* ===================== RENDER: SETTLEMENT ===================== */
+function renderSettlement(){
+  const latest=SETTLEMENTS.find(s=>s.status==="unpaid")||SETTLEMENTS[0];
+  const periodPayable=latest?latest.payable:0;
+  const paidAll=SETTLEMENTS.reduce((s,x)=>s+(x.paid||0),0);
+  const subsidyAll=SETTLEMENTS.reduce((s,x)=>s+(x.subsidy||0),0);
+  const gmvAll=SETTLEMENTS.reduce((s,x)=>s+(x.gmv||0),0);
+  const payableAll=SETTLEMENTS.reduce((s,x)=>s+(x.payable||0),0);
+  $("#settlePayable").textContent=fmtVND(periodPayable);
+  $("#settlePaid").textContent=fmtVND(paidAll);
+  $("#settleSubsidy").textContent=fmtVND(subsidyAll);
+  $("#settleCommission").textContent=fmtVND(0);
+  $("#settleDateLabel").textContent=latest?latest.period:"";
+  $("#settleTableBody").innerHTML=SETTLEMENTS.map(x=>`
+    <tr>
+      <td>${x.period}</td>
+      <td class="right num">${fmtNum(x.orders)}</td>
+      <td class="right num">${fmtVND(x.gmv)}</td>
+      <td class="right num">${fmtVND(x.payable)}</td>
+      <td class="right num" style="color:var(--brand-strong)">+${fmtVND(x.subsidy)}</td>
+      <td>${settlePill(x.status)}</td>
+    </tr>`).join("");
+  $("#reconGmv").textContent=fmtVND(gmvAll);
+  $("#reconPayable").textContent=fmtVND(payableAll);
+  $("#reconSubsidy").textContent="−"+fmtVND(subsidyAll);
+  $("#reconCommission").textContent=fmtVND(0);
+}
+
+/* ===================== RENDER: SETTINGS ===================== */
+function renderSettings(){
+  $("#setName").value=MERCHANT.name||"";
+  $("#setPhone").value=MERCHANT.phone||"";
+  $("#setAddr").value=MERCHANT.address||"";
+  $("#setHours").value=MERCHANT.business_hours||"";
+  $("#setRating").value="★ "+(MERCHANT.rating||0);
+  $("#setOpenSw").classList.toggle("on",!!MERCHANT.is_open);
+  $("#setSubSw").classList.toggle("on",!!MERCHANT.delivery_subsidy);
+}
+$("#setOpenSw").onclick=()=>toggleOpen();
+$("#setSubSw").onclick=async()=>{
+  MERCHANT.delivery_subsidy=!MERCHANT.delivery_subsidy;
+  renderSettings();
+  if(LIVE){ try{ await GN.API.updateMerchantProfile({delivery_subsidy:MERCHANT.delivery_subsidy}); }catch(e){} }
+  toast(t("toast_status"),"ok");
+};
+$("#btnSaveSettings").onclick=async()=>{
+  MERCHANT.name=$("#setName").value.trim()||MERCHANT.name;
+  MERCHANT.phone=$("#setPhone").value.trim()||MERCHANT.phone;
+  MERCHANT.address=$("#setAddr").value.trim()||MERCHANT.address;
+  MERCHANT.business_hours=$("#setHours").value.trim()||MERCHANT.business_hours;
+  MERCHANT.is_open=$("#setOpenSw").classList.contains("on");
+  MERCHANT.delivery_subsidy=$("#setSubSw").classList.contains("on");
+  renderShopChip();
+  if(LIVE){
+    try{ await GN.API.updateMerchantProfile({name:MERCHANT.name, phone:MERCHANT.phone, address:MERCHANT.address, business_hours:MERCHANT.business_hours, is_open:MERCHANT.is_open, delivery_subsidy:MERCHANT.delivery_subsidy}); }catch(e){}
+  }
+  toast(t("toast_saved"),"ok");
+};
+
+/* ===================== SHOP CHIP / OPEN TOGGLE ===================== */
+function renderShopChip(){
+  $("#topShopName").textContent=MERCHANT.name;
+  $("#topShopCat").textContent=MERCHANT.category;
+  $("#topLogo").textContent=MERCHANT.logo||"🏪";
+  $("#sideShopName").textContent=MERCHANT.name;
+  const open=MERCHANT.is_open;
+  const pill=$("#openPill");
+  pill.classList.toggle("on",open);
+  $("#openPillTxt").textContent=open?t("open"):t("close");
+}
+function toggleOpen(){
+  MERCHANT.is_open=!MERCHANT.is_open;
+  renderShopChip(); renderDashboard(); renderSettings();
+  if(LIVE){ (async()=>{ try{ await GN.API.updateMerchantProfile({is_open:MERCHANT.is_open}); }catch(e){} })(); }
+  toast(MERCHANT.is_open?t("toast_open"):t("toast_close"),"ok");
+}
+$("#openPill").onclick=toggleOpen;
+
+/* ===================== DRAWER ===================== */
+function openDrawer(){ $("#drawerOverlay").classList.add("show"); $("#drawer").classList.add("show"); }
+function closeDrawer(){ $("#drawerOverlay").classList.remove("show"); $("#drawer").classList.remove("show"); }
+$("#drawerOverlay").onclick=closeDrawer;
+$("#drawerClose").onclick=closeDrawer;
+
+function openOrder(no){
+  const o=ORDERS.find(x=>x.order_no===no); if(!o) return;
+  $("#drawerIc").textContent="🧾";
+  $("#drawerTitle").textContent=o.order_no;
+  $("#drawerSub").textContent=o.created_at;
+  const items=o.items.map(i=>`<div class="stat-line"><span class="k">${i.name} <span style="color:var(--faint)">×${i.qty}</span></span><span class="v">${fmtVND(i.qty*i.price)}</span></div>`).join("");
+  $("#drawerBody").innerHTML=`
+    <div style="margin-bottom:6px">${statusPill(o.status)}</div>
+    <div class="kv">
+      <div class="k">${t("order_customer")}</div><div class="v">${o.customer}</div>
+      <div class="k">SĐT</div><div class="v mono">${o.phone}</div>
+      <div class="k">${t("order_addr")}</div><div class="v">${o.address}</div>
+      <div class="k">${t("order_pay")}</div><div class="v">${t(o.pay)}</div>
+    </div>
+    <div class="sec-tt">${t("order_items")}</div>
+    ${items}
+    <div class="stat-line" style="border-top:2px solid var(--border);margin-top:6px"><span class="k" style="font-weight:800">${t("order_total")}</span><span class="v" style="color:var(--brand-strong);font-size:17px">${fmtVND(o.amount)}</span></div>`;
+  let foot="";
+  if(NEEDS_ACCEPT.includes(o.status)) foot+=`<button class="btn btn-primary" id="drAccept">${t("accept")}</button>`;
+  if(READY_SET.includes(o.status)) foot+=`<button class="btn btn-ghost" id="drReady" style="border-color:var(--teal);color:#0F766E">${t("ready")}</button>`;
+  if(!foot) foot=`<button class="btn btn-ghost" data-action="closeDrawer">${t("cancel")}</button>`;
+  $("#drawerFoot").innerHTML=foot;
+  if($("#drAccept")) $("#drAccept").onclick=()=>{ closeDrawer(); orderAction(o.order_no,"accept"); };
+  if($("#drReady")) $("#drReady").onclick=()=>{ closeDrawer(); orderAction(o.order_no,"ready"); };
+  openDrawer();
+}
+
+async function orderAction(no, act){
+  const o=ORDERS.find(x=>x.order_no===no); if(!o) return;
+  let ok=false;
+  if(LIVE){
+    try{
+      if(act==="accept"){ await GN.API.merchantAccept(no); o.status="accepted"; }
+      else if(act==="ready"){ await GN.API.merchantReady(no); o.status=(o.status==="picked")?"delivering":"picked"; }
+      ok=true;
+    }catch(e){}
+  }
+  if(!ok){
+    if(act==="accept") o.status="accepted";
+    else if(act==="ready") o.status=(o.status==="picked")?"delivering":"picked";
+  }
+  renderOrders(); renderDashboard(); renderOrderDetail();
+  toast(act==="accept"?t("toast_accept"):t("toast_ready"),"ok");
+}
+
+/* ===================== ADD PRODUCT (demo fallback, P2 gap) ===================== */
+$("#btnAddProduct").onclick=()=>{
+  $("#drawerIc").textContent="➕";
+  $("#drawerTitle").textContent=t("new_product_title");
+  $("#drawerSub").textContent="GIAONHANH";
+  $("#drawerBody").innerHTML=`
+    <div class="field-row"><label>${t("np_name")}</label><input id="npName" placeholder="Tên món..." /></div>
+    <div class="field-row"><label>${t("np_cat")}</label><input id="npCat" placeholder="Danh mục..." /></div>
+    <div class="field-row"><label>${t("np_price")}</label><input id="npPrice" type="text" inputmode="numeric" placeholder="0" /></div>
+    <div class="field-row"><label>${t("np_emoji")}</label><input id="npEmoji" placeholder="📦" maxlength="2" /></div>
+    <div class="note-box" style="margin-top:6px">${t("add_product_demo")}</div>`;
+  $("#drawerFoot").innerHTML=`<button class="btn btn-ghost" data-action="closeDrawer">${t("cancel")}</button><button class="btn btn-primary" id="npSave">${t("save")}</button>`;
+  $("#npSave").onclick=async()=>{
+    const name=$("#npName").value.trim(); const price=parseInt(($("#npPrice").value||"").replace(/\D/g,""))||0;
+    if(!name){ $("#npName").focus(); return; }
+    const emoji=$("#npEmoji").value.trim()||"📦"; const cat=$("#npCat").value.trim()||"Khác";
+    const payload={name_vi:name, name_zh:name, price, category_id:null, status:"on"};
+    if(LIVE){
+      try{
+        const np=await GN.API.createProduct(payload);
+        const obj=np&&np.data?np.data:np;
+        PRODUCTS.unshift({id:obj.id, emoji, name:obj.name_vi||name, category:cat, price:obj.price!=null?obj.price:price, stock:obj.stock!=null?obj.stock:0, status:obj.status||"on"});
+        closeDrawer(); renderProducts(); toast(t("toast_added"),"ok"); return;
+      }catch(e){ /* fall back to demo */ }
+    }
+    const id=Math.max(0,...PRODUCTS.map(p=>p.id))+1;
+    PRODUCTS.unshift({id, emoji, name, category:cat, price, stock:0, status:"on", demoAdded:true});
+    closeDrawer(); renderProducts();
+    toast(t("toast_added"),"ok");
+  };
+  openDrawer();
+};
+
+/* ===================== STOREFRONT PREVIEW ===================== */
+$("#btnPreview").onclick=()=>{
+  $("#drawerIc").textContent=MERCHANT.logo||"🏪";
+  $("#drawerTitle").textContent=MERCHANT.name;
+  $("#drawerSub").textContent=t("set_preview");
+  const prods=PRODUCTS.filter(p=>p.status==="on").slice(0,5).map(p=>`<div class="sp-prod"><span>${p.emoji} ${p.name}</span><b>${fmtVND(p.price)}</b></div>`).join("");
+  $("#drawerBody").innerHTML=`
+    <div class="store-preview">
+      <div class="sp-h"><div class="sp-lg">${MERCHANT.logo||"🏪"}</div>
+        <div><div class="sp-nm">${MERCHANT.name}</div><div class="sp-cat">${MERCHANT.category} · ★ ${MERCHANT.rating}</div></div></div>
+      <div class="sp-badge">0% hoa hồng · ${MERCHANT.is_open?t("open"):t("close")}</div>
+      ${prods}
+    </div>
+    <div class="kv" style="margin-top:14px">
+      <div class="k">${t("set_addr")}</div><div class="v">${MERCHANT.address}</div>
+      <div class="k">${t("set_hours")}</div><div class="v">${MERCHANT.business_hours}</div>
+      <div class="k">${t("set_subsidy")}</div><div class="v">${MERCHANT.delivery_subsidy?"ON":"OFF"}</div>
+    </div>`;
+  $("#drawerFoot").innerHTML=`<button class="btn btn-ghost" data-action="closeDrawer">${t("cancel")}</button>`;
+  openDrawer();
+};
+
+/* ===================== EXPORT STATEMENT (client CSV) ===================== */
+$("#btnExport").onclick=()=>{
+  const head=["Ky","Don","GMV","Phai thu","Da chi","Tro phi","Hoa hong","Trang thai"];
+  const rows=SETTLEMENTS.map(s=>[s.period,s.orders,s.gmv,s.payable,s.paid,s.subsidy,0,s.status==="paid"?t("settle_paid_st"):t("settle_unpaid_st")]);
+  const csv=[head,...rows].map(r=>r.map(c=>`"${c}"`).join(",")).join("\n");
+  try{
+    if(typeof URL!=="undefined" && URL.createObjectURL){
+      const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+      const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+      a.download="doi-soat-"+MERCHANT.name.replace(/\s+/g,"-")+".csv"; a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    }
+  }catch(e){ /* download not available in this env; CSV string still built */ }
+  toast(t("toast_export"),"ok");
+};
+$("#btnConfirmSettle").onclick=async()=>{
+  const latest=SETTLEMENTS.find(s=>s.status==="unpaid")||SETTLEMENTS[0];
+  const date=latest&&latest.settle_date?latest.settle_date:undefined;
+  if(LIVE){
+    try{
+      await GN.API.confirmSettlement(date);
+      toast("Đã xác nhận đối soát","ok"); return;
+    }catch(e){ /* demo fallback */ }
+  }
+  toast("Đã xác nhận đối soát (demo)","ok");
+};
+
+/* ===================== NEW M SCREENS — RENDER & ACTIONS ===================== */
+let selectedOrderNo = null;
+let mEditProductId = null;
+
+/* ---- Order detail (desktop) ---- */
+function renderOrderDetail(){
+  const no = selectedOrderNo || (ORDERS[0] && ORDERS[0].order_no);
+  const o = ORDERS.find(x=>x.order_no===no);
+  if(!o){ $("#orderDetailBody").innerHTML=`<div class="empty">${t("empty")}</div>`; return; }
+  const steps=[
+    {s:"paid",      lb:t("od_new")},
+    {s:"accepted",  lb:t("status_accepted")},
+    {s:"picked",    lb:t("od_picked")},
+    {s:"delivering",lb:t("status_delivering")},
+    {s:"delivered", lb:t("status_delivered")},
+  ];
+  const order=["paid","accepted","picked","delivering","delivered"];
+  let tl;
+  if(o.status==="cancelled"){
+    tl=`<div class="timeline"><div class="tl-step cancel"><div class="dot">✕</div><div class="lb">${t("status_cancelled")}</div></div></div>`;
+  } else {
+    const idx=order.indexOf(o.status);
+    tl=`<div class="timeline">`+steps.map((st,i)=>{
+      const cls = i<idx?"done":(i===idx?"cur":"");
+      const mark = i<idx?"✓":(i+1);
+      return `<div class="tl-step ${cls}"><div class="dot">${mark}</div><div class="lb">${st.lb}</div></div>`;
+    }).join("")+`</div>`;
+  }
+  const items=o.items.map(i=>`<div class="stat-line"><span class="k">${i.name} <span style="color:var(--faint)">×${i.qty}</span></span><span class="v">${fmtVND(i.qty*i.price)}</span></div>`).join("");
+  let acts="";
+  if(o.status==="paid") acts+=`<button class="btn btn-primary" id="mAccept">${t("od_accept")}</button>`;
+  if(["accepted","picked"].includes(o.status)) acts+=`<button class="btn btn-ghost" id="mReady" style="border-color:var(--teal);color:#0F766E">${t("od_ready")}</button>`;
+  if(o.status==="delivering") acts+=`<button class="btn btn-primary" id="mDeliver">${t("od_deliver")}</button>`;
+  if(!acts) acts=`<button class="btn btn-ghost" data-action="switchPage" data-args='["orders"]'>${t("back_orders")}</button>`;
+  $("#orderDetailBody").innerHTML=`
+    <div class="panel" style="margin-bottom:18px">
+      <div class="panel-head"><h3>${o.order_no}</h3><span class="sub">${o.created_at}</span>
+        <span class="pill ${o.status==='cancelled'?'red':(o.status==='delivered'?'green':'amber')}" style="margin-left:auto">${t('status_'+o.status)||o.status}</span></div>
+      <div class="panel-body">${tl}</div>
+    </div>
+    <div class="split">
+      <div class="panel">
+        <div class="panel-head"><h3>${t("od_items")}</h3></div>
+        <div style="padding:6px 18px 14px">${items}
+          <div class="stat-line" style="border-top:2px solid var(--border);margin-top:6px"><span class="k" style="font-weight:800">${t("od_total")}</span><span class="v" style="color:var(--brand-strong);font-size:17px">${fmtVND(o.amount)}</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>${t("od_customer")}</h3></div>
+        <div class="kv">
+          <div class="k">${t("od_customer")}</div><div class="v">${o.customer}</div>
+          <div class="k">SĐT</div><div class="v mono">${o.phone}</div>
+          <div class="k">${t("od_addr")}</div><div class="v">${o.address}</div>
+          <div class="k">${t("od_pay")}</div><div class="v">${t(o.pay)}</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:18px;display:flex;gap:12px">${acts}</div>`;
+  if($("#mAccept")) $("#mAccept").onclick=()=>orderAction(o.order_no,"accept");
+  if($("#mReady")) $("#mReady").onclick=()=>orderAction(o.order_no,"ready");
+  if($("#mDeliver")) $("#mDeliver").onclick=()=>mDeliverOrder(o.order_no);
+}
+function mDeliverOrder(no){
+  const o=ORDERS.find(x=>x.order_no===no); if(!o) return;
+  o.status="delivered";
+  renderOrders(); renderOrderDetail();
+  toast(t("od_deliver")+" ✓","ok");
+}
+
+/* ---- Product edit ---- */
+function renderProductEdit(){
+  const p = mEditProductId!=null ? PRODUCTS.find(x=>x.id===mEditProductId) : null;
+  const emoji = p?(p.emoji||"📦"):"📦";
+  $("#mpNameVi").value = p?p.name:"";
+  $("#mpNameZh").value = p?(p.name_zh||p.name):"";
+  $("#mpCat").value = p?p.category:"";
+  $("#mpPrice").value = p?fmtNum(p.price):"";
+  $("#mpStock").value = p?(p.stock||0):"";
+  $("#mpEmoji").value = emoji;
+  $("#mpImgPrev").textContent = emoji;
+  $("#mpOnSw").classList.toggle("on", p? p.status==="on" : true);
+}
+$("#mpOnSw").onclick=()=>$("#mpOnSw").classList.toggle("on");
+$("#mpEmoji").oninput=()=>{ $("#mpImgPrev").textContent=$("#mpEmoji").value.trim()||"📦"; };
+$("#btnNewMProduct").onclick=()=>{ mEditProductId=null; renderProductEdit(); };
+$("#btnSaveMProduct").onclick=async()=>{
+  const nameVi=$("#mpNameVi").value.trim(); if(!nameVi){ $("#mpNameVi").focus(); return; }
+  const nameZh=$("#mpNameZh").value.trim()||nameVi;
+  const cat=$("#mpCat").value.trim()||"Khác";
+  const price=parseInt(($("#mpPrice").value||"").replace(/\D/g,""))||0;
+  const stock=parseInt(($("#mpStock").value||"").replace(/\D/g,""))||0;
+  const emoji=$("#mpEmoji").value.trim()||"📦";
+  const status=$("#mpOnSw").classList.contains("on")?"on":"off";
+  const p = mEditProductId!=null ? PRODUCTS.find(x=>x.id===mEditProductId) : null;
+  if(p){
+    p.name=nameVi; p.name_zh=nameZh; p.category=cat; p.price=price; p.stock=stock; p.emoji=emoji; p.status=status;
+    if(LIVE){ try{ await GN.API.updateProduct(p.id,{name_vi:nameVi,name_zh:nameZh,price,stock,status,category_id:null}); }catch(e){} }
+    toast(t("toast_mproduct"),"ok");
+  } else {
+    const payload={name_vi:nameVi,name_zh:nameZh,price,stock,category_id:null,status};
+    if(LIVE){ try{ const np=await GN.API.createProduct(payload); const obj=np&&np.data?np.data:np;
+      PRODUCTS.unshift({id:obj.id,emoji,name:obj.name_vi||nameVi,category:cat,price:obj.price!=null?obj.price:price,stock:obj.stock!=null?obj.stock:stock,status:obj.status||status});
+      renderProducts(); toast(t("toast_mproduct"),"ok"); return; }catch(e){} }
+    const id=Math.max(0,...PRODUCTS.map(x=>x.id))+1;
+    PRODUCTS.unshift({id,emoji,name:nameVi,category:cat,price,stock,status});
+    renderProducts(); toast(t("toast_mproduct"),"ok");
+  }
+};
+
+/* ---- Merchant coupons (demo) ---- */
+function mCouponPill(s){ return s==="active"?`<span class="pill green">${lang==="vi"?"Đang chạy":"进行中"}</span>`:`<span class="pill gray">${lang==="vi"?"Tạm dừng":"已暂停"}</span>`; }
+function mCouponType(s){ return s==="percent"?t("mcoupon_percent"):t("mcoupon_cash"); }
+function renderMCoupons(){
+  $("#mCouponTableBody").innerHTML = MCOUPONS.length?MCOUPONS.map(c=>`
+    <tr>
+      <td><b>${c.name}</b></td>
+      <td>${mCouponType(c.type)}</td>
+      <td class="right num">${c.type==="percent"?c.value+"%":fmtVND(c.value)}</td>
+      <td class="right num">${c.cond?fmtVND(c.cond):"—"}</td>
+      <td class="right num">${fmtNum(c.used)}</td>
+      <td>${mCouponPill(c.status)}</td>
+    </tr>`).join(""):`<tr><td colspan="6"><div class="empty">${t("empty")}</div></td></tr>`;
+}
+$("#btnNewMCoupon").onclick=()=>openMCouponForm();
+function openMCouponForm(){
+  $("#drawerIc").textContent="🎟️";
+  $("#drawerTitle").textContent=t("mcoupon_new_title");
+  $("#drawerSub").textContent=t("mc_funded");
+  $("#drawerBody").innerHTML=`
+    <div class="field-row"><label>${t("mc_name")}</label><input id="mcName" placeholder="Freeship đơn 80K" /></div>
+    <div class="field-row"><label>${t("mc_type")}</label>
+      <select class="select" id="mcType" style="width:100%"><option value="cash">${t("mcoupon_cash")}</option><option value="percent">${t("mcoupon_percent")}</option></select></div>
+    <div class="field-row"><label>${t("mc_value")}</label><input id="mcValue" type="text" inputmode="numeric" placeholder="15000" /></div>
+    <div class="field-row"><label>${t("mc_cond")}</label><input id="mcCond" type="text" inputmode="numeric" placeholder="0" /></div>
+    <div class="field-row"><label>${t("mc_expire")}</label><input id="mcExpire" placeholder="2026-12-31" /></div>
+    <div class="note-box" style="margin-top:6px">${t("mc_funded")} · ${t("mpedit_note")}</div>`;
+  $("#drawerFoot").innerHTML=`<button class="btn btn-ghost" data-action="closeDrawer">${t("cancel")}</button><button class="btn btn-primary" id="mcSave">${t("save")}</button>`;
+  $("#mcSave").onclick=async()=>{
+    const name=$("#mcName").value.trim(); if(!name){ $("#mcName").focus(); return; }
+    const value=parseInt(($("#mcValue").value||"").replace(/\D/g,""))||0;
+    const cond=parseInt(($("#mcCond").value||"").replace(/\D/g,""))||0;
+    const payload={ name, type:$("#mcType").value, value, min_order:cond };
+    const exp=$("#mcExpire").value.trim(); if(exp) payload.end_at=exp;
+    closeDrawer();
+    if(GN_CONFIG.useApi && GN_CONFIG.apiBase){
+      try{
+        const np=await GN.API.createCoupon(payload);
+        const obj=np&&np.data?np.data:np;
+        if(obj&&obj.id) MCOUPONS.unshift({id:obj.id,name:obj.name,type:obj.type,value:Number(obj.value),cond:Number(obj.min_order),used:obj.used_count||0,status:obj.status});
+      }catch(e){ /* keep demo on failure */ }
+    }else{
+      const id=Math.max(0,...MCOUPONS.map(c=>c.id))+1;
+      MCOUPONS.unshift({id,name,type:$("#mcType").value,value,cond,used:0,status:"active"});
+    }
+    renderMCoupons(); toast(t("toast_mcoupon"),"ok");
+  };
+  openDrawer();
+}
+
+/* ---- Merchant data dashboard ---- */
+function renderMData(){
+  const rev=MDATA.rev7;
+  const total=rev.reduce((s,v)=>s+v,0);
+  const nonCancel=Math.max(1, ORDERS.filter(o=>o.status!=="cancelled").length);
+  const aov=Math.round(total / nonCancel);
+  const cards=[
+    {ic:"wallet",cls:"o",lab:t("mdata_rev7"),zh:t("mdata_rev7_zh"),val:fmtVND(total)},
+    {ic:"receipt",cls:"r",lab:t("mdata_orders7"),zh:t("mdata_orders7_zh"),val:fmtNum(ORDERS.length)},
+    {ic:"box",cls:"t",lab:t("mdata_aov"),zh:t("mdata_aov_zh"),val:fmtVND(aov)},
+    {ic:"chart",cls:"b",lab:t("mdata_rebuy"),zh:t("mdata_rebuy_zh"),val:"38%"},
+  ];
+  $("#mDataKpi").innerHTML=cards.map(c=>`
+    <div class="kpi"><div class="top"><div class="ic ${c.cls}">${ICONS[c.ic]}</div>
+      <div class="lab">${c.lab}<small>${c.zh}</small></div></div><div class="val">${c.val}</div></div>`).join("");
+  const max=Math.max(...rev);
+  $("#mDataChart").innerHTML=rev.map((v,i)=>`
+    <div class="bar-col"><div class="bar" style="height:${Math.round(v/max*100)}%"><span class="tip">${fmtVND(v)}</span></div><div class="x">${MDATA.days[i]}</div></div>`).join("");
+  $("#mDataTrendMax").textContent=`${t("mdata_rev7")}: ${fmtVND(max)}`;
+  const agg={};
+  ORDERS.forEach(o=>o.items.forEach(it=>{ agg[it.name]=(agg[it.name]||0)+it.qty; }));
+  const top=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const mx2=Math.max(1,...top.map(x=>x[1]));
+  $("#mDataTop").innerHTML=top.length?top.map((x,i)=>`
+    <div class="top-row"><div class="rk">${i+1}</div><div class="nm">${x[0]}</div>
+      <div class="bar-mini"><i style="width:${Math.round(x[1]/mx2*100)}%"></i></div>
+      <div class="qt">${fmtNum(x[1])}</div></div>`).join(""):`<div class="empty">${t("empty")}</div>`;
+}
+
+/* ===================== LOGIN ===================== */
+async function doLogin(){
+  const phone=$("#loginPhone").value.trim();
+  const pass=$("#loginPass").value;
+  $("#loginBtn").textContent="..."; $("#loginBtn").disabled=true;
+  enterApp();
+  if(GN_CONFIG.useApi && GN_CONFIG.apiBase){
+    try{
+      const r=await GN.API.login(phone,pass);
+      if(r && r.token){ GN.token=r.token; await tryLive(); toast(t("toast_login")+" · "+t("toast_live"),"ok"); }
+      else { await tryLive(); toast(t("toast_demo"),"ok"); }
+    }catch(e){ await tryLive(); toast(t("toast_demo"),"ok"); }
+  }else{
+    toast(t("toast_login")+" · "+t("toast_demo"),"ok");
+  }
+  $("#loginBtn").textContent=t("m_login_btn"); $("#loginBtn").disabled=false;
+}
+function enterApp(){
+  $("#login").classList.add("hide");
+  $("#app").style.display="flex";
+  renderShopChip(); renderAll();
+}
+$("#loginBtn").onclick=doLogin;
+$("#loginPass").addEventListener("keydown",e=>{ if(e.key==="Enter") doLogin(); });
+
+/* ===================== LIVE SYNC ===================== */
+function mapOrder(o){
+  return { order_no:o.order_no, status:o.status,
+    customer:o.contact_name||o.customer||"Khách", phone:o.contact_phone||o.phone||"",
+    address:o.address||"", pay:o.pay_method||o.pay||"pay_wallet",
+    created_at:(o.created_at||"").replace("T"," ").slice(0,16),
+    items:(o.items||[]).map(it=>({name:it.name,qty:it.qty,price:it.price})),
+    amount:o.amount };
+}
+function mapProduct(p){
+  return { id:p.id, emoji:p.image||p.emoji||"📦", name:p['name_'+lang]||p.name_vi||p.name_zh||p.name||"",
+    category:(p.category&&(p.category['name_'+lang]||p.category.name_vi))||p.category||"Khác",
+    price:p.price, stock:p.stock!=null?p.stock:0, status:p.status==="on"?"on":"off" };
+}
+function mapProfile(p){
+  return { id:p.id, name:p.name, logo:p.logo||"🏪", category:(p.category&&(p.category['name_'+lang]||p.category.name_vi))||p.category||"",
+    phone:p.phone||"", address:p.address||"", rating:p.rating||0, is_open:!!p.is_open,
+    delivery_subsidy:!!p.delivery_subsidy, business_hours:p.business_hours||"", joined:p.joined||"" };
+}
+function mapSettlements(s){
+  if(!s) return SETTLEMENTS;
+  const arr=(Array.isArray(s))?s:(s.data||s.settlements||[]);
+  if(!Array.isArray(arr)||!arr.length) return SETTLEMENTS;
+  return arr.map(x=>({ period:x.period||x.settle_date||"", orders:x.orders||0, gmv:x.gmv||0,
+    payable:x.payable!=null?x.payable:x.amount||0, paid:x.paid||0, subsidy:x.subsidy||x.platform_subsidy||0,
+    commission:0, status:x.status||(x.paid?"paid":"unpaid") }));
+}
+async function tryLive(){
+  if(!(GN_CONFIG.useApi && GN_CONFIG.apiBase)) return;
+  try{
+    if(!GN.token){ const logged=await GN.demoLoginAs('0900000003','merchant'); if(!logged||logged.offline||!logged.token) return; }
+    const [ord,prods,prof,settle,cps]=await Promise.all([
+      GN.API.merchantOrders(), GN.API.myProducts(), GN.API.merchantProfile(), GN.API.merchantSettlements(), GN.API.merchantCoupons()
+    ]);
+    const oa=(ord&&Array.isArray(ord.data))?ord.data:(Array.isArray(ord)?ord:[]);
+    if(oa.length) ORDERS=oa.map(mapOrder);
+    const pa=(prods&&Array.isArray(prods.data))?prods.data:(Array.isArray(prods)?prods:[]);
+    if(pa.length) PRODUCTS=pa.map(mapProduct);
+    if(prof && !prof.offline) MERCHANT=mapProfile(prof);
+    SETTLEMENTS=mapSettlements(settle);
+    const ca=(cps&&Array.isArray(cps.data))?cps.data:(Array.isArray(cps)?cps:[]);
+    if(ca.length) MCOUPONS = ca.map(c=>({ id:c.id, name:c.name, type:c.type, value:Number(c.value), cond:Number(c.min_order), used:c.used_count||0, status:c.status }));
+    LIVE=true;
+    renderShopChip(); renderAll();
+  }catch(e){ /* keep demo */ }
+}
+
+/* ===================== RENDER ALL ===================== */
+function renderAll(){
+  renderDashboard(); renderProducts(); renderOrders(); renderSettlement(); renderSettings();
+  renderOrderDetail(); renderProductEdit(); renderMCoupons(); renderMData();
+}
+
+/* ===================== TOPBAR EVENTS ===================== */
+document.querySelectorAll("#langPill button").forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+$("#themeBtn").onclick=()=>setTheme(theme==="light"?"dark":"light");
+$("#logoutBtn").onclick=()=>{ $("#app").style.display="none"; $("#login").classList.remove("hide"); };
+
+/* ===================== INIT ===================== */
+setTheme(theme); setLang(lang);
+</script>
+</body>
+</html>

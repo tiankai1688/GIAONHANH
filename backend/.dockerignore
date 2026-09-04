@@ -1,0 +1,14 @@
+.git
+.github
+node_modules
+vendor
+tests
+*.md
+.env
+.env.*
+!.env.example
+storage/*.key
+storage/logs/*.log
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
