@@ -41,7 +41,7 @@ jobs:
           tools: composer
       - name: Install backend deps
         working-directory: backend
-        run: composer install --no-dev --prefer-dist -q --no-progress
+        run: composer install --no-dev --prefer-dist --no-progress
       - name: artisan version
         working-directory: backend
         run: php artisan --version
@@ -63,7 +63,7 @@ jobs:
           tools: composer
       - name: Install backend deps (with dev)
         working-directory: backend
-        run: composer install --prefer-dist -q --no-progress
+        run: composer install --prefer-dist --no-progress
       - name: Configure .env
         working-directory: backend
         run: |
@@ -112,7 +112,7 @@ jobs:
           node-version: "22"
       - name: Install backend deps
         working-directory: backend
-        run: composer install --no-dev --prefer-dist -q --no-progress
+        run: composer install --no-dev --prefer-dist --no-progress
       - name: Configure .env
         working-directory: backend
         run: |
