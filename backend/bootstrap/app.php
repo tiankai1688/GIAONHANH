@@ -38,5 +38,4 @@ return Application::configure(basePath: dirname(__DIR__))
         ['prefix' => 'api', 'middleware' => ['auth:sanctum']]
     )
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->shouldRenderJsonKeys(true);
     })->create();
