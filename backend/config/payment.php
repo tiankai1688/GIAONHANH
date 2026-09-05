@@ -3,7 +3,7 @@
 /**
  * Payment gateway configuration for GIAONHANH.
  *
- * All PAYMENT_*/MOMO_*/ZALOPAY_*/AGGREGATOR_* env values are read HERE — the ONLY
+ * All PAYMENT_*, MOMO_*, ZALOPAY_*, AGGREGATOR_* env values are read HERE — the ONLY
  * place env() is permitted. Runtime code MUST read config('payment.*') instead
  * of env() so that `php artisan config:cache` does not silently null out the
  * gateway credentials / sandbox secret and break signature verification
