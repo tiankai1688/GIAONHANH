@@ -42,6 +42,7 @@ jobs:
       - name: Install backend deps
         working-directory: backend
         run: |
+          mkdir -p bootstrap/cache storage/app/public storage/framework/cache/data storage/framework/sessions storage/framework/views storage/framework/testing storage/logs
           cp .env.example .env
           echo "APP_KEY=base64:MTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXY=" >> .env
           composer install --no-dev --prefer-dist --no-progress
@@ -67,6 +68,7 @@ jobs:
       - name: Install backend deps (with dev)
         working-directory: backend
         run: |
+          mkdir -p bootstrap/cache storage/app/public storage/framework/cache/data storage/framework/sessions storage/framework/views storage/framework/testing storage/logs
           cp .env.example .env
           echo "APP_KEY=base64:MTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXY=" >> .env
           composer install --prefer-dist --no-progress
@@ -119,6 +121,7 @@ jobs:
       - name: Install backend deps
         working-directory: backend
         run: |
+          mkdir -p bootstrap/cache storage/app/public storage/framework/cache/data storage/framework/sessions storage/framework/views storage/framework/testing storage/logs
           cp .env.example .env
           echo "APP_KEY=base64:MTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXY=" >> .env
           composer install --no-dev --prefer-dist --no-progress

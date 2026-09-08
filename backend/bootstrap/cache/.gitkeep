@@ -1,0 +1,2 @@
+# Keep this directory in git so CI has bootstrap/cache present after checkout.
+# (Git does not track empty dirs; this placeholder ensures package:discover works.)
