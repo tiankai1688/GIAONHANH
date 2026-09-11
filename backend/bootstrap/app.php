@@ -27,11 +27,17 @@ return Application::configure(basePath: dirname(__DIR__))
             'token.expiry' => \App\Http\Middleware\CheckTokenExpiry::class,
         ]);
         // Rate limiters: aggressive on auth endpoints (prevent brute-force / bot reg).
-        $middleware->limiter([
-            'auth' => \Illuminate\Routing\Middleware\ThrottleRequests::class.':10,1',   // 10 req/min per IP (coarse; real lockout is per-account in AuthController)
-            'ipn'  => \Illuminate\Routing\Middleware\ThrottleRequests::class.':120,1', // 120 req/min for payment webhooks
-            'api'  => \Illuminate\Routing\Middleware\ThrottleRequests::class.':30,1',  // 30 req/min per IP for public/anon writes (e.g. agent signup)
-        ]);
+        // Laravel 11 has no Middleware::limiter(); named limiters are registered via
+        // RateLimiter::for() and referenced in routes as `throttle:auth|ipn|api`.
+        \Illuminate\Support\Facades\RateLimiter::for('auth', function (\Illuminate\Http\Request $request) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(10)->by($request->ip());
+        });
+        \Illuminate\Support\Facades\RateLimiter::for('ipn', function (\Illuminate\Http\Request $request) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(120)->by($request->ip());
+        });
+        \Illuminate\Support\Facades\RateLimiter::for('api', function (\Illuminate\Http\Request $request) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(30)->by($request->ip());
+        });
     })
     ->withBroadcasting(
         __DIR__.'/../routes/channels.php',
