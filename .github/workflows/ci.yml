@@ -51,7 +51,7 @@ jobs:
         run: php artisan --version
       - name: config sanity (fails if routes are broken)
         working-directory: backend
-        run: php artisan route:list --columns=method,uri,name --compact
+        run: php artisan route:list
 
   # PHPUnit/Pest test suite (Feature HTTP tests + existing split/signature
   # unit tests) against an in-memory SQLite database. Requires dev dependencies

@@ -29,7 +29,7 @@ use Mockery;
  * in-memory SQLite and a Mockery gateway double, so no real PSP is touched.
  */
 
-uses(RefreshDatabase::class);
+uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
     app()->bind(PaymentGatewayInterface::class, \App\Services\PaymentGatewayService::class);

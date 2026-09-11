@@ -2,7 +2,7 @@
 
 use App\Services\PaymentSplitService;
 
-uses(RefreshDatabase::class);
+uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 /*
  * The 0-commission promise must be an AUDITABLE config decision, not a literal.

@@ -37,7 +37,7 @@ use Mockery;
  * Runs against RefreshDatabase + in-memory SQLite with a Mockery gateway.
  */
 
-uses(RefreshDatabase::class);
+uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
     app()->bind(PaymentGatewayInterface::class, \App\Services\PaymentGatewayService::class);

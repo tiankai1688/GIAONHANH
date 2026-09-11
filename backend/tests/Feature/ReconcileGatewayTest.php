@@ -10,7 +10,7 @@ use App\Models\User;
 use App\Services\PaymentGatewayInterface;
 use Illuminate\Support\Facades\DB;
 
-uses(RefreshDatabase::class);
+uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 /**
  * Fake gateway that returns a scripted status from queryStatus. All other

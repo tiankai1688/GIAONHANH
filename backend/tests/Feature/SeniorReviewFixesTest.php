@@ -11,7 +11,7 @@ use App\Services\MerchantSettlementService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-uses(RefreshDatabase::class);
+uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
     app()->bind(\App\Services\PaymentGatewayInterface::class, \App\Services\PaymentGatewayService::class);

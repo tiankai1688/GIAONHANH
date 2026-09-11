@@ -3,7 +3,7 @@
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-uses(RefreshDatabase::class);
+uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
     app()->bind(\App\Services\PaymentGatewayInterface::class, \App\Services\PaymentGatewayService::class);

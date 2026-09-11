@@ -25,7 +25,7 @@ use Mockery;
  * Run with: php artisan test  (Pest; see phpunit.xml + tests/Pest.php)
  */
 
-uses(RefreshDatabase::class);
+uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
     // Reset the gateway interface to the real implementation before each test
