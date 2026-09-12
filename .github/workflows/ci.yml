@@ -95,9 +95,17 @@ jobs:
           # the workflow-command parser.
           CLEAN=$(perl -CSD -pe 's/\e\[[0-9;]*m//g; s/[\x{2500}-\x{257F}\x{2580}-\x{259F}]//g' /tmp/pest.log)
           NAMES=$(printf '%s\n' "$CLEAN" | grep -E "FAIL " | sed 's/::/__/g' | head -30 | tr '\n' '|')
-          ERRS=$(printf '%s\n' "$CLEAN" | grep -E "SQLSTATE|NOT NULL|Failed asserting|Tests: [0-9]+ (failed|passed)" | sed 's/::/__/g' | head -30 | tr '\n' '|')
           echo "::error title=PEST_FAILS::$NAMES"
-          echo "::error title=PEST_ERRS::$ERRS"
+          # Emit the raw log in 4 single-line slices (each <=1500 chars, '::'->'__')
+          # so the whole failure detail survives GitHub's annotation-size quirks.
+          A=$(printf '%s\n' "$CLEAN" | head -c 1400 | tr '\n' ' ' | sed 's/::/__/g')
+          B=$(printf '%s\n' "$CLEAN" | tail -c +1401 | head -c 1400 | tr '\n' ' ' | sed 's/::/__/g')
+          C=$(printf '%s\n' "$CLEAN" | tail -c +2801 | head -c 1400 | tr '\n' ' ' | sed 's/::/__/g')
+          D=$(printf '%s\n' "$CLEAN" | tail -c 1400 | tr '\n' ' ' | sed 's/::/__/g')
+          echo "::error title=PEST_A::$A"
+          echo "::error title=PEST_B::$B"
+          echo "::error title=PEST_C::$C"
+          echo "::error title=PEST_D::$D"
           # Secondary: full log committed to the repo (force-add; *.log gitignored;
           # push HEAD:main because checkout is detached HEAD). May fail silently if
           # the workflow token is read-only — the annotations above are the source.
