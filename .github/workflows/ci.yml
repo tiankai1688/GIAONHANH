@@ -96,7 +96,14 @@ jobs:
           CLEAN=$(perl -CSD -pe 's/\e\[[0-9;]*m//g; s/[\x{2500}-\x{257F}\x{2580}-\x{259F}]//g' /tmp/pest.log)
           # Compact list of failing test names (the authoritative list of what broke).
           NAMES=$(printf '%s\n' "$CLEAN" | grep -E "FAILED |FAIL " | sed 's/::/__/g' | head -40 | tr '\n' '|')
-          BODY=$(printf '%s\n' "$CLEAN" | tail -c 11000 | tr '\n' ' ' | sed 's/::/__/g')
+          # Surface the BadMethodCallException stack — it occurs earlier in the log
+          # (HttpOnlyRefresh tests run before OrderControllerTest) and a plain tail
+          # truncates it. Fall back to the trailing block if no such exception fired.
+          STACK=$(printf '%s\n' "$CLEAN" | grep -A 50 "BadMethodCallException" | head -55)
+          if [ -z "$STACK" ]; then
+            STACK=$(printf '%s\n' "$CLEAN" | tail -c 11000)
+          fi
+          BODY=$(printf '%s\n' "$STACK" | tr '\n' ' ' | sed 's/::/__/g')
           # Surface the result as a public commit comment (reliably readable via
           # the REST API; the ::error annotation channel drops these).
           PAYLOAD=$(jq -n --arg rc "PEST_RC=$RC" --arg n "FAILS: $NAMES" --arg b "$BODY" '{body: ($rc + "\n" + $n + "\n" + $b)}' 2>/dev/null)

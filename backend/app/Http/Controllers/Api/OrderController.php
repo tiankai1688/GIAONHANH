@@ -144,7 +144,7 @@ class OrderController extends Controller
         );
         $split = $splitter->computeMerged($groups, $platformDiscount, $merchantCouponDiscounts);
 
-        return DB::transaction(function () use ($request, $user, $groups, $split, $merchantCoupons, $merchantCouponDiscounts) {
+        return DB::transaction(function () use ($request, $user, $groups, $split, $platformDiscount, $merchantCoupons, $merchantCouponDiscounts) {
             $parentNo = 'GN' . date('Ymd') . strtoupper(Str::random(6));
 
             $parent = new Order([
