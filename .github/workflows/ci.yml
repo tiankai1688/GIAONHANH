@@ -96,26 +96,15 @@ jobs:
           CLEAN=$(perl -CSD -pe 's/\e\[[0-9;]*m//g; s/[\x{2500}-\x{257F}\x{2580}-\x{259F}]//g' /tmp/pest.log)
           NAMES=$(printf '%s\n' "$CLEAN" | grep -E "FAIL " | sed 's/::/__/g' | head -30 | tr '\n' '|')
           echo "::error title=PEST_FAILS::$NAMES"
-          # Emit the raw log in 4 single-line slices (each <=1500 chars, '::'->'__')
-          # so the whole failure detail survives GitHub's annotation-size quirks.
-          A=$(printf '%s\n' "$CLEAN" | head -c 1400 | tr '\n' ' ' | sed 's/::/__/g')
-          B=$(printf '%s\n' "$CLEAN" | tail -c +1401 | head -c 1400 | tr '\n' ' ' | sed 's/::/__/g')
-          C=$(printf '%s\n' "$CLEAN" | tail -c +2801 | head -c 1400 | tr '\n' ' ' | sed 's/::/__/g')
-          D=$(printf '%s\n' "$CLEAN" | tail -c 1400 | tr '\n' ' ' | sed 's/::/__/g')
-          echo "::error title=PEST_A::$A"
-          echo "::error title=PEST_B::$B"
-          echo "::error title=PEST_C::$C"
-          echo "::error title=PEST_D::$D"
-          # Secondary: full log committed to the repo (force-add; *.log gitignored;
-          # push HEAD:main because checkout is detached HEAD). May fail silently if
-          # the workflow token is read-only — the annotations above are the source.
-          cp /tmp/pest.log "${GITHUB_WORKSPACE}/pest-debug.log"
-          git -C "${GITHUB_WORKSPACE}" config user.email "ci@example.com"
-          git -C "${GITHUB_WORKSPACE}" config user.name "CI Debug"
-          git -C "${GITHUB_WORKSPACE}" remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/tiankai1688/GIAONHANH.git"
-          git -C "${GITHUB_WORKSPACE}" add -f pest-debug.log
-          git -C "${GITHUB_WORKSPACE}" commit -m "debug: pest log [skip ci]" >/dev/null 2>&1 || true
-          git -C "${GITHUB_WORKSPACE}" push origin HEAD:main >/dev/null 2>&1 || true
+          # Emit the raw log in 8 single-line slices (each <=1500 chars, '::'->'__')
+          # covering the trailing failure-detail block, so every failing test's
+          # assertion/error survives GitHub's annotation-size quirks.
+          TAILLOG=$(printf '%s\n' "$CLEAN" | tail -c 11200)
+          for i in 1 2 3 4 5 6 7 8; do
+            START=$(( ($i - 1) * 1400 + 1 ))
+            SLICE=$(printf '%s\n' "$TAILLOG" | tail -c +$START | head -c 1400 | tr '\n' ' ' | sed 's/::/__/g')
+            echo "::error title=PEST_$i::$SLICE"
+          done
           exit $RC
 
   # Boots the REAL Laravel stack (MySQL) and proves every endpoint works
