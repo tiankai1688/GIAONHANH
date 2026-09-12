@@ -89,7 +89,7 @@ jobs:
           php artisan test --no-coverage > /tmp/pest.log 2>&1
           RC=$?
           if [ $RC -ne 0 ]; then
-            CLEAN=$(perl -CSD -pe 's/\e\[[0-9;]*m//g; s/[\x{2500}-\x{257F}\x{2580}-\x{259F}]//g' /tmp/pest.log | tr '\n' ' ' | tail -c 12000)
+            CLEAN=$(perl -CSD -pe 's/\e\[[0-9;]*m//g; s/[\x{2500}-\x{257F}\x{2580}-\x{259F}]//g' /tmp/pest.log | tr '\n' ' ' | head -c 10000)
             echo "::error title=PEST_FULL::$CLEAN"
           fi
           exit $RC
