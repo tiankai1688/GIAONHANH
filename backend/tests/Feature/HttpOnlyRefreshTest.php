@@ -80,15 +80,6 @@ it('rotates via the HttpOnly cookie and never re-echoes the refresh token', func
         ['HTTP_ACCEPT' => 'application/json']
     );
 
-    if ($response->status() !== 200) {
-        fwrite(STDERR, "DIAG_RC=" . $response->status() . "\n");
-        fwrite(STDERR, "DIAG_BODY=" . $response->getContent() . "\n");
-        fwrite(STDERR, "DIAG_VALUE_PRESENT=" . ($value !== null ? 'yes' : 'no') . "\n");
-        fwrite(STDERR, "DIAG_VALUE_HEAD=" . substr((string) $value, 0, 12) . "\n");
-        fwrite(STDERR, "DIAG_VALUE_HASH=" . substr(hash('sha256', (string) $value), 0, 12) . "\n");
-        fwrite(STDERR, "DIAG_RECEIVED=" . ($this->app['request']->cookie('gn_refresh_token') ?? 'NULL') . "\n");
-        fwrite(STDERR, "DIAG_RT_LATEST_HEAD=" . (($l = \App\Models\RefreshToken::latest('id')->first()) ? substr($l->token_hash, 0, 12) : 'NULL') . "\n");
-    }
     $response->assertOk();
     $response->assertJsonStructure(['token', 'expires_at', 'user']);
     $response->assertJsonMissingPath('refresh_token');
