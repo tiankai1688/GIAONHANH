@@ -68,6 +68,7 @@ jobs:
         with:
           php-version: "8.2"
           extensions: ctype,curl,dom,fileinfo,filter,hash,mbstring,openssl,pcre,pdo,pdo_mysql,pdo_sqlite,session,tokenizer,xml
+          ini-values: opcache.enable=0
           tools: composer
       - name: Install backend deps (with dev)
         working-directory: backend

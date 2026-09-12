@@ -73,6 +73,7 @@ it('rotates via the HttpOnly cookie and never re-echoes the refresh token', func
         fwrite(STDERR, "DIAG_REFRESH_STATUS=" . $response->status() . "\n");
         fwrite(STDERR, "DIAG_REFRESH_BODY=" . $response->getContent() . "\n");
         fwrite(STDERR, "DIAG_COOKIE_LEN=" . strlen((string) $value) . "\n");
+        fwrite(STDERR, "DIAG_COOKIE_HEAD=" . substr((string) $value, 0, 12) . "\n");
     }
     $response->assertOk();
     $response->assertJsonStructure(['token', 'expires_at', 'user']);
