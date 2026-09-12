@@ -89,11 +89,11 @@ jobs:
           php artisan test --no-coverage > /tmp/pest.log 2>&1
           RC=$?
           if [ $RC -ne 0 ]; then
-            # Emit the FULL cleaned log (sanitize '::' so it is not parsed as an
-            # annotation command) so the exact failing assertions / exceptions are
-            # readable from the check-run annotation without admin job-log access.
-            SAFE=$(sed 's/::/__/g' /tmp/pest.log | head -c 60000)
-            echo "::error title=PEST_FULL::$SAFE"
+            # Emit the FULL log as a single-line base64 annotation. Newlines and
+            # '::' both break the GitHub workflow-command parser, so base64 is the
+            # safe encoding; decode it locally to read the exact failing assertions.
+            B64=$(tail -c 36000 /tmp/pest.log | base64 -w0 2>/dev/null || tail -c 36000 /tmp/pest.log | base64 | tr -d '\n')
+            echo "::error title=PEST_FULL::$B64"
           fi
           exit $RC
 
