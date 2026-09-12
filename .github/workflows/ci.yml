@@ -89,7 +89,8 @@ jobs:
           php artisan test --no-coverage > /tmp/pest.log 2>&1
           RC=$?
           if [ $RC -ne 0 ]; then
-            grep -aE 'Tests:|FAIL |Error|Exception|Warning|Deprecated|Notice|SQLSTATE|Failed asserting|Expected|Mockery|Cannot|Undefined' /tmp/pest.log | head -n 80 | while IFS= read -r line; do echo "::error title=PEST_LINE::$line"; done
+            CLEAN=$(perl -CSD -pe 's/\e\[[0-9;]*m//g; s/[\x{2500}-\x{257F}\x{2580}-\x{259F}]//g' /tmp/pest.log | tr '\n' ' ' | head -c 3800)
+            echo "::error title=PEST_FULL::$CLEAN"
           fi
           exit $RC
 
@@ -160,7 +161,8 @@ jobs:
           php artisan db:seed --force > /tmp/seed.log 2>&1
           RC=$?
           if [ $RC -ne 0 ]; then
-            grep -aE 'SQLSTATE|Exception|Error|Illuminate|at .*php:|#?[0-9]+ ' /tmp/seed.log | head -n 80 | while IFS= read -r line; do echo "::error title=SEED_LINE::$line"; done
+            CLEAN=$(perl -CSD -pe 's/\e\[[0-9;]*m//g; s/[\x{2500}-\x{257F}\x{2580}-\x{259F}]//g' /tmp/seed.log | tr '\n' ' ' | head -c 3800)
+            echo "::error title=SEED_FULL::$CLEAN"
           fi
           exit $RC
       - name: Boot server + run smoke test
