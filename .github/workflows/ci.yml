@@ -88,7 +88,9 @@ jobs:
           set +e
           php artisan test --no-coverage > /tmp/pest.log 2>&1
           RC=$?
-          if [ $RC -ne 0 ]; then echo "::error title=PEST_FAIL_LOG::$(tail -c 4000 /tmp/pest.log)"; fi
+          if [ $RC -ne 0 ]; then
+            grep -aE 'Tests:|FAIL |Error|Exception|Warning|Deprecated|Notice|SQLSTATE|Failed asserting|Expected|Mockery|Cannot|Undefined' /tmp/pest.log | head -n 80 | while IFS= read -r line; do echo "::error title=PEST_LINE::$line"; done
+          fi
           exit $RC
 
   # Boots the REAL Laravel stack (MySQL) and proves every endpoint works
@@ -153,7 +155,14 @@ jobs:
           done
       - name: Seed demo data
         working-directory: backend
-        run: php artisan db:seed --force
+        run: |
+          set +e
+          php artisan db:seed --force > /tmp/seed.log 2>&1
+          RC=$?
+          if [ $RC -ne 0 ]; then
+            grep -aE 'SQLSTATE|Exception|Error|Illuminate|at .*php:|#?[0-9]+ ' /tmp/seed.log | head -n 80 | while IFS= read -r line; do echo "::error title=SEED_LINE::$line"; done
+          fi
+          exit $RC
       - name: Boot server + run smoke test
         run: |
           (cd backend && php artisan serve --host=127.0.0.1 --port=8080 > /tmp/laravel.log 2>&1 &)
