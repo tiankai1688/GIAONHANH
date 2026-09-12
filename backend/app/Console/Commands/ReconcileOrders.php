@@ -46,7 +46,10 @@ class ReconcileOrders extends Command
         // via app(...)->handle() in a unit test) no output stream is bound and
         // $this->output is null — guard it so info()/warn() calls don't crash.
         if ($this->output === null) {
-            $this->setOutput(new \Symfony\Component\Console\Output\NullOutput());
+            $this->setOutput(new \Illuminate\Console\OutputStyle(
+                new \Symfony\Component\Console\Input\ArrayInput([]),
+                new \Symfony\Component\Console\Output\NullOutput()
+            ));
         }
 
         $ttl = (int) config('payment.pending_ttl_minutes', 30);

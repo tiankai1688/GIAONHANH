@@ -108,7 +108,7 @@ it('records the PSP fee on a wallet payment (unit economics visible)', function 
         'password' => Hash::make('secret123'), 'role' => 'customer',
     ]);
     $order = Order::create([
-        'order_no' => 'GN' . uniqid(), 'user_id' => $user->id, 'merchant_id' => 1,
+        'order_no' => 'GN' . uniqid(), 'user_id' => $user->id, 'merchant_id' => srMerchant()->id,
         'status' => 'pending_payment', 'amount' => 100000.0, 'product_amount' => 100000.0,
     ]);
 
@@ -134,7 +134,7 @@ it('charges no PSP fee on COD', function () {
         'password' => Hash::make('secret123'), 'role' => 'customer',
     ]);
     $order = Order::create([
-        'order_no' => 'GN' . uniqid(), 'user_id' => $user->id, 'merchant_id' => 1,
+        'order_no' => 'GN' . uniqid(), 'user_id' => $user->id, 'merchant_id' => srMerchant()->id,
         'status' => 'pending_payment', 'amount' => 100000.0, 'product_amount' => 100000.0,
     ]);
 
