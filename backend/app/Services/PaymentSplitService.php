@@ -95,6 +95,11 @@ class PaymentSplitService
     ): Order {
         $productAmount = 0.0;
         foreach ($cart as $item) {
+            // cart may mix product rows (['price'=>,'qty'=>]) with scalar meta
+            // keys like '_coupon_discount'; skip anything that isn't a product row.
+            if (!is_array($item)) {
+                continue;
+            }
             $productAmount += (float) $item['price'] * (int) $item['qty'];
         }
 

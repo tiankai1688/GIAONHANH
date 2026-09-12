@@ -174,7 +174,7 @@ class OrderSeeder extends Seeder
             'order_no'      => $this->orderNo(),
             'user_id'       => $customer->id,
             'merchant_id'   => $merchant->id,
-            'rider_id'      => $opts['rider']?->id,
+            'rider_id'      => ($opts['rider'] ?? null)?->id,
             'status'        => $status,
             'delivery_type' => 'instant',
             'pay_method'    => $opts['pay_method'] ?? 'momo',
