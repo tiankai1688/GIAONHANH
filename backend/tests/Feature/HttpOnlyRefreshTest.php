@@ -42,7 +42,7 @@ it('issues access token in body but refresh token only as an HttpOnly cookie', f
 
     // SECURITY (senior-review-2 fix 3.4): the refresh token must NEVER appear
     // in the JSON body, otherwise an XSS payload could read and replay it.
-    $response->assertJsonMissingKey('refresh_token');
+    $response->assertJsonMissingPath('refresh_token');
 
     // A refresh cookie must be present and be HttpOnly (unreadable by JS).
     $cookie = null;
@@ -69,9 +69,14 @@ it('rotates via the HttpOnly cookie and never re-echoes the refresh token', func
     $response = $this->withCookie('gn_refresh_token', $value)
         ->postJson('/api/v1/auth/refresh');
 
+    if ($response->status() !== 200) {
+        fwrite(STDERR, "DIAG_REFRESH_STATUS=" . $response->status() . "\n");
+        fwrite(STDERR, "DIAG_REFRESH_BODY=" . $response->getContent() . "\n");
+        fwrite(STDERR, "DIAG_COOKIE_LEN=" . strlen((string) $value) . "\n");
+    }
     $response->assertOk();
     $response->assertJsonStructure(['token', 'expires_at', 'user']);
-    $response->assertJsonMissingKey('refresh_token');
+    $response->assertJsonMissingPath('refresh_token');
 
     // Rotation re-issues a fresh HttpOnly cookie with a new value.
     $new = refreshCookieValue($response);
