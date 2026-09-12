@@ -89,8 +89,11 @@ jobs:
           php artisan test --no-coverage > /tmp/pest.log 2>&1
           RC=$?
           if [ $RC -ne 0 ]; then
-            CLEAN=$(grep -aE "^\s*[0-9]+\) |Failed asserting|Exception|SQLSTATE|FAILURES|^Tests:|at .*\.php:[0-9]+|Error:" /tmp/pest.log | tr '\n' ' ' | head -c 10000)
-            echo "::error title=PEST_FULL::$CLEAN"
+            # Emit the FULL cleaned log (sanitize '::' so it is not parsed as an
+            # annotation command) so the exact failing assertions / exceptions are
+            # readable from the check-run annotation without admin job-log access.
+            SAFE=$(sed 's/::/__/g' /tmp/pest.log | head -c 60000)
+            echo "::error title=PEST_FULL::$SAFE"
           fi
           exit $RC
 
