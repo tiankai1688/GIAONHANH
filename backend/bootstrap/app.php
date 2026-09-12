@@ -5,7 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\HandleCors;
 
-return Application::configure(basePath: dirname(__DIR__))
+$app = Application::configure(basePath: dirname(__DIR__))
     ->withBindings([
         // P1-d: controllers depend on the interface; tests can rebind a mock.
         \App\Services\PaymentGatewayInterface::class => \App\Services\PaymentGatewayService::class,
@@ -26,22 +26,22 @@ return Application::configure(basePath: dirname(__DIR__))
             'ability' => \App\Http\Middleware\EnsureTokenHasAbility::class,
             'token.expiry' => \App\Http\Middleware\CheckTokenExpiry::class,
         ]);
-        // Rate limiters: aggressive on auth endpoints (prevent brute-force / bot reg).
-        // Laravel 11 has no Middleware::limiter(); named limiters are registered via
-        // RateLimiter::for() and referenced in routes as `throttle:auth|ipn|api`.
-        \Illuminate\Support\Facades\RateLimiter::for('auth', function (\Illuminate\Http\Request $request) {
-            return \Illuminate\Cache\RateLimiting\Limit::perMinute(10)->by($request->ip());
-        });
-        \Illuminate\Support\Facades\RateLimiter::for('ipn', function (\Illuminate\Http\Request $request) {
-            return \Illuminate\Cache\RateLimiting\Limit::perMinute(120)->by($request->ip());
-        });
-        \Illuminate\Support\Facades\RateLimiter::for('api', function (\Illuminate\Http\Request $request) {
-            return \Illuminate\Cache\RateLimiting\Limit::perMinute(30)->by($request->ip());
-        });
     })
-    ->withBroadcasting(
-        __DIR__.'/../routes/channels.php',
-        ['prefix' => 'api', 'middleware' => ['auth:sanctum']]
-    )
     ->withExceptions(function (Exceptions $exceptions) {
     })->create();
+
+// Named rate limiters, referenced in routes/api.php as `throttle:auth|ipn|api`.
+// Registered AFTER the app is built (service providers booted) — defining them
+// inside the withMiddleware closure fires before the `rate.limiter` binding
+// exists and crashes `php artisan serve` with "A facade root has not been set".
+\Illuminate\Support\Facades\RateLimiter::for('auth', function (\Illuminate\Http\Request $request) {
+    return \Illuminate\Cache\RateLimiting\Limit::perMinute(10)->by($request->ip());
+});
+\Illuminate\Support\Facades\RateLimiter::for('ipn', function (\Illuminate\Http\Request $request) {
+    return \Illuminate\Cache\RateLimiting\Limit::perMinute(120)->by($request->ip());
+});
+\Illuminate\Support\Facades\RateLimiter::for('api', function (\Illuminate\Http\Request $request) {
+    return \Illuminate\Cache\RateLimiting\Limit::perMinute(30)->by($request->ip());
+});
+
+return $app;
