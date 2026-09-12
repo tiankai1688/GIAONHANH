@@ -84,7 +84,12 @@ jobs:
         run: php artisan key:generate
       - name: Run Pest test suite
         working-directory: backend
-        run: php artisan test
+        run: |
+          set +e
+          php artisan test --no-coverage > /tmp/pest.log 2>&1
+          RC=$?
+          if [ $RC -ne 0 ]; then echo "::error title=PEST_FAIL_LOG::$(tail -c 4000 /tmp/pest.log)"; fi
+          exit $RC
 
   # Boots the REAL Laravel stack (MySQL) and proves every endpoint works
   # end-to-end. This is the gate that answers "does the backend actually run?"
