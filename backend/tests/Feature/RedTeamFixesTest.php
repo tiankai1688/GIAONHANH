@@ -20,7 +20,11 @@ use Illuminate\Support\Facades\Hash;
  *   - PSP fee recorded: wallet > 0, COD == 0
  */
 
-uses(\Tests\TestCase::class, \Illuminate\Foundation\Testing\RefreshDatabase::class);
+// NOTE: Tests\TestCase is already bound globally for the Feature folder in
+// tests/Pest.php (uses(Tests\TestCase::class)->in('Feature')). Re-declaring it
+// here triggers Pest's fatal "Test case already used" error. Only the trait is
+// declared per-file.
+uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 it('only shows picked orders within the grab radius (geofence)', function () {
     $user = User::create([

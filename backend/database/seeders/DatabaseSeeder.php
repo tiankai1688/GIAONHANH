@@ -26,10 +26,11 @@ class DatabaseSeeder extends Seeder
         if (! env('ADMIN_SEED_PASSWORD')) {
             info('[DatabaseSeeder] ADMIN_SEED_PASSWORD not set — generated random admin password: ' . $adminPassword);
         }
+        $demoPassword = Hash::make('demo1234');
         $admin = User::create(['name' => 'Admin', 'phone' => '0900000001', 'role' => 'admin', 'password' => Hash::make($adminPassword)]);
-        $customer = User::create(['name' => 'Khách Hàng', 'phone' => '0900000002', 'role' => 'customer']);
-        User::create(['name' => 'Merchant Demo', 'phone' => '0900000003', 'role' => 'merchant']);
-        User::create(['name' => 'Shipper A', 'phone' => '0900000004', 'role' => 'rider']);
+        $customer = User::create(['name' => 'Khách Hàng', 'phone' => '0900000002', 'role' => 'customer', 'password' => $demoPassword]);
+        User::create(['name' => 'Merchant Demo', 'phone' => '0900000003', 'role' => 'merchant', 'password' => $demoPassword]);
+        User::create(['name' => 'Shipper A', 'phone' => '0900000004', 'role' => 'rider', 'password' => $demoPassword]);
 
         Rider::create(['user_id' => User::where('phone', '0900000004')->first()->id, 'name' => 'Shipper A', 'phone' => '0900000004', 'vehicle' => 'bike', 'lat' => 21.0295, 'lng' => 105.8522, 'status' => 'online']);
         Rider::create(['name' => 'Shipper B', 'phone' => '0900000005', 'vehicle' => 'bike', 'lat' => 21.0260, 'lng' => 105.8570, 'status' => 'online']);
