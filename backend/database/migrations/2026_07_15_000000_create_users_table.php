@@ -10,8 +10,11 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('phone')->unique();
+            // Nullable: account-deletion anonymization (PDPD/GDPR right to erasure)
+            // wipes name/phone. The 2026_08_02 make_user_name_phone_nullable
+            // migration's ->change() is a no-op under SQLite, so declare here.
+            $table->string('name')->nullable();
+            $table->string('phone')->nullable()->unique();
             $table->string('email')->nullable()->unique();
             $table->string('password')->nullable();
             $table->string('role')->default('customer'); // customer | merchant | rider | admin

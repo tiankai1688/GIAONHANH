@@ -31,6 +31,14 @@ beforeEach(function () {
     // so a mock bound in one test cannot leak into another.
     app()->bind(PaymentGatewayInterface::class, PaymentGatewayService::class);
 
+    // Pin the platform new-user welcome coupon OFF so the 0%-commission /
+    // delivery-subsidy split assertions are deterministic and not confounded by
+    // the auto welcome coupon (which is environment-driven via
+    // NEW_USER_COUPON_AMOUNT and would otherwise lower `amount` below the
+    // product value the split test asserts). The coupon itself is covered by
+    // dedicated tests; this file verifies the core split math in isolation.
+    config(['business.new_user_coupon_amount' => 0]);
+
     $this->customer = User::create([
         'name'     => 'Nguyen Van A',
         'phone'    => '0901112223',

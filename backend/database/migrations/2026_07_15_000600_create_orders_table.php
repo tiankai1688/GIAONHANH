@@ -12,7 +12,12 @@ return new class extends Migration
             $table->id();
             $table->string('order_no')->unique();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('merchant_id')->constrained('merchants')->cascadeOnDelete();
+            // Nullable so cross-store MERGED parent orders (type='merged') can be
+            // inserted without a merchant. NOTE: `->change()` is a no-op for column
+            // nullability under the in-memory SQLite test DB, so we declare it
+            // nullable here at CREATE time (the 2026_07_29 migration's ->change()
+            // is kept for parity but does not re-apply).
+            $table->foreignId('merchant_id')->nullable()->constrained('merchants')->nullOnDelete();
             $table->foreignId('rider_id')->nullable()->constrained('riders')->nullOnDelete();
 
             // Money (VND, integer-safe decimals)
@@ -31,11 +36,16 @@ return new class extends Migration
             $table->string('delivery_type')->default('instant'); // instant | appointment
             $table->timestamp('expect_time')->nullable();
             $table->string('pay_method')->default('cod');        // momo | zalopay | cod
-            $table->text('address');
+            // Delivery fields are validated at the request layer but must NOT be
+            // hard NOT NULL: merged parents (type=merged) carry merchant_id=null
+            // and no delivery address, and many orders created outside the API
+            // path legitimately omit them. `->change()` is a no-op under SQLite, so
+            // we declare them nullable here at CREATE time.
+            $table->text('address')->nullable();
             $table->decimal('lat', 10, 7)->nullable();
             $table->decimal('lng', 10, 7)->nullable();
-            $table->string('contact_name');
-            $table->string('contact_phone');
+            $table->string('contact_name')->nullable();
+            $table->string('contact_phone')->nullable();
             $table->text('note')->nullable();
 
             $table->timestamp('paid_at')->nullable();

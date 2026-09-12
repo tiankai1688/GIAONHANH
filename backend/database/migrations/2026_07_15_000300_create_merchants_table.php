@@ -13,8 +13,11 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
             $table->string('name');
-            $table->string('contact_name');
-            $table->string('phone');
+            // Nullable: riders'/tests create merchant rows (e.g. geofence feed,
+            // PII-masking) without contact details. The original NOT NULL is
+            // softened here because ->change() is a no-op under SQLite.
+            $table->string('contact_name')->nullable();
+            $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->text('address');
             $table->string('logo')->nullable();
