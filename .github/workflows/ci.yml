@@ -88,19 +88,23 @@ jobs:
           set +e
           php artisan test --no-coverage > /tmp/pest.log 2>&1
           RC=$?
-          # Surface the FULL pest log as a committed file so it can be read via the
-          # (public) repo contents API — the job-log API is admin-only and large
-          # annotations break the annotations listing. [skip ci] avoids recursion.
+          # PRIMARY readout: a SHORT single-line annotation. Multi-line annotations
+          # are silently dropped by GitHub, and >~3k-char (or base64) annotations
+          # break the annotations listing — so we keep it <=1500 chars, single line,
+          # with '::' rewritten to '__' (otherwise it breaks the workflow-command
+          # parser). This is readable via the check-run annotations API without auth.
+          SHORT=$(tail -c 1500 /tmp/pest.log | tr '\n' ' ' | sed 's/::/__/g' | tr -s ' ')
+          echo "::error title=PEST_TAIL::$SHORT"
+          # SECONDARY readout: full log committed to the repo. Force-add because the
+          # repo-wide '*.log' gitignore would otherwise swallow it; push HEAD:main
+          # because checkout leaves a detached HEAD (no local 'main' branch).
           cp /tmp/pest.log "${GITHUB_WORKSPACE}/pest-debug.log"
           git -C "${GITHUB_WORKSPACE}" config user.email "ci@example.com"
           git -C "${GITHUB_WORKSPACE}" config user.name "CI Debug"
           git -C "${GITHUB_WORKSPACE}" remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/tiankai1688/GIAONHANH.git"
-          # pest-debug.log is matched by the repo-wide '*.log' gitignore rule, so a
-          # plain `git add` stages nothing and the commit/push becomes a silent no-op.
-          # Force-add it so the log actually reaches the remote for diagnosis.
           git -C "${GITHUB_WORKSPACE}" add -f pest-debug.log
           git -C "${GITHUB_WORKSPACE}" commit -m "debug: pest log [skip ci]" >/dev/null 2>&1 || true
-          git -C "${GITHUB_WORKSPACE}" push origin main >/dev/null 2>&1 || true
+          git -C "${GITHUB_WORKSPACE}" push origin HEAD:main >/dev/null 2>&1 || true
           exit $RC
 
   # Boots the REAL Laravel stack (MySQL) and proves every endpoint works
