@@ -84,7 +84,15 @@ jobs:
         run: php artisan key:generate
       - name: Run Pest test suite
         working-directory: backend
-        run: php artisan test --no-coverage
+        run: |
+          set +e
+          php artisan test --no-coverage > /tmp/pest.log 2>&1
+          RC=$?
+          if [ $RC -ne 0 ]; then
+            CLEAN=$(perl -CSD -pe 's/\e\[[0-9;]*m//g; s/[\x{2500}-\x{257F}\x{2580}-\x{259F}]//g' /tmp/pest.log | tr '\n' ' ' | tail -c 5000)
+            echo "::error title=PEST_FULL::$CLEAN"
+          fi
+          exit $RC
 
   # Boots the REAL Laravel stack (MySQL) and proves every endpoint works
   # end-to-end. This is the gate that answers "does the backend actually run?"
@@ -153,7 +161,7 @@ jobs:
           php artisan db:seed --force > /tmp/seed.log 2>&1
           RC=$?
           if [ $RC -ne 0 ]; then
-            CLEAN=$(perl -CSD -pe 's/\e\[[0-9;]*m//g; s/[\x{2500}-\x{257F}\x{2580}-\x{259F}]//g' /tmp/seed.log | tr '\n' ' ' | head -c 3800)
+            CLEAN=$(perl -CSD -pe 's/\e\[[0-9;]*m//g; s/[\x{2500}-\x{257F}\x{2580}-\x{259F}]//g' /tmp/seed.log | tr '\n' ' ' | tail -c 5000)
             echo "::error title=SEED_FULL::$CLEAN"
           fi
           exit $RC
