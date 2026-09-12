@@ -66,8 +66,8 @@ it('rotates via the HttpOnly cookie and never re-echoes the refresh token', func
     expect($value)->not->toBeNull();
 
     // Refresh using ONLY the HttpOnly cookie (no token in the request body).
-    $response = $this->withCookie('gn_refresh_token', $value)
-        ->postJson('/api/v1/auth/refresh', ['refresh_token' => $value]);
+    $response = $this->withHeader('Cookie', 'gn_refresh_token=' . $value)
+        ->postJson('/api/v1/auth/refresh');
 
     if ($response->status() !== 200) {
         $rc = \App\Models\RefreshToken::count();
