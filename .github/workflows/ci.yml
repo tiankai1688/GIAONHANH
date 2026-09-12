@@ -88,13 +88,16 @@ jobs:
           set +e
           php artisan test --no-coverage > /tmp/pest.log 2>&1
           RC=$?
-          if [ $RC -ne 0 ]; then
-            # Emit the FULL log as a single-line base64 annotation. Newlines and
-            # '::' both break the GitHub workflow-command parser, so base64 is the
-            # safe encoding; decode it locally to read the exact failing assertions.
-            B64=$(tail -c 36000 /tmp/pest.log | base64 -w0 2>/dev/null || tail -c 36000 /tmp/pest.log | base64 | tr -d '\n')
-            echo "::error title=PEST_FULL::$B64"
-          fi
+          # Surface the FULL pest log as a committed file so it can be read via the
+          # (public) repo contents API — the job-log API is admin-only and large
+          # annotations break the annotations listing. [skip ci] avoids recursion.
+          cp /tmp/pest.log "${GITHUB_WORKSPACE}/pest-debug.log"
+          git -C "${GITHUB_WORKSPACE}" config user.email "ci@example.com"
+          git -C "${GITHUB_WORKSPACE}" config user.name "CI Debug"
+          git -C "${GITHUB_WORKSPACE}" remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/tiankai1688/GIAONHANH.git"
+          git -C "${GITHUB_WORKSPACE}" add pest-debug.log
+          git -C "${GITHUB_WORKSPACE}" commit -m "debug: pest log [skip ci]" >/dev/null 2>&1 || true
+          git -C "${GITHUB_WORKSPACE}" push origin main >/dev/null 2>&1 || true
           exit $RC
 
   # Boots the REAL Laravel stack (MySQL) and proves every endpoint works
