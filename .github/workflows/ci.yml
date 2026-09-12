@@ -88,16 +88,19 @@ jobs:
           set +e
           php artisan test --no-coverage > /tmp/pest.log 2>&1
           RC=$?
-          # PRIMARY readout: a SHORT single-line annotation. Multi-line annotations
-          # are silently dropped by GitHub, and >~3k-char (or base64) annotations
-          # break the annotations listing — so we keep it <=1500 chars, single line,
-          # with '::' rewritten to '__' (otherwise it breaks the workflow-command
-          # parser). This is readable via the check-run annotations API without auth.
-          SHORT=$(tail -c 1500 /tmp/pest.log | tr '\n' ' ' | sed 's/::/__/g' | tr -s ' ')
-          echo "::error title=PEST_TAIL::$SHORT"
-          # SECONDARY readout: full log committed to the repo. Force-add because the
-          # repo-wide '*.log' gitignore would otherwise swallow it; push HEAD:main
-          # because checkout leaves a detached HEAD (no local 'main' branch).
+          # Readout via SHORT single-line annotations (multi-line and >~3k-char
+          # annotations are silently dropped by GitHub). Strip ANSI + box-drawing,
+          # then surface (a) every failing test name and (b) the underlying
+          # error/assertion lines. '::' is rewritten to '__' so it doesn't break
+          # the workflow-command parser.
+          CLEAN=$(perl -CSD -pe 's/\e\[[0-9;]*m//g; s/[\x{2500}-\x{257F}\x{2580}-\x{259F}]//g' /tmp/pest.log)
+          NAMES=$(printf '%s\n' "$CLEAN" | grep -E "FAIL " | sed 's/::/__/g' | head -30 | tr '\n' '|')
+          ERRS=$(printf '%s\n' "$CLEAN" | grep -E "SQLSTATE|NOT NULL|Failed asserting|Tests: [0-9]+ (failed|passed)" | sed 's/::/__/g' | head -30 | tr '\n' '|')
+          echo "::error title=PEST_FAILS::$NAMES"
+          echo "::error title=PEST_ERRS::$ERRS"
+          # Secondary: full log committed to the repo (force-add; *.log gitignored;
+          # push HEAD:main because checkout is detached HEAD). May fail silently if
+          # the workflow token is read-only — the annotations above are the source.
           cp /tmp/pest.log "${GITHUB_WORKSPACE}/pest-debug.log"
           git -C "${GITHUB_WORKSPACE}" config user.email "ci@example.com"
           git -C "${GITHUB_WORKSPACE}" config user.name "CI Debug"
