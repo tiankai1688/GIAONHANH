@@ -27,14 +27,18 @@ describe('Order state machine', function () {
         // The merged-cancel cascade (OrderController::cancel) depends on this
         // relationship resolving correctly. Previously this test just set two
         // model properties in memory and asserted them — it tested nothing.
+        $user = User::create([
+            'name' => 'Merged Parent', 'phone' => '0901112241',
+            'password' => bcrypt('secret123'), 'role' => 'customer',
+        ]);
         $parentNo = 'GN20260715X1';
         $parent = Order::create([
-            'order_no' => $parentNo, 'user_id' => 1, 'merchant_id' => null,
+            'order_no' => $parentNo, 'user_id' => $user->id, 'merchant_id' => null,
             'type' => 'merged', 'status' => 'pending_payment',
             'amount' => 100000.0, 'product_amount' => 100000.0,
         ]);
         $sub = Order::create([
-            'order_no' => $parentNo . '-1', 'user_id' => 1, 'merchant_id' => null,
+            'order_no' => $parentNo . '-1', 'user_id' => $user->id, 'merchant_id' => null,
             'type' => 'sub', 'parent_order_no' => $parentNo, 'status' => 'pending_payment',
             'amount' => 100000.0, 'product_amount' => 100000.0,
         ]);

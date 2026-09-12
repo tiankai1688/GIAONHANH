@@ -132,7 +132,7 @@ it('persists psp_fee on the order after the fillable fix (red-team fatal C)', fu
         'psp_fee_bearer'  => 'platform',
     ]);
 
-    expect($order->fresh()->psp_fee)->toBe(2500.0);
+    expect((float) $order->fresh()->psp_fee)->toBe(2500.0);
     expect($order->fresh()->psp_fee_bearer)->toBe('platform');
 });
 

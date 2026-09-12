@@ -42,6 +42,13 @@ class ReconcileOrders extends Command
 
     public function handle(): int
     {
+        // When the command is invoked outside the Laravel console (e.g. directly
+        // via app(...)->handle() in a unit test) no output stream is bound and
+        // $this->output is null — guard it so info()/warn() calls don't crash.
+        if ($this->output === null) {
+            $this->setOutput(new \Symfony\Component\Console\Output\NullOutput());
+        }
+
         $ttl = (int) config('payment.pending_ttl_minutes', 30);
         $cutoff = now()->subMinutes($ttl);
 

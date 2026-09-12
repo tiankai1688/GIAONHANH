@@ -58,6 +58,10 @@ jobs:
   # (pestphp/pest, doctrine/dbal) which the --no-dev `laravel` job skips.
   pest:
     runs-on: ubuntu-latest
+    # Needed to POST the failure summary as a public commit comment (read via the
+    # REST API from the sandbox, which cannot read GitHub's annotation UI).
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -88,23 +92,20 @@ jobs:
           set +e
           php artisan test --no-coverage > /tmp/pest.log 2>&1
           RC=$?
-          # Readout via SHORT single-line annotations (multi-line and >~3k-char
-          # annotations are silently dropped by GitHub). Strip ANSI + box-drawing,
-          # then surface (a) every failing test name and (b) the underlying
-          # error/assertion lines. '::' is rewritten to '__' so it doesn't break
-          # the workflow-command parser.
+          # Strip ANSI + box-drawing, keep the trailing failure-detail block.
           CLEAN=$(perl -CSD -pe 's/\e\[[0-9;]*m//g; s/[\x{2500}-\x{257F}\x{2580}-\x{259F}]//g' /tmp/pest.log)
-          NAMES=$(printf '%s\n' "$CLEAN" | grep -E "FAIL " | sed 's/::/__/g' | head -30 | tr '\n' '|')
-          echo "::error title=PEST_FAILS::$NAMES"
-          # Emit the raw log in 8 single-line slices (each <=1500 chars, '::'->'__')
-          # covering the trailing failure-detail block, so every failing test's
-          # assertion/error survives GitHub's annotation-size quirks.
-          TAILLOG=$(printf '%s\n' "$CLEAN" | tail -c 11200)
-          for i in 1 2 3 4 5 6 7 8; do
-            START=$(( ($i - 1) * 1400 + 1 ))
-            SLICE=$(printf '%s\n' "$TAILLOG" | tail -c +$START | head -c 1400 | tr '\n' ' ' | sed 's/::/__/g')
-            echo "::error title=PEST_$i::$SLICE"
-          done
+          BODY=$(printf '%s\n' "$CLEAN" | tail -c 14000 | tr '\n' ' ' | sed 's/::/__/g')
+          # Surface the result as a public commit comment (reliably readable via
+          # the REST API; the ::error annotation channel drops these).
+          PAYLOAD=$(jq -n --arg b "PEST_RC=$RC"$'\n'"$BODY" '{body: $b}' 2>/dev/null)
+          if [ -n "$PAYLOAD" ]; then
+            curl -s -X POST \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github+json" \
+              -H "Content-Type: application/json" \
+              -d "$PAYLOAD" \
+              "https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }}/comments" >/dev/null 2>&1 || true
+          fi
           exit $RC
 
   # Boots the REAL Laravel stack (MySQL) and proves every endpoint works

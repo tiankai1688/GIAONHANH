@@ -37,11 +37,11 @@ it('only shows picked orders within the grab radius (geofence)', function () {
     $far  = Merchant::create(['name' => 'Far',  'address' => 'B', 'lat' => 10.900, 'lng' => 106.900, 'status' => 'approved', 'is_open' => true]);
 
     $nearOrder = Order::create([
-        'order_no' => 'GN' . uniqid(), 'user_id' => 1, 'merchant_id' => $near->id,
+        'order_no' => 'GN' . uniqid(), 'user_id' => $user->id, 'merchant_id' => $near->id,
         'status' => 'picked', 'amount' => 50000.0, 'product_amount' => 50000.0,
     ]);
     Order::create([
-        'order_no' => 'GN' . uniqid(), 'user_id' => 1, 'merchant_id' => $far->id,
+        'order_no' => 'GN' . uniqid(), 'user_id' => $user->id, 'merchant_id' => $far->id,
         'status' => 'picked', 'amount' => 50000.0, 'product_amount' => 50000.0,
     ]);
 
