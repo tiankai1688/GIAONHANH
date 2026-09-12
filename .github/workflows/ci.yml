@@ -95,7 +95,10 @@ jobs:
           git -C "${GITHUB_WORKSPACE}" config user.email "ci@example.com"
           git -C "${GITHUB_WORKSPACE}" config user.name "CI Debug"
           git -C "${GITHUB_WORKSPACE}" remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/tiankai1688/GIAONHANH.git"
-          git -C "${GITHUB_WORKSPACE}" add pest-debug.log
+          # pest-debug.log is matched by the repo-wide '*.log' gitignore rule, so a
+          # plain `git add` stages nothing and the commit/push becomes a silent no-op.
+          # Force-add it so the log actually reaches the remote for diagnosis.
+          git -C "${GITHUB_WORKSPACE}" add -f pest-debug.log
           git -C "${GITHUB_WORKSPACE}" commit -m "debug: pest log [skip ci]" >/dev/null 2>&1 || true
           git -C "${GITHUB_WORKSPACE}" push origin main >/dev/null 2>&1 || true
           exit $RC
