@@ -31,17 +31,21 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })->create();
 
 // Named rate limiters, referenced in routes/api.php as `throttle:auth|ipn|api`.
-// Registered AFTER the app is built (service providers booted) — defining them
-// inside the withMiddleware closure fires before the `rate.limiter` binding
-// exists and crashes `php artisan serve` with "A facade root has not been set".
-\Illuminate\Support\Facades\RateLimiter::for('auth', function (\Illuminate\Http\Request $request) {
-    return \Illuminate\Cache\RateLimiting\Limit::perMinute(10)->by($request->ip());
-});
-\Illuminate\Support\Facades\RateLimiter::for('ipn', function (\Illuminate\Http\Request $request) {
-    return \Illuminate\Cache\RateLimiting\Limit::perMinute(120)->by($request->ip());
-});
-\Illuminate\Support\Facades\RateLimiter::for('api', function (\Illuminate\Http\Request $request) {
-    return \Illuminate\Cache\RateLimiting\Limit::perMinute(30)->by($request->ip());
+// Registered on the `booted` callback so the RateLimiter facade root is set in
+// BOTH the CLI (`php artisan …`) and `php artisan serve` (per-request) boot
+// paths. Defining them inside withMiddleware — or immediately after create() —
+// fires before the `rate.limiter` binding exists and throws
+// "A facade root has not been set".
+$app->booted(function () {
+    \Illuminate\Support\Facades\RateLimiter::for('auth', function (\Illuminate\Http\Request $request) {
+        return \Illuminate\Cache\RateLimiting\Limit::perMinute(10)->by($request->ip());
+    });
+    \Illuminate\Support\Facades\RateLimiter::for('ipn', function (\Illuminate\Http\Request $request) {
+        return \Illuminate\Cache\RateLimiting\Limit::perMinute(120)->by($request->ip());
+    });
+    \Illuminate\Support\Facades\RateLimiter::for('api', function (\Illuminate\Http\Request $request) {
+        return \Illuminate\Cache\RateLimiting\Limit::perMinute(30)->by($request->ip());
+    });
 });
 
 return $app;
