@@ -287,14 +287,6 @@ class AuthController extends Controller
             return response()->json([
                 'error' => 'invalid_refresh_token',
                 'message' => 'Phiên làm mới không hợp lệ hoặc đã hết hạn.',
-                '_diag' => [
-                    'received_len' => strlen($plain),
-                    'received_head' => substr($plain, 0, 12),
-                    'hash_head' => substr($hash, 0, 12),
-                    'token_exists' => RefreshToken::where('token_hash', $hash)->exists(),
-                    'total_tokens' => RefreshToken::count(),
-                    'all_hashes' => RefreshToken::pluck('token_hash')->map(fn ($h) => substr($h, 0, 12))->all(),
-                ],
             ], 401);
         }
 
