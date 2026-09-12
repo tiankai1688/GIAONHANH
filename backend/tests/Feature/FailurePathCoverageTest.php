@@ -6,7 +6,6 @@ use App\Models\Payment;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\PaymentGatewayInterface;
-use Mockery;
 
 /*
  * Failure-path coverage.

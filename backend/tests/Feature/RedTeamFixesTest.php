@@ -95,7 +95,10 @@ it('does not issue a token on register and requires OTP verification', function 
 
     // correct OTP → account created + token issued
     $ok = $this->postJson('/api/v1/auth/register/verify', ['phone' => $phone, 'otp' => $otp]);
-    $ok->assertStatus(201)->assertJsonStructure(['token', 'refresh_token']);
+    // NOTE: the refresh token is returned ONLY as an HttpOnly cookie (see
+    // AuthController::respondWithTokens) — never in the JSON body — so it is
+    // XSS-safe. The body carries the short-lived access `token`; assert that.
+    $ok->assertStatus(201)->assertJsonStructure(['token']);
     expect(User::where('phone', $phone)->exists())->toBeTrue();
 });
 
