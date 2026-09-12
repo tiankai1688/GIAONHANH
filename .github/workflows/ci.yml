@@ -32,10 +32,6 @@ jobs:
   # Laravel install + artisan sanity (proves the backend is buildable).
   laravel:
     runs-on: ubuntu-latest
-    # Lets the failure step POST the artisan output as a public commit comment
-    # (readable from the sandbox, which cannot read GitHub's annotation UI).
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -56,19 +52,6 @@ jobs:
       - name: config sanity (fails if routes are broken)
         working-directory: backend
         run: php artisan route:list 2>&1 | tee -a /tmp/laravel.log
-      - name: Surface laravel failure
-        if: failure()
-        run: |
-          LOG=$(cat /tmp/laravel.log 2>/dev/null | perl -CSD -pe 's/\e\[[0-9;]*m//g; s/[\x{2500}-\x{257F}\x{2580}-\x{259F}]//g' | tail -c 8000 | tr '\n' ' ')
-          PAYLOAD=$(jq -n --arg b "$LOG" '{body: ("LARAVEL_LOG:\n" + $b)}' 2>/dev/null)
-          if [ -n "$PAYLOAD" ]; then
-            curl -s -X POST \
-              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Accept: application/vnd.github+json" \
-              -H "Content-Type: application/json" \
-              -d "$PAYLOAD" \
-              "https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }}/comments" >/dev/null 2>&1 || true
-          fi
 
   # PHPUnit/Pest test suite (Feature HTTP tests + existing split/signature
   # unit tests) against an in-memory SQLite database. Requires dev dependencies
@@ -108,10 +91,6 @@ jobs:
   backend-smoke:
     needs: laravel
     runs-on: ubuntu-latest
-    # Lets the failure step POST the smoke log as a public commit comment
-    # (readable from the sandbox, which cannot read GitHub's annotation UI).
-    permissions:
-      contents: write
     services:
       mysql:
         image: mysql:8.0
@@ -193,16 +172,3 @@ jobs:
           RC=${PIPESTATUS[0]}
           pkill -f "artisan serve" || true
           exit $RC
-      - name: Surface backend-smoke failure
-        if: failure()
-        run: |
-          LOG=$(cat /tmp/bs.log /tmp/laravel.log 2>/dev/null | perl -CSD -pe 's/\e\[[0-9;]*m//g; s/[\x{2500}-\x{257F}\x{2580}-\x{259F}]//g' | tail -c 11000 | tr '\n' ' ')
-          PAYLOAD=$(jq -n --arg b "$LOG" '{body: ("BACKEND_SMOKE_LOG:\n" + $b)}' 2>/dev/null)
-          if [ -n "$PAYLOAD" ]; then
-            curl -s -X POST \
-              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Accept: application/vnd.github+json" \
-              -H "Content-Type: application/json" \
-              -d "$PAYLOAD" \
-              "https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }}/comments" >/dev/null 2>&1 || true
-          fi
