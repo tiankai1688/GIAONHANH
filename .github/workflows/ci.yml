@@ -152,9 +152,18 @@ jobs:
           cp .env.example .env
           sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=ci_pass/' .env
           sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
-          sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
+          # APP_DEBUG=true so the dev OTP is echoed by /auth/register (the
+          # smoke test needs it to complete the 2-step registration without a
+          # real SMS gateway). In production this stays false and the OTP is
+          # never returned. This is a CI-only override, not the shipped .env.
+          sed -i 's/^APP_DEBUG=.*/APP_DEBUG=true/' .env
           grep -q '^ADMIN_SEED_PASSWORD=' .env || echo 'ADMIN_SEED_PASSWORD=SmokeAdmin#2026' >> .env
-          echo "CACHE_DRIVER=array" >> .env
+          # File cache (not array): the 2-step registration stores the pending
+          # OTP in cache during POST /auth/register and reads it back during
+          # POST /auth/register/verify. `artisan serve` re-boots the app per
+          # request, so an in-memory (array) cache would lose the pending record
+          # between the two HTTP calls and verification would always time out.
+          echo "CACHE_DRIVER=file" >> .env
           echo "QUEUE_CONNECTION=sync" >> .env
           echo "SESSION_DRIVER=array" >> .env
       - name: Generate app key
