@@ -66,22 +66,28 @@ it('rotates via the HttpOnly cookie and never re-echoes the refresh token', func
     expect($value)->not->toBeNull();
 
     // Refresh using ONLY the HttpOnly cookie (no token in the request body).
-    $response = $this->withHeader('Cookie', 'gn_refresh_token=' . $value)
-        ->postJson('/api/v1/auth/refresh');
+    // `call()` passes the cookie as a flat name=>value map straight into the
+    // request cookies bag — the faithful equivalent of a browser replaying the
+    // HttpOnly cookie. (withCookie() wraps the value in metadata the test
+    // client fails to unwrap; withHeader('Cookie', …) is ignored by
+    // Request::create() entirely, so neither reaches $request->cookie().)
+    $response = $this->call(
+        'POST',
+        '/api/v1/auth/refresh',
+        [],
+        ['gn_refresh_token' => $value],
+        [],
+        ['HTTP_ACCEPT' => 'application/json']
+    );
 
     if ($response->status() !== 200) {
-        $rc = \App\Models\RefreshToken::count();
-        $latest = \App\Models\RefreshToken::latest('id')->first();
-        fwrite(STDERR, "DIAG_REFRESH_STATUS=" . $response->status() . "\n");
-        fwrite(STDERR, "DIAG_REFRESH_BODY=" . $response->getContent() . "\n");
-        fwrite(STDERR, "DIAG_COOKIE_LEN=" . strlen((string) $value) . "\n");
-        fwrite(STDERR, "DIAG_COOKIE_HEAD=" . substr((string) $value, 0, 12) . "\n");
-        fwrite(STDERR, "DIAG_RT_COUNT=" . $rc . "\n");
-        fwrite(STDERR, "DIAG_RT_LATEST_HEAD=" . ($latest ? substr($latest->token_hash, 0, 12) : 'NULL') . "\n");
-        fwrite(STDERR, "DIAG_RT_LATEST_USER=" . ($latest ? $latest->user_id : 'NULL') . "\n");
-        fwrite(STDERR, "DIAG_RT_REVOKED=" . ($latest ? var_export($latest->revoked, true) : 'NULL') . "\n");
-        fwrite(STDERR, "DIAG_RT_EXPIRES=" . ($latest ? (string) $latest->expires_at : 'NULL') . "\n");
-        fwrite(STDERR, "DIAG_HASH_HEAD=" . substr(hash('sha256', (string) $value), 0, 12) . "\n");
+        fwrite(STDERR, "DIAG_RC=" . $response->status() . "\n");
+        fwrite(STDERR, "DIAG_BODY=" . $response->getContent() . "\n");
+        fwrite(STDERR, "DIAG_VALUE_PRESENT=" . ($value !== null ? 'yes' : 'no') . "\n");
+        fwrite(STDERR, "DIAG_VALUE_HEAD=" . substr((string) $value, 0, 12) . "\n");
+        fwrite(STDERR, "DIAG_VALUE_HASH=" . substr(hash('sha256', (string) $value), 0, 12) . "\n");
+        fwrite(STDERR, "DIAG_RECEIVED=" . ($this->app['request']->cookie('gn_refresh_token') ?? 'NULL') . "\n");
+        fwrite(STDERR, "DIAG_RT_LATEST_HEAD=" . (($l = \App\Models\RefreshToken::latest('id')->first()) ? substr($l->token_hash, 0, 12) : 'NULL') . "\n");
     }
     $response->assertOk();
     $response->assertJsonStructure(['token', 'expires_at', 'user']);
