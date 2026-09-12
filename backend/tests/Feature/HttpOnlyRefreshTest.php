@@ -79,6 +79,8 @@ it('rotates via the HttpOnly cookie and never re-echoes the refresh token', func
         fwrite(STDERR, "DIAG_RT_COUNT=" . $rc . "\n");
         fwrite(STDERR, "DIAG_RT_LATEST_HEAD=" . ($latest ? substr($latest->token_hash, 0, 12) : 'NULL') . "\n");
         fwrite(STDERR, "DIAG_RT_LATEST_USER=" . ($latest ? $latest->user_id : 'NULL') . "\n");
+        fwrite(STDERR, "DIAG_RT_REVOKED=" . ($latest ? var_export($latest->revoked, true) : 'NULL') . "\n");
+        fwrite(STDERR, "DIAG_RT_EXPIRES=" . ($latest ? (string) $latest->expires_at : 'NULL') . "\n");
         fwrite(STDERR, "DIAG_HASH_HEAD=" . substr(hash('sha256', (string) $value), 0, 12) . "\n");
     }
     $response->assertOk();
