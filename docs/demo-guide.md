@@ -93,3 +93,65 @@ cd app && python3 -m http.server 5173
 
 ---
 *本指南仅描述本地演示流程；生产部署另需真实 PSP 密钥、TLS、持牌聚合接入。*
+
+---
+
+## 7. 镜头前逐句旁白（VI + ZH 双语，可直接照读）
+
+> 用法：按时间轴口播，语速从容，总长约 3–5 分钟。两套语言择一即可，投资人在场建议 **VI 主声 + ZH 字幕**（或反过来）。加粗句为「必须说到位」的核心卖点。
+
+### 0:00 — 容器活体 & 后端健康
+
+**画面**：终端 `curl http://127.0.0.1:8080/api/v1/health` 返回 `{"ok":true}`；Docker Desktop 显示 `app / mysql / redis` 三个容器 `Running`。
+
+- 🎙 **VI**："Xin chào, đây là **GIAONHANH** — nền tảng giao hàng nhanh 30–60 phút tại Việt Nam. Backend đang chạy thực tế trong Docker container: app, MySQL và Redis đều đang hoạt động. Lệnh curl vừa trả về `ok`, chứng tỏ API đang sống."
+- 🎙 **ZH**："大家好，这是 **GIAONHANH**——越南 30 到 60 分钟极速达平台。后端正真实跑在 Docker 容器里：app、MySQL、Redis 全部运行。刚才 curl 返回 ok，证明 API 已活。"
+
+### 0:30 — 两步注册看 dev OTP（安全差异化）
+
+**画面**：演示页走 `POST /auth/register` → 响应回显 `otp` → `POST /auth/register/verify` 拿 token（需临时 `APP_DEBUG=true`）。
+
+- 🎙 **VI**："Điểm khác biệt về bảo mật: **đăng ký hai bước**. Chúng tôi không bao giờ tạo tài khoản nếu chưa xác minh, và không phát mã giảm giá cho tài khoản chưa xác minh. Ở đây bạn thấy OTP hiện ra trên môi trường dev, sau đó verify để lấy token."
+- 🎙 **ZH**："安全上的差异化卖点：**两步注册**。未验证我们绝不建账号，也绝不向未验证账号发券。这里你能看到 dev 环境回显 OTP，然后 verify 拿 token。"
+
+### 1:15 — 商家 / 商品真实数据
+
+**画面**：`GN.API.merchants()` 返回列表；点商家 → `merchantProducts()` 拉出商品（来自容器 DB，非假数据）。
+
+- 🎙 **VI**："Danh sách merchant và sản phẩm được lấy trực tiếp từ cơ sở dữ liệu trong container — **không phải dữ liệu giả**. Mỗi merchant đều có sản phẩm thật."
+- 🎙 **ZH**："商家和商品列表直接从容器数据库拉取，**不是假数据**。每个商家都有真实商品。"
+
+### 1:45 — 下单 → 支付全链路（验签为真）
+
+**画面**：加购 → `createOrder` → `pay` → 打开 pay-mock 收银台 → IPN 验签通过 → 订单 `paid`。
+
+- 🎙 **VI**："Thêm vào giỏ, tạo đơn, rồi thanh toán. Ở chế độ sandbox, cổng MoMo/ZaloPay được thay bằng pay-mock, nhưng **chữ ký xác thực IPN là thật**. Đơn chuyển sang `paid` ngay sau khi xác thực."
+- 🎙 **ZH**："加购、建单、支付。沙箱模式下 MoMo/ZaloPay 网关由 pay-mock 替代，但 **IPN 验签是真实的**。验签通过后订单立即转 paid。"
+
+### 2:30 — 跨店合并单（单次配送费）
+
+**画面**：打开 `merged-demo-live.html`，多店加购 → `createMergedOrder` → 单次配送费。
+
+- 🎙 **VI**："Tính năng gộp đơn nhiều cửa hàng: khách chọn hàng từ nhiều merchant, hệ thống tạo một đơn cha và **gộp thành một lần giao hàng, chỉ thu một khoản phí giao hàng duy nhất**."
+- 🎙 **ZH**："跨店合并单功能：顾客从多家店选货，系统生成一个父单并**合并成一次配送，只收一次配送费**。"
+
+### 3:15 — 0 佣金 + 平台补贴
+
+**画面**：切商家 / 骑手 / 结算视角，展示 `PLATFORM_COMMISSION_RATE=0`、配送费平台补贴、商家拿满货款。
+
+- 🎙 **VI**："Mô hình doanh thu: nền tảng thu **0% hoa hồng**. Phí giao hàng được nền tảng trợ cấp, nên thương gia nhận toàn bộ tiền hàng. **Biên lợi nhuận hoàn toàn thuộc về thương gia**."
+- 🎙 **ZH**："营收模型：平台抽成 **0%**。配送费由平台补贴，所以商家拿到全部货款，**毛利完全留在商家**。"
+
+### 4:00 — CI 4 job 全绿（融资前工程就绪）
+
+**画面**：GitHub Actions：contract / laravel / pest / backend-smoke 全部 `success`。
+
+- 🎙 **VI**："Về kỹ thuật, trước vòng gọi vốn: **4 job CI đều xanh** — contract, Laravel, Pest và backend-smoke. Sẵn sàng cho due diligence."
+- 🎙 **ZH**："工程上，融资前技术就绪：**CI 4 个 job 全绿**——contract、Laravel、Pest、backend-smoke。可直接进入尽调。"
+
+---
+
+### 收尾口播（建议，15 秒）
+
+- 🎙 **VI**："Đó là GIAONHANH — backend thực trong Docker, thanh toán có xác thực thật, và mô hình 0% hoa hồng. Cảm ơn các bạn đã theo dõi."
+- 🎙 **ZH**："这就是 GIAONHANH——Docker 真容器后端、真实验签支付、0 佣金模型。感谢观看。"
