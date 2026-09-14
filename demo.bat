@@ -13,9 +13,9 @@ echo [准备] 请确认 Docker Desktop 已启动（系统托盘鲸鱼图标为�
 echo.
 
 echo [1/4] 构建并后台启动 Docker 栈（首次约 3-5 分钟，请耐心等待）...
-docker compose up --build -d
+docker compose -p giaonhanh up --build -d
 if errorlevel 1 (
-  echo [错误] docker compose 启动失败，请确认 Docker Desktop 已运行后再试。
+  echo [错误] docker compose -p giaonhanh 启动失败，请确认 Docker Desktop 已运行后再试。
   pause
   exit /b 1
 )
@@ -24,11 +24,11 @@ echo [2/4] 等待数据库与后端就绪（约 20 秒）...
 timeout /t 20 >nul
 
 echo [3/4] 建表 + 灌入演示数据（3 商家/商品 + 账号）...
-docker compose exec -T app php artisan migrate --force
-docker compose exec -T app php artisan db:seed
+docker compose -p giaonhanh exec -T app php artisan migrate --force
+docker compose -p giaonhanh exec -T app php artisan db:seed
 
-echo [4/4] 验证后端活体（应返回含 ok 的 JSON）...
-curl -s http://127.0.0.1:8080/health
+echo [4/4] 验证后端活体（应返回 {"ok":true}）...
+curl -s http://127.0.0.1:8080/api/v1/health
 echo.
 
 echo ============================================================
@@ -40,6 +40,6 @@ echo       apiBase: "http://127.0.0.1:8080", useApi: true
 echo  2) 打开 Git Bash，进入 app 目录，运行：python3 -m http.server 5173
 echo  3) 浏览器打开 http://localhost:5173/pay-demo-live.html
 echo  4) 用 OBS 照 docs\demo-guide.md 的脚本表录 3-5 分钟
-echo  5) 录完在另一个窗口运行：docker compose down（关闭栈）
+echo  5) 录完在另一个窗口运行：docker compose -p giaonhanh down（关闭栈）
 echo ============================================================
 pause

@@ -19,10 +19,15 @@ WORKDIR /var/www/html
 
 # Install PHP deps first (leverages Docker layer cache when composer files unchanged)
 COPY composer.json composer.lock* ./
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
 # Application code
 COPY . .
+
+# Regenerate autoloader + discover packages now that artisan exists.
+# (composer install above ran with --no-scripts, so its post-autoload-dump
+#  hook that calls `php artisan package:discover` is deferred until here.)
+RUN composer dump-autoload --optimize --no-interaction
 
 # nginx site + supervisor programs
 COPY infra/nginx/default.conf /etc/nginx/sites-available/default

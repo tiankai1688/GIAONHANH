@@ -18,14 +18,14 @@
 
 ```bash
 # 仓库根目录
-docker compose up --build -d
+docker compose -p giaonhanh up --build -d
 
-# 验证后端活体（应返回 ok / health 字段）
-curl http://127.0.0.1:8080/health
+# 验证后端活体（应返回 {"ok":true}）
+curl http://127.0.0.1:8080/api/v1/health
 
 # 迁移 + 种子（自带 3 商家 + 商品 + customer/merchant/rider 账号 + 订单生命周期）
-docker compose exec app php artisan migrate --force
-docker compose exec app php artisan db:seed
+docker compose -p giaonhanh exec app php artisan migrate --force
+docker compose -p giaonhanh exec app php artisan db:seed
 ```
 
 > 数据层（MySQL / Redis）在 `internal` 网络，不暴露主机；仅 `app` 暴露 `:8080`。
@@ -61,7 +61,7 @@ cd app && python3 -m http.server 5173
 这是安全差异化卖点（未验证不发账号、不发车券）。需临时开 debug：
 
 1. 编辑 `docker-compose.yml` 第 42 行 `APP_DEBUG: "false"` → `"true"`
-2. `docker compose up -d` 重建 app 容器
+2. `docker compose -p giaonhanh up -d` 重建 app 容器
 3. 演示页走 `POST /auth/register` → 响应回显 `otp` → `POST /auth/register/verify` 拿 token
 4. **录完务必改回 `false` 并重新 up**（生产永不回显 OTP，防脚本批量注册薅新人券）
 
@@ -87,7 +87,7 @@ cd app && python3 -m http.server 5173
 ## 6. 收尾检查
 
 - [ ] `docker-compose.yml` 第 42 行 `APP_DEBUG` 已改回 `"false"`
-- [ ] `docker compose down` 关栈（或留作后续演示）
+- [ ] `docker compose -p giaonhanh down` 关栈（或留作后续演示）
 - [ ] `app/*-live.html` 为本地临时文件，勿提交（可加 `.gitignore` 或删除）
 - [ ] `backend/.env` 不会进版本库（已被 gitignore）
 
