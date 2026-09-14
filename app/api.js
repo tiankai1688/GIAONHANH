@@ -324,4 +324,20 @@
     if (GN.native && GN.native.flushPushToken) GN.native.flushPushToken();
     return r;
   };
+
+  /* Poll /api/v1/orders/{no}/payment-status until paid or timeout.
+     Used by the MoMo/ZaloPay flow after opening the PSP cashier window. */
+  GN.waitForPayment = async function (orderNo, opts = {}) {
+    const timeout = opts.timeout || 120000;
+    const interval = opts.interval || 2000;
+    const deadline = Date.now() + timeout;
+    while (Date.now() < deadline) {
+      try {
+        const st = await GN.API.paymentStatus(orderNo);
+        if (st && st.paid) return { paid: true, status: st };
+      } catch (e) { /* transient errors: keep polling */ }
+      await new Promise(r => setTimeout(r, interval));
+    }
+    return { paid: false };
+  };
 })();
