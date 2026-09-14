@@ -131,7 +131,10 @@
       if (newTok) res = await attempt();
     }
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    return res.json();
+    const json = await res.json();
+    // Backend envelopes single resources & collections in { data: ... }; unwrap
+    // so the prototypes can read o.order_no / list[].name at the top level.
+    return (json && typeof json === 'object' && 'data' in json) ? json.data : json;
   }
 
   GN.API = {
@@ -308,7 +311,7 @@
     return GN.demoLoginAs(phone, role);
   };
 
-  GN.demoLoginAs = async function (phone, role = 'customer', password = 'demo123') {
+  GN.demoLoginAs = async function (phone, role = 'customer', password = 'demo1234') {
     let r = await GN.API.login(phone, password);
     if (r && r.offline) return { offline: true };
     if (r && r.token) {
